@@ -5,7 +5,6 @@ import { createRequire } from 'node:module'
 import path, { join } from 'node:path'
 import { rollup } from 'rollup'
 import esbuild from 'rollup-plugin-esbuild'
-import { copyPrettier } from './copyPrettier.js'
 import { root } from './root.js'
 
 const extension = path.join(root, 'packages', 'extension')
@@ -19,15 +18,13 @@ fs.rmSync(join(root, 'dist'), { recursive: true, force: true })
 fs.mkdirSync(path.join(root, 'dist'))
 
 fs.copyFileSync(join(root, 'README.md'), join(root, 'dist', 'README.md'))
-fs.copyFileSync(join(extension, 'icon.png'), join(root, 'dist', 'icon.png'))
 fs.copyFileSync(
   join(extension, 'extension.json'),
   join(root, 'dist', 'extension.json'),
 )
-copyPrettier(root, join(root, 'dist'))
 
 const bundle = await rollup({
-  input: join(extension, 'src', 'prettierMain.ts'),
+  input: join(extension, 'src', 'trelloMain.ts'),
   external: ['electron', 'node:*'],
   plugins: [
     nodeResolve({
@@ -35,9 +32,6 @@ const bundle = await rollup({
     }),
     commonjs(),
     esbuild({
-      define: {
-        PRETTIER_PATH_PREFIX: JSON.stringify('../third_party/prettier'),
-      },
       target: 'esnext',
     }),
   ],
@@ -47,7 +41,7 @@ const bundle = await rollup({
 })
 
 await bundle.write({
-  file: join(root, 'dist', 'dist', 'prettierMain.js'),
+  file: join(root, 'dist', 'dist', 'trelloMain.js'),
   format: 'esm',
 })
 

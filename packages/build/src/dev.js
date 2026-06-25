@@ -4,14 +4,11 @@ import path from 'node:path'
 import { root } from './root.js'
 
 const extension = path.join(root, 'packages', 'extension')
-const entryPoint = path.join(extension, 'src', 'prettierMain.ts')
-const outfile = path.join(extension, 'dist', 'prettierMain.js')
+const entryPoint = path.join(extension, 'src', 'trelloMain.ts')
+const outfile = path.join(extension, 'dist', 'trelloMain.js')
 
 const context = await esbuild.context({
   bundle: true,
-  define: {
-    PRETTIER_PATH_PREFIX: JSON.stringify('../../../node_modules/prettier'),
-  },
   entryPoints: [entryPoint],
   external: ['electron', 'node:*'],
   format: 'esm',

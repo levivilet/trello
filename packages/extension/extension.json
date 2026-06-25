@@ -1,84 +1,28 @@
 {
-  "id": "builtin.prettier",
-  "name": "Prettier",
-  "description": "Code formatter using prettier",
-  "repository": "https://github.com/lvce-editor/prettier",
-  "browser": "dist/prettierMain.js",
+  "id": "builtin.trello",
+  "name": "Trello",
+  "description": "Browse Trello boards from Lvce Editor",
+  "repository": "https://github.com/lvce-editor/trello",
+  "browser": "dist/trelloMain.js",
   "isolated": true,
-  "icon": "./icon.png",
-  "categories": ["Formatters"],
-  "activation": [
-    "onStatusBarItem",
-    "onFormatting:css",
-    "onFormatting:json",
-    "onFormatting:javascript",
-    "onFormatting:typescript",
-    "onFormatting:handlebars",
-    "onFormatting:html",
-    "onFormatting:graphql",
-    "onFormatting:yaml",
-    "onFormatting:markdown"
-  ],
-  "formattingProviders": [
+  "categories": ["Other"],
+  "activation": ["onView:trello.views.boards", "onCommand:trello.test.useMockData", "onCommand:trello.test.reset"],
+  "commands": [
     {
-      "id": "prettier.css",
-      "languageId": "css"
+      "id": "trello.test.useMockData",
+      "label": "Trello Test: Use Mock Data"
     },
     {
-      "id": "prettier.handlebars",
-      "languageId": "handlebars"
-    },
-    {
-      "id": "prettier.html",
-      "languageId": "html"
-    },
-    {
-      "id": "prettier.json",
-      "languageId": "json"
-    },
-    {
-      "id": "prettier.javascript",
-      "languageId": "javascript"
-    },
-    {
-      "id": "prettier.typescript",
-      "languageId": "typescript"
-    },
-    {
-      "id": "prettier.graphql",
-      "languageId": "graphql"
-    },
-    {
-      "id": "prettier.yaml",
-      "languageId": "yaml"
-    },
-    {
-      "id": "prettier.markdown",
-      "languageId": "markdown"
+      "id": "trello.test.reset",
+      "label": "Trello Test: Reset"
     }
   ],
-  "languages": [
+  "views": [
     {
-      "id": "handlebars",
-      "extensions": [".hbs", ".handlebars"]
-    },
-    {
-      "id": "json",
-      "fileNames": [".prettierrc"]
-    },
-    {
-      "id": "ignore",
-      "fileNames": [".prettierignore"]
-    }
-  ],
-  "jsonValidation": [
-    {
-      "fileMatch": ".prettierrc",
-      "url": "https://json.schemastore.org/prettierrc"
-    },
-    {
-      "fileMatch": ".prettierrc.json",
-      "url": "https://json.schemastore.org/prettierrc"
+      "id": "trello.views.boards",
+      "title": "Trello",
+      "icon": "list-tree",
+      "kind": "virtualDom"
     }
   ]
 }

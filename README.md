@@ -1,14 +1,11 @@
-# builtin.prettier
+# builtin.trello
 
-## Contributing
+Trello extension for Lvce Editor.
+
+## Development
 
 ```sh
-git clone git@github.com:lvce-editor/prettier.git &&
-cd prettier &&
-npm ci &&
+npm ci
+npm run build
 npm test
 ```
-
-## Gitpod
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/lvce-editor/prettier)

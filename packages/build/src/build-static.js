@@ -18,6 +18,6 @@ const { commitHash } = await exportStatic({
 
 await cp(
   path.join(root, 'dist2'),
-  path.join(root, 'dist', commitHash, 'extensions', 'builtin.prettier'),
+  path.join(root, 'dist', commitHash, 'extensions', 'builtin.trello'),
   { recursive: true, force: true },
 )

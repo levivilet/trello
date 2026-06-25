@@ -1,7 +1,7 @@
 {
-  "name": "builtin.prettier-monorepo",
+  "name": "builtin.trello-monorepo",
   "version": "0.0.0-dev",
-  "description": "Prettier extension monorepo for Lvce Editor",
+  "description": "Trello extension monorepo for Lvce Editor",
   "type": "module",
   "scripts": {
     "build": "node packages/build/src/build.js",
@@ -22,7 +22,7 @@
     "@lerna/legacy-package-management": "^8.2.4",
     "@lvce-editor/api": "^8.29.0",
     "@lvce-editor/eslint-config": "^13.3.0",
-    "@lvce-editor/server": "0.84.3",
+    "@lvce-editor/server": "^0.84.9",
     "@types/node": "^26.0.0",
     "eslint": "^10.5.0",
     "jest": "^30.4.2",
