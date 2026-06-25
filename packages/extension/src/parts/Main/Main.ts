@@ -1,4 +1,4 @@
-import { activate as activateExtensionApi, registerCommand, registerView } from '@lvce-editor/api'
+import { activate as activateExtensionApi, executeCommand, registerCommand, registerView } from '@lvce-editor/api'
 import { createMemoryCredentialStorage } from '../CredentialStorage/CredentialStorage.ts'
 import { createMockTrelloClient, type MockTrelloData } from '../MockTrelloClient/MockTrelloClient.ts'
 import * as TrelloView from '../TrelloView/TrelloView.ts'
@@ -15,19 +15,25 @@ export const activate = async (): Promise<void> => {
   await activateExtensionApi()
   registerView(TrelloView.view)
   registerCommand({
-    id: 'trello.test.useMockData',
+    execute() {
+      return executeCommand('SideBar.show', TrelloView.viewId, true)
+    },
+    id: 'trello.show',
+  })
+  registerCommand({
     execute(data: MockTrelloData) {
       TrelloView.setTrelloViewDependencyFactory(() => ({
         client: createMockTrelloClient(data),
         storage: createMemoryCredentialStorage(),
       }))
     },
+    id: 'trello.test.useMockData',
   })
   registerCommand({
-    id: 'trello.test.reset',
     execute() {
       TrelloView.resetTrelloViewDependencyFactory()
     },
+    id: 'trello.test.reset',
   })
 }
 
