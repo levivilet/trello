@@ -1,0 +1,84 @@
+{
+  "id": "builtin.prettier",
+  "name": "Prettier",
+  "description": "Code formatter using prettier",
+  "repository": "https://github.com/lvce-editor/prettier",
+  "browser": "dist/prettierMain.js",
+  "isolated": true,
+  "icon": "./icon.png",
+  "categories": ["Formatters"],
+  "activation": [
+    "onStatusBarItem",
+    "onFormatting:css",
+    "onFormatting:json",
+    "onFormatting:javascript",
+    "onFormatting:typescript",
+    "onFormatting:handlebars",
+    "onFormatting:html",
+    "onFormatting:graphql",
+    "onFormatting:yaml",
+    "onFormatting:markdown"
+  ],
+  "formattingProviders": [
+    {
+      "id": "prettier.css",
+      "languageId": "css"
+    },
+    {
+      "id": "prettier.handlebars",
+      "languageId": "handlebars"
+    },
+    {
+      "id": "prettier.html",
+      "languageId": "html"
+    },
+    {
+      "id": "prettier.json",
+      "languageId": "json"
+    },
+    {
+      "id": "prettier.javascript",
+      "languageId": "javascript"
+    },
+    {
+      "id": "prettier.typescript",
+      "languageId": "typescript"
+    },
+    {
+      "id": "prettier.graphql",
+      "languageId": "graphql"
+    },
+    {
+      "id": "prettier.yaml",
+      "languageId": "yaml"
+    },
+    {
+      "id": "prettier.markdown",
+      "languageId": "markdown"
+    }
+  ],
+  "languages": [
+    {
+      "id": "handlebars",
+      "extensions": [".hbs", ".handlebars"]
+    },
+    {
+      "id": "json",
+      "fileNames": [".prettierrc"]
+    },
+    {
+      "id": "ignore",
+      "fileNames": [".prettierignore"]
+    }
+  ],
+  "jsonValidation": [
+    {
+      "fileMatch": ".prettierrc",
+      "url": "https://json.schemastore.org/prettierrc"
+    },
+    {
+      "fileMatch": ".prettierrc.json",
+      "url": "https://json.schemastore.org/prettierrc"
+    }
+  ]
+}
