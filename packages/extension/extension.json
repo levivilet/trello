@@ -1,0 +1,28 @@
+{
+  "id": "builtin.trello",
+  "name": "Trello",
+  "description": "Browse Trello boards from Lvce Editor",
+  "repository": "https://github.com/lvce-editor/trello",
+  "browser": "dist/trelloMain.js",
+  "isolated": true,
+  "categories": ["Other"],
+  "activation": ["onView:trello.views.boards", "onCommand:trello.test.useMockData", "onCommand:trello.test.reset"],
+  "commands": [
+    {
+      "id": "trello.test.useMockData",
+      "label": "Trello Test: Use Mock Data"
+    },
+    {
+      "id": "trello.test.reset",
+      "label": "Trello Test: Reset"
+    }
+  ],
+  "views": [
+    {
+      "id": "trello.views.boards",
+      "title": "Trello",
+      "icon": "list-tree",
+      "kind": "virtualDom"
+    }
+  ]
+}
