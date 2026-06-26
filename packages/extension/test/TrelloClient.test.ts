@@ -2,7 +2,7 @@ import { expect, test } from '@jest/globals'
 import { createTrelloClient } from '../src/parts/TrelloClient/TrelloClient.ts'
 
 const jsonResponse = (value: unknown): Response => {
-  return new Response(JSON.stringify(value), {
+  return Response.json(value, {
     status: 200,
   })
 }
@@ -58,7 +58,10 @@ test('getBoardDetail requests lists and cards', async () => {
     ],
   })
 
-  expect(requests.map((request) => new URL(request).pathname)).toEqual(['/1/boards/board-1/lists', '/1/lists/list-1/cards'])
+  expect(requests.map((request) => new URL(request).pathname)).toEqual([
+    '/1/boards/board-1/lists',
+    '/1/lists/list-1/cards',
+  ])
 })
 
 test('listBoards throws useful errors for failed requests', async () => {

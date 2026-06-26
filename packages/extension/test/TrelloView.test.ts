@@ -1,8 +1,12 @@
-import { expect, test } from '@jest/globals'
 import type { VirtualDomViewInstance } from '@lvce-editor/api'
+import { expect, test } from '@jest/globals'
 import { createMemoryCredentialStorage } from '../src/parts/CredentialStorage/CredentialStorage.ts'
 import { createMockTrelloClient } from '../src/parts/MockTrelloClient/MockTrelloClient.ts'
-import { resetTrelloViewDependencyFactory, setTrelloViewDependencyFactory, view } from '../src/parts/TrelloView/TrelloView.ts'
+import {
+  resetTrelloViewDependencyFactory,
+  setTrelloViewDependencyFactory,
+  view,
+} from '../src/parts/TrelloView/TrelloView.ts'
 
 const getText = (dom: readonly any[]): string => {
   return dom
@@ -69,6 +73,8 @@ test('connect shows validation error for missing credentials', async () => {
   const instance = (await view.create()) as VirtualDomViewInstance
   await instance.handleEvent?.({ name: 'connect', type: 'click' })
 
-  expect(getText(await instance.render())).toContain('Enter an API key and token.')
+  expect(getText(await instance.render())).toContain(
+    'Enter an API key and token.',
+  )
   resetTrelloViewDependencyFactory()
 })

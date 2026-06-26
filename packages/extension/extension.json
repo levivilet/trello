@@ -6,7 +6,12 @@
   "browser": "dist/trelloMain.js",
   "isolated": true,
   "categories": ["Other"],
-  "activation": ["onView:trello.views.boards", "onCommand:trello.show", "onCommand:trello.test.useMockData", "onCommand:trello.test.reset"],
+  "activation": [
+    "onView:trello.views.boards",
+    "onCommand:trello.show",
+    "onCommand:trello.test.useMockData",
+    "onCommand:trello.test.reset"
+  ],
   "commands": [
     {
       "id": "trello.show",

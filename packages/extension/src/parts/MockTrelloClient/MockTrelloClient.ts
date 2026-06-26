@@ -1,21 +1,20 @@
 import type { TrelloClient } from '../TrelloClient/TrelloClient.ts'
-import type { TrelloBoard, TrelloBoardDetail } from '../TrelloTypes/TrelloTypes.ts'
+import type {
+  TrelloBoard,
+  TrelloBoardDetail,
+} from '../TrelloTypes/TrelloTypes.ts'
 
 export interface MockTrelloData {
-  readonly boardDetails?: Record<string, TrelloBoardDetail>
+  readonly boardDetails?: Readonly<Record<string, TrelloBoardDetail>>
   readonly boards?: readonly TrelloBoard[]
   readonly error?: string
 }
 
-export const createMockTrelloClient = (data: MockTrelloData): TrelloClient => {
+export const createMockTrelloClient = (
+  data: Readonly<MockTrelloData>,
+): TrelloClient => {
   return {
-    async listBoards() {
-      if (data.error) {
-        throw new Error(data.error)
-      }
-      return data.boards || []
-    },
-    async getBoardDetail(board) {
+    async getBoardDetail(board: TrelloBoard): Promise<TrelloBoardDetail> {
       if (data.error) {
         throw new Error(data.error)
       }
@@ -27,6 +26,12 @@ export const createMockTrelloClient = (data: MockTrelloData): TrelloClient => {
         }
       }
       return detail
+    },
+    async listBoards(): Promise<readonly TrelloBoard[]> {
+      if (data.error) {
+        throw new Error(data.error)
+      }
+      return data.boards || []
     },
   }
 }
