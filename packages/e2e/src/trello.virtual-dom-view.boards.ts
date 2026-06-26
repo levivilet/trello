@@ -5,10 +5,8 @@ export const name = 'trello.virtual-dom-view.boards'
 
 export { skip } from './_TrelloE2e.ts'
 
-export const test: Test = async (context) => {
-  const { expect, Locator } = context
-
-  await connectToMockTrello(context)
+export const test: Test = async ({ Command, expect, Locator }) => {
+  await connectToMockTrello({ Command, expect, Locator })
 
   const roadmap = Locator('text=Roadmap')
 

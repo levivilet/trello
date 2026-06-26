@@ -1,6 +1,10 @@
 import type { Test } from '@lvce-editor/test-with-playwright'
 
-type TestContext = Parameters<Test>[0]
+type TestContext = Pick<Parameters<Test>[0], 'Locator' | 'expect'>
+type MockTestContext = Pick<
+  Parameters<Test>[0],
+  'Command' | 'Locator' | 'expect'
+>
 
 export const skip = true
 
@@ -37,25 +41,32 @@ export const openMockTrelloView = async ({
   Command,
   expect,
   Locator,
-}: TestContext): Promise<void> => {
+}: MockTestContext): Promise<void> => {
   await Command.executeExtensionCommand('trello.test.useMockData', mockData)
   await Command.executeExtensionCommand('trello.show')
 
-  await expect(Locator('input[name="apiKey"]')).toBeVisible()
-  await expect(Locator('input[name="token"]')).toBeVisible()
+  const apiKey = Locator('input[name="apiKey"]')
+  const token = Locator('input[name="token"]')
+  await expect(apiKey).toBeVisible()
+  await expect(token).toBeVisible()
 }
 
-export const connectToMockTrello = async (
-  context: TestContext,
-): Promise<void> => {
-  const { expect, Locator } = context
+export const connectToMockTrello = async ({
+  Command,
+  expect,
+  Locator,
+}: MockTestContext): Promise<void> => {
+  await openMockTrelloView({ Command, expect, Locator })
+  const apiKey = Locator('input[name="apiKey"]')
+  const token = Locator('input[name="token"]')
+  await apiKey.type('key')
+  await token.type('token')
+  const connect = Locator('button[name="connect"]')
+  // eslint-disable-next-line e2e/no-direct-click
+  await connect.click()
 
-  await openMockTrelloView(context)
-  await Locator('input[name="apiKey"]').type('key')
-  await Locator('input[name="token"]').type('token')
-  await Locator('button[name="connect"]').click()
-
-  await expect(Locator('button[name="board:board-1"]')).toBeVisible()
+  const board = Locator('button[name="board:board-1"]')
+  await expect(board).toBeVisible()
 }
 
 export const selectBoard = async (
@@ -64,5 +75,6 @@ export const selectBoard = async (
 ): Promise<void> => {
   const board = Locator(`button[name="board:${boardId}"]`)
   await expect(board).toBeVisible()
+  // eslint-disable-next-line e2e/no-direct-click
   await board.click()
 }

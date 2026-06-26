@@ -5,10 +5,8 @@ export const name = 'trello.virtual-dom-view.credentials'
 
 export { skip } from './_TrelloE2e.ts'
 
-export const test: Test = async (context) => {
-  const { expect, Locator } = context
-
-  await openMockTrelloView(context)
+export const test: Test = async ({ Command, expect, Locator }) => {
+  await openMockTrelloView({ Command, expect, Locator })
 
   const apiKey = Locator('text=API key')
   const token = Locator('text=Token')
