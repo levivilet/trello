@@ -33,6 +33,7 @@ export const button = (name: string, label: string, className = 'TrelloButton'):
     {
       className,
       name,
+      onClick: 'handleClick',
     },
     [textNode(label)],
   )
@@ -42,6 +43,7 @@ export const input = (name: string, value: string, placeholder: string): TreeNod
   return node(VirtualDomElements.Input, {
     className: 'TrelloInput',
     name,
+    onInput: 'handleInput',
     placeholder,
     value,
   })
