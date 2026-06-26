@@ -2,7 +2,6 @@ import type { Test } from '@lvce-editor/test-with-playwright'
 
 type TestContext = Parameters<Test>[0]
 
-// TODO enable when @lvce-editor/server includes virtual-DOM extension view rendering.
 export const skip = true
 
 const mockData = {
@@ -35,61 +34,35 @@ const mockData = {
 }
 
 export const openMockTrelloView = async ({
-  ActivityBar,
   Command,
+  expect,
+  Locator,
 }: TestContext): Promise<void> => {
   await Command.executeExtensionCommand('trello.test.useMockData', mockData)
-  await ActivityBar.toggleActivityBarItem('trello.views.boards')
+  await Command.executeExtensionCommand('trello.show')
+
+  await expect(Locator('input[name="apiKey"]')).toBeVisible()
+  await expect(Locator('input[name="token"]')).toBeVisible()
 }
 
 export const connectToMockTrello = async (
   context: TestContext,
 ): Promise<void> => {
-  const { Command } = context
+  const { expect, Locator } = context
 
   await openMockTrelloView(context)
-  await Command.execute(
-    'Extensions.dispatchViewEvent',
-    'trello.views.boards',
-    1,
-    {
-      name: 'apiKey',
-      type: 'input',
-      value: 'key',
-    },
-  )
-  await Command.execute(
-    'Extensions.dispatchViewEvent',
-    'trello.views.boards',
-    1,
-    {
-      name: 'token',
-      type: 'input',
-      value: 'token',
-    },
-  )
-  await Command.execute(
-    'Extensions.dispatchViewEvent',
-    'trello.views.boards',
-    1,
-    {
-      name: 'connect',
-      type: 'click',
-    },
-  )
+  await Locator('input[name="apiKey"]').type('key')
+  await Locator('input[name="token"]').type('token')
+  await Locator('button[name="connect"]').click()
+
+  await expect(Locator('button[name="board:board-1"]')).toBeVisible()
 }
 
 export const selectBoard = async (
-  { Command }: TestContext,
+  { expect, Locator }: TestContext,
   boardId: string,
 ): Promise<void> => {
-  await Command.execute(
-    'Extensions.dispatchViewEvent',
-    'trello.views.boards',
-    1,
-    {
-      name: `board:${boardId}`,
-      type: 'click',
-    },
-  )
+  const board = Locator(`button[name="board:${boardId}"]`)
+  await expect(board).toBeVisible()
+  await board.click()
 }
