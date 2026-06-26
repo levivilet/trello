@@ -1,8 +1,21 @@
 import type { View, ViewEvent, VirtualDomViewInstance } from '@lvce-editor/api'
-import { VirtualDomElements, type VirtualDomNode } from '@lvce-editor/virtual-dom-worker'
-import { createCacheCredentialStorage, type CredentialStorage } from '../CredentialStorage/CredentialStorage.ts'
-import { createTrelloClient, type TrelloClient } from '../TrelloClient/TrelloClient.ts'
-import type { TrelloBoard, TrelloBoardDetail, TrelloCredentials } from '../TrelloTypes/TrelloTypes.ts'
+import {
+  VirtualDomElements,
+  type VirtualDomNode,
+} from '@lvce-editor/virtual-dom-worker'
+import type {
+  TrelloBoard,
+  TrelloBoardDetail,
+  TrelloCredentials,
+} from '../TrelloTypes/TrelloTypes.ts'
+import {
+  createCacheCredentialStorage,
+  type CredentialStorage,
+} from '../CredentialStorage/CredentialStorage.ts'
+import {
+  createTrelloClient,
+  type TrelloClient,
+} from '../TrelloClient/TrelloClient.ts'
 import * as Dom from '../VirtualDom/VirtualDom.ts'
 
 export const viewId = 'trello.views.boards'
@@ -24,27 +37,30 @@ interface TrelloViewState {
 
 type DependencyFactory = () => TrelloViewDependencies
 
-let dependencyFactory: DependencyFactory = () => ({
+const defaultDependencyFactory = (): TrelloViewDependencies => ({
   client: createTrelloClient(),
   storage: createCacheCredentialStorage(),
 })
 
-export const setTrelloViewDependencyFactory = (factory: DependencyFactory): void => {
-  dependencyFactory = factory
+const dependencyState: { factory: DependencyFactory } = {
+  factory: defaultDependencyFactory,
+}
+
+export const setTrelloViewDependencyFactory = (
+  factory: DependencyFactory,
+): void => {
+  dependencyState.factory = factory
 }
 
 export const resetTrelloViewDependencyFactory = (): void => {
-  dependencyFactory = () => ({
-    client: createTrelloClient(),
-    storage: createCacheCredentialStorage(),
-  })
+  dependencyState.factory = defaultDependencyFactory
 }
 
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
     return error.message
   }
-  return `${error}`
+  return String(error)
 }
 
 const renderError = (error: string): readonly Dom.TreeNode[] => {
@@ -54,46 +70,126 @@ const renderError = (error: string): readonly Dom.TreeNode[] => {
   return [Dom.div('TrelloError', [Dom.textNode(error)])]
 }
 
-const renderAuth = (state: TrelloViewState): readonly VirtualDomNode[] => {
+const renderTitle = (text: string): Dom.TreeNode => {
+  return Dom.node(VirtualDomElements.H2, { className: 'TrelloTitle' }, [
+    Dom.textNode(text),
+  ])
+}
+
+const renderListTitle = (text: string): Dom.TreeNode => {
+  return Dom.node(VirtualDomElements.H3, { className: 'TrelloListTitle' }, [
+    Dom.textNode(text),
+  ])
+}
+
+const renderToolbar = (children: readonly Dom.TreeNode[]): Dom.TreeNode => {
+  return Dom.div('TrelloToolbar', children)
+}
+
+const renderField = (
+  label: string,
+  name: string,
+  value: string,
+): Dom.TreeNode => {
+  return Dom.div('TrelloField', [
+    Dom.textNode(label),
+    Dom.input(name, value, label),
+  ])
+}
+
+const renderAuth = (
+  state: Readonly<TrelloViewState>,
+): readonly VirtualDomNode[] => {
+  const title = renderTitle('Trello')
+  const apiKey = renderField('API key', 'apiKey', state.draftApiKey)
+  const token = renderField('Token', 'token', state.draftToken)
+  const connect = Dom.button(
+    'connect',
+    state.loading ? 'Connecting...' : 'Connect',
+  )
   return Dom.flatten(
     Dom.div('TrelloView TrelloAuth', [
-      Dom.node(VirtualDomElements.H2, { className: 'TrelloTitle' }, [Dom.textNode('Trello')]),
-      Dom.div('TrelloField', [Dom.textNode('API key'), Dom.input('apiKey', state.draftApiKey, 'API key')]),
-      Dom.div('TrelloField', [Dom.textNode('Token'), Dom.input('token', state.draftToken, 'Token')]),
-      Dom.button('connect', state.loading ? 'Connecting...' : 'Connect'),
+      title,
+      apiKey,
+      token,
+      connect,
       ...renderError(state.error),
     ]),
   )
 }
 
-const renderBoards = (state: TrelloViewState): readonly VirtualDomNode[] => {
+const renderBoardContent = (
+  state: Readonly<TrelloViewState>,
+  boardItems: readonly Dom.TreeNode[],
+): readonly Dom.TreeNode[] => {
+  if (state.loading) {
+    return [Dom.textNode('Loading boards...')]
+  }
+  if (state.boards.length === 0) {
+    return [Dom.textNode('No boards found')]
+  }
+  return boardItems
+}
+
+const renderBoards = (
+  state: Readonly<TrelloViewState>,
+): readonly VirtualDomNode[] => {
   const boardItems = state.boards.map((board) => {
     return Dom.button(`board:${board.id}`, board.name, 'TrelloBoardButton')
   })
-  return Dom.flatten(
-    Dom.div('TrelloView TrelloBoards', [
-      Dom.div('TrelloToolbar', [Dom.button('refreshBoards', 'Refresh'), Dom.button('logout', 'Sign out')]),
-      Dom.node(VirtualDomElements.H2, { className: 'TrelloTitle' }, [Dom.textNode('Boards')]),
-      ...(state.loading ? [Dom.textNode('Loading boards...')] : boardItems),
-      ...(!state.loading && state.boards.length === 0 ? [Dom.textNode('No boards found')] : []),
-      ...renderError(state.error),
-    ]),
-  )
+  const toolbar = renderToolbar([
+    Dom.button('refreshBoards', 'Refresh'),
+    Dom.button('logout', 'Sign out'),
+  ])
+  const children = [
+    toolbar,
+    renderTitle('Boards'),
+    ...renderBoardContent(state, boardItems),
+    ...renderError(state.error),
+  ]
+  return Dom.flatten(Dom.div('TrelloView TrelloBoards', children))
 }
 
-const renderBoardDetail = (state: TrelloViewState, detail: TrelloBoardDetail): readonly VirtualDomNode[] => {
-  const lists = detail.lists.map((list) => {
-    const cards = list.cards.length === 0 ? [Dom.textNode('No cards')] : list.cards.map((card) => Dom.div('TrelloCard', [Dom.textNode(card.name)]))
-    return Dom.div('TrelloList', [Dom.node(VirtualDomElements.H3, { className: 'TrelloListTitle' }, [Dom.textNode(list.name)]), ...cards])
+const renderCards = (
+  cards: readonly { readonly name: string }[],
+): readonly Dom.TreeNode[] => {
+  if (cards.length === 0) {
+    return [Dom.textNode('No cards')]
+  }
+  return cards.map((card) => {
+    return Dom.div('TrelloCard', [Dom.textNode(card.name)])
   })
-  return Dom.flatten(
-    Dom.div('TrelloView TrelloBoardDetail', [
-      Dom.div('TrelloToolbar', [Dom.button('backToBoards', 'Back'), Dom.button('logout', 'Sign out')]),
-      Dom.node(VirtualDomElements.H2, { className: 'TrelloTitle' }, [Dom.textNode(detail.board.name)]),
-      ...(state.loading ? [Dom.textNode('Loading board...')] : lists),
-      ...renderError(state.error),
-    ]),
-  )
+}
+
+const renderBoardDetailContent = (
+  state: Readonly<TrelloViewState>,
+  lists: readonly Dom.TreeNode[],
+): readonly Dom.TreeNode[] => {
+  if (state.loading) {
+    return [Dom.textNode('Loading board...')]
+  }
+  return lists
+}
+
+const renderBoardDetail = (
+  state: Readonly<TrelloViewState>,
+  detail: TrelloBoardDetail,
+): readonly VirtualDomNode[] => {
+  const lists = detail.lists.map((list) => {
+    const cards = renderCards(list.cards)
+    return Dom.div('TrelloList', [renderListTitle(list.name), ...cards])
+  })
+  const toolbar = renderToolbar([
+    Dom.button('backToBoards', 'Back'),
+    Dom.button('logout', 'Sign out'),
+  ])
+  const children = [
+    toolbar,
+    renderTitle(detail.board.name),
+    ...renderBoardDetailContent(state, lists),
+    ...renderError(state.error),
+  ]
+  return Dom.flatten(Dom.div('TrelloView TrelloBoardDetail', children))
 }
 
 const createInitialState = (): TrelloViewState => {
@@ -107,7 +203,7 @@ const createInitialState = (): TrelloViewState => {
 }
 
 const createInstance = async (): Promise<VirtualDomViewInstance> => {
-  const { client, storage } = dependencyFactory()
+  const { client, storage } = dependencyState.factory()
   const state = createInitialState()
 
   const loadBoards = async (): Promise<void> => {
@@ -167,36 +263,57 @@ const createInstance = async (): Promise<VirtualDomViewInstance> => {
     }
   }
 
-  return {
-    async handleEvent(event: ViewEvent): Promise<void> {
-      if (event.type === 'input' && event.name === 'apiKey') {
-        state.draftApiKey = typeof event.value === 'string' ? event.value : ''
+  const logout = async (): Promise<void> => {
+    await storage.delete()
+    Object.assign(state, createInitialState())
+  }
+
+  const goBackToBoards = (): void => {
+    state.boardDetail = undefined
+    state.error = ''
+  }
+
+  const handleInputEvent = (event: Readonly<ViewEvent>): void => {
+    if (event.name === 'apiKey') {
+      state.draftApiKey = typeof event.value === 'string' ? event.value : ''
+      return
+    }
+    if (event.name === 'token') {
+      state.draftToken = typeof event.value === 'string' ? event.value : ''
+    }
+  }
+
+  const handleClickEvent = async (
+    event: Readonly<ViewEvent>,
+  ): Promise<void> => {
+    switch (event.name) {
+      case 'backToBoards':
+        goBackToBoards()
         return
-      }
-      if (event.type === 'input' && event.name === 'token') {
-        state.draftToken = typeof event.value === 'string' ? event.value : ''
-        return
-      }
-      if (event.type === 'click' && event.name === 'connect') {
+      case 'connect':
         await connect()
         return
-      }
-      if (event.type === 'click' && event.name === 'logout') {
-        await storage.delete()
-        Object.assign(state, createInitialState())
+      case 'logout':
+        await logout()
         return
-      }
-      if (event.type === 'click' && event.name === 'refreshBoards') {
+      case 'refreshBoards':
         await loadBoards()
         return
-      }
-      if (event.type === 'click' && event.name === 'backToBoards') {
-        state.boardDetail = undefined
-        state.error = ''
+      default:
+        if (event.name?.startsWith('board:')) {
+          await openBoard(event.name.slice('board:'.length))
+        }
+    }
+  }
+
+  return {
+    async handleEvent(event: Readonly<ViewEvent>): Promise<void> {
+      if (event.type === 'input') {
+        handleInputEvent(event)
         return
       }
-      if (event.type === 'click' && event.name?.startsWith('board:')) {
-        await openBoard(event.name.slice('board:'.length))
+      if (event.type === 'click') {
+        await handleClickEvent(event)
       }
     },
     render(): readonly VirtualDomNode[] {

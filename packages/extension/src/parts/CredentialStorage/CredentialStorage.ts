@@ -19,6 +19,10 @@ const isCredentials = (value: unknown): value is TrelloCredentials => {
 
 export const createCacheCredentialStorage = (): CredentialStorage => {
   return {
+    async delete(): Promise<void> {
+      const cache = await caches.open(cacheName)
+      await cache.delete(credentialsRequestUrl)
+    },
     async read(): Promise<TrelloCredentials | undefined> {
       const cache = await caches.open(cacheName)
       const response = await cache.match(credentialsRequestUrl)
@@ -33,33 +37,24 @@ export const createCacheCredentialStorage = (): CredentialStorage => {
     },
     async write(credentials: TrelloCredentials): Promise<void> {
       const cache = await caches.open(cacheName)
-      await cache.put(
-        credentialsRequestUrl,
-        new Response(JSON.stringify(credentials), {
-          headers: {
-            'content-type': 'application/json',
-          },
-        }),
-      )
-    },
-    async delete(): Promise<void> {
-      const cache = await caches.open(cacheName)
-      await cache.delete(credentialsRequestUrl)
+      await cache.put(credentialsRequestUrl, Response.json(credentials))
     },
   }
 }
 
-export const createMemoryCredentialStorage = (initial?: TrelloCredentials): CredentialStorage => {
+export const createMemoryCredentialStorage = (
+  initial?: TrelloCredentials,
+): CredentialStorage => {
   let value = initial
   return {
+    async delete(): Promise<void> {
+      value = undefined
+    },
     async read(): Promise<TrelloCredentials | undefined> {
       return value
     },
     async write(credentials: TrelloCredentials): Promise<void> {
       value = credentials
-    },
-    async delete(): Promise<void> {
-      value = undefined
     },
   }
 }
