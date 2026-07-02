@@ -20,15 +20,10 @@
   "license": "MIT",
   "devDependencies": {
     "@lerna/legacy-package-management": "^8.2.4",
-    "@lvce-editor/api": "^8.33.0",
     "@lvce-editor/eslint-config": "^15.0.0",
-    "@lvce-editor/server": "^0.84.15",
-    "@types/node": "^26.1.0",
     "eslint": "^10.6.0",
-    "jest": "^30.4.2",
     "lerna": "^8.2.3",
     "prettier": "^4.0.0-alpha.10",
-    "ts-jest": "^29.4.11",
     "typescript": "^6.0.3"
   },
   "prettier": {
