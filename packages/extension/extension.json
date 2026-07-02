@@ -1,6 +1,7 @@
 {
   "id": "builtin.trello",
   "name": "Trello",
+  "workerName": "Trello Worker",
   "description": "Browse Trello boards from Lvce Editor",
   "repository": "https://github.com/lvce-editor/trello",
   "browser": "dist/trelloMain.js",
