@@ -34,12 +34,14 @@ export const activate = async (): Promise<void> => {
         client: createMockTrelloClient(data),
         storage: createMemoryCredentialStorage(),
       }))
+      return { ok: true }
     },
     id: 'trello.test.useMockData',
   })
   registerCommand({
     execute() {
       TrelloView.resetTrelloViewDependencyFactory()
+      return { ok: true }
     },
     id: 'trello.test.reset',
   })
