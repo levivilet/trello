@@ -22,6 +22,7 @@ fs.copyFileSync(
   join(extension, 'extension.json'),
   join(root, 'dist', 'extension.json'),
 )
+fs.copyFileSync(join(extension, 'trello.css'), join(root, 'dist', 'trello.css'))
 
 const bundle = await rollup({
   input: join(extension, 'src', 'trelloMain.ts'),

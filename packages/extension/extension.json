@@ -28,6 +28,7 @@
   ],
   "views": [
     {
+      "css": "trello.css",
       "id": "trello.views.boards",
       "title": "Trello",
       "icon": "list-tree",
