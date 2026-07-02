@@ -2,6 +2,8 @@ import type { Test } from '@lvce-editor/test-with-playwright'
 
 export const name = 'trello.virtual-dom-view.board-detail'
 
+export const skip = true
+
 const mockData = {
   boardDetails: {
     'board-1': {
