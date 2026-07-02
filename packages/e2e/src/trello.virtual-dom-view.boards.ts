@@ -2,8 +2,6 @@ import type { Test } from '@lvce-editor/test-with-playwright'
 
 export const name = 'trello.virtual-dom-view.boards'
 
-export const skip = 1
-
 const mockData = {
   boardDetails: {
     'board-1': {
@@ -34,7 +32,11 @@ const mockData = {
 }
 
 export const test: Test = async ({ Command, expect, Locator }) => {
-  await Command.executeExtensionCommand('trello.test.useMockData', mockData)
+  const r = await Command.executeExtensionCommand(
+    'trello.test.useMockData',
+    mockData,
+  )
+  console.log({ r })
   await Command.executeExtensionCommand('trello.show')
 
   const apiKey = Locator('input[name="apiKey"]')
