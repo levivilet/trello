@@ -32,10 +32,7 @@ const mockData = {
 }
 
 export const test: Test = async ({ Command, expect, Locator }) => {
-  const r = await Command.executeExtensionCommand(
-    'trello.test.useMockData',
-    mockData,
-  )
+  await Command.executeExtensionCommand('trello.test.useMockData', mockData)
   await Command.executeExtensionCommand('trello.show')
 
   const apiKey = Locator('input[name="apiKey"]')
