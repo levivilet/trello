@@ -31,9 +31,9 @@ interface TrelloViewDependencies {
 }
 
 interface TrelloViewState {
-  boardDetail?: TrelloBoardDetail
+  boardDetail: TrelloBoardDetail | undefined
   boards: readonly TrelloBoard[]
-  credentials?: TrelloCredentials
+  credentials: TrelloCredentials | undefined
   draftApiKey: string
   draftToken: string
   error: string
@@ -199,7 +199,9 @@ const renderBoardDetail = (
 
 const createInitialState = (): TrelloViewState => {
   return {
+    boardDetail: undefined,
     boards: [],
+    credentials: undefined,
     draftApiKey: '',
     draftToken: '',
     error: '',
