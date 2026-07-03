@@ -7,6 +7,12 @@
   "browser": "dist/trelloMain.js",
   "isolated": true,
   "categories": ["Other"],
+  "configuration": {
+    "trello.searchEnabled": {
+      "type": "boolean",
+      "default": false
+    }
+  },
   "activation": [
     "onView:trello.views.boards",
     "onCommand:trello.show",
