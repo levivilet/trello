@@ -198,7 +198,7 @@ const renderBoardDetailContent = (
   if (state.loading) {
     return [Dom.textNode('Loading board...')]
   }
-  return lists
+  return [Dom.div('TrelloLists', lists)]
 }
 
 const renderBoardDetail = (
@@ -207,7 +207,10 @@ const renderBoardDetail = (
 ): readonly VirtualDomNode[] => {
   const lists = detail.lists.map((list) => {
     const cards = renderCards(list.cards)
-    return Dom.div('TrelloList', [renderListTitle(list.name), ...cards])
+    return Dom.div('TrelloList', [
+      renderListTitle(list.name),
+      Dom.div('TrelloCards', cards),
+    ])
   })
   const toolbar = renderToolbar([
     Dom.button('backToBoards', 'Back'),
