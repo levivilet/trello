@@ -38,6 +38,22 @@ export const div = (
   return node(VirtualDomElements.Div, { className }, children)
 }
 
+export const form = (
+  name: string,
+  className: string,
+  children: readonly TreeNode[],
+): TreeNode => {
+  return node(
+    VirtualDomElements.Form,
+    {
+      className,
+      name,
+      onSubmit: 'handleSubmit',
+    },
+    children,
+  )
+}
+
 export const button = (
   name: string,
   label: string,

@@ -1,8 +1,9 @@
-import type {
-  View,
-  ViewContext,
-  ViewEvent,
-  VirtualDomViewInstance,
+import {
+  getPreference,
+  type View,
+  type ViewContext,
+  type ViewEvent,
+  type VirtualDomViewInstance,
 } from '@lvce-editor/api'
 import {
   VirtualDomElements,
@@ -12,11 +13,18 @@ import type {
   TrelloBoard,
   TrelloBoardDetail,
   TrelloCredentials,
+  TrelloSearchResult,
 } from '../TrelloTypes/TrelloTypes.ts'
 import {
   createCacheCredentialStorage,
   type CredentialStorage,
 } from '../CredentialStorage/CredentialStorage.ts'
+import {
+  createCacheRecentBoardStorage,
+  type RecentBoardStorage,
+  type RecentBoardView,
+  updateRecentBoardViews,
+} from '../RecentBoardStorage/RecentBoardStorage.ts'
 import {
   createTrelloClient,
   type TrelloClient,
@@ -24,12 +32,15 @@ import {
 import * as Dom from '../VirtualDom/VirtualDom.ts'
 
 export const viewId = 'trello.views.boards'
+export const searchEnabledPreference = 'trello.searchEnabled'
 
 const apiKeyPattern = /^[A-Za-z0-9]{32}$/
 const tokenPattern = /^[A-Za-z0-9]{64}$/
 
 interface TrelloViewDependencies {
   readonly client: TrelloClient
+  readonly readSearchEnabled?: () => Promise<boolean>
+  readonly recentStorage: RecentBoardStorage
   readonly storage: CredentialStorage
 }
 
@@ -37,16 +48,27 @@ interface TrelloViewState {
   boardDetail?: TrelloBoardDetail
   boards: readonly TrelloBoard[]
   credentials?: TrelloCredentials
+  activeSearchQuery: string
+  draftSearchQuery: string
   draftApiKey: string
   draftToken: string
   error: string
   loading: boolean
+  recentBoardViews: readonly RecentBoardView[]
+  searchEnabled: boolean
+  searchResults: readonly TrelloSearchResult[]
 }
 
 type DependencyFactory = () => TrelloViewDependencies
 
+const readSearchEnabledPreference = async (): Promise<boolean> => {
+  return (await getPreference(searchEnabledPreference)) === true
+}
+
 const defaultDependencyFactory = (): TrelloViewDependencies => ({
   client: createTrelloClient(),
+  readSearchEnabled: readSearchEnabledPreference,
+  recentStorage: createCacheRecentBoardStorage(),
   storage: createCacheCredentialStorage(),
 })
 
@@ -120,6 +142,12 @@ const renderField = (
   ])
 }
 
+const renderSearchForm = (state: Readonly<TrelloViewState>): Dom.TreeNode => {
+  return Dom.form('search', 'TrelloSearchForm', [
+    Dom.input('search', state.draftSearchQuery, 'Search Trello'),
+  ])
+}
+
 const renderWelcomeText = (text: string): Dom.TreeNode => {
   return Dom.div('TrelloWelcomeText', [Dom.textNode(text)])
 }
@@ -168,31 +196,199 @@ const renderAuth = (
 
 const renderBoardContent = (
   state: Readonly<TrelloViewState>,
-  boardItems: readonly Dom.TreeNode[],
 ): readonly Dom.TreeNode[] => {
+  if (state.activeSearchQuery) {
+    return renderSearchContent(state)
+  }
   if (state.loading) {
     return [Dom.textNode('Loading boards...')]
   }
   if (state.boards.length === 0) {
     return [Dom.textNode('No boards found')]
   }
-  return boardItems
+  const recentBoards = getRecentlyViewedBoards(state)
+  const workspaceSections = getWorkspaceSections(state)
+  return [
+    ...renderRecentlyViewed(recentBoards),
+    Dom.div('TrelloWorkspaces', [
+      renderListTitle('Your workspaces'),
+      ...workspaceSections.map(renderWorkspaceSection),
+    ]),
+  ]
+}
+
+const parseDate = (value: string | undefined): number => {
+  if (!value) {
+    return 0
+  }
+  const time = Date.parse(value)
+  if (Number.isNaN(time)) {
+    return 0
+  }
+  return time
+}
+
+const getLocalViewedAt = (
+  recentBoardViews: readonly RecentBoardView[],
+  boardId: string,
+): number => {
+  const recentBoardView = recentBoardViews.find(
+    (item) => item.boardId === boardId,
+  )
+  return parseDate(recentBoardView?.viewedAt)
+}
+
+const getBoardViewedAt = (
+  state: Readonly<TrelloViewState>,
+  board: TrelloBoard,
+): number => {
+  return Math.max(
+    parseDate(board.dateLastView),
+    getLocalViewedAt(state.recentBoardViews, board.id),
+  )
+}
+
+const sortBoardsByViewedAt = (
+  state: Readonly<TrelloViewState>,
+  boards: readonly TrelloBoard[],
+): readonly TrelloBoard[] => {
+  const originalIndexes = new Map(
+    state.boards.map((board, index) => [board.id, index]),
+  )
+  return boards.toSorted((a, b) => {
+    const viewedAtDiff = getBoardViewedAt(state, b) - getBoardViewedAt(state, a)
+    if (viewedAtDiff !== 0) {
+      return viewedAtDiff
+    }
+    return (originalIndexes.get(a.id) ?? 0) - (originalIndexes.get(b.id) ?? 0)
+  })
+}
+
+const getRecentlyViewedBoards = (
+  state: Readonly<TrelloViewState>,
+): readonly TrelloBoard[] => {
+  return sortBoardsByViewedAt(state, state.boards)
+    .filter((board) => getBoardViewedAt(state, board) > 0)
+    .slice(0, 4)
+}
+
+interface WorkspaceSection {
+  readonly boards: readonly TrelloBoard[]
+  readonly name: string
+}
+
+const getWorkspaceName = (board: TrelloBoard): string => {
+  return (
+    board.organization?.displayName ||
+    board.organization?.name ||
+    'Personal boards'
+  )
+}
+
+const getWorkspaceSections = (
+  state: Readonly<TrelloViewState>,
+): readonly WorkspaceSection[] => {
+  const sections = new Map<string, TrelloBoard[]>()
+  for (const board of state.boards) {
+    const name = getWorkspaceName(board)
+    const boards = sections.get(name) || []
+    boards.push(board)
+    sections.set(name, boards)
+  }
+  return Array.from(
+    sections,
+    (entry: readonly [string, readonly TrelloBoard[]]): WorkspaceSection => {
+      const [name, boards] = entry
+      return {
+        boards: sortBoardsByViewedAt(state, boards),
+        name,
+      }
+    },
+  )
+}
+
+const renderBoardButton = (board: TrelloBoard): Dom.TreeNode => {
+  return Dom.button(`board:${board.id}`, board.name, 'TrelloBoardButton')
+}
+
+const renderBoardGrid = (boards: readonly TrelloBoard[]): Dom.TreeNode => {
+  return Dom.div('TrelloBoardGrid', boards.map(renderBoardButton))
+}
+
+const renderRecentlyViewed = (
+  boards: readonly TrelloBoard[],
+): readonly Dom.TreeNode[] => {
+  if (boards.length === 0) {
+    return []
+  }
+  return [
+    Dom.div('TrelloSection', [
+      renderListTitle('Recently viewed'),
+      renderBoardGrid(boards),
+    ]),
+  ]
+}
+
+const renderWorkspaceSection = (
+  section: Readonly<WorkspaceSection>,
+): Dom.TreeNode => {
+  return Dom.div('TrelloWorkspace', [
+    renderListTitle(section.name),
+    renderBoardGrid(section.boards),
+  ])
+}
+
+const renderSearchResult = (
+  result: Readonly<TrelloSearchResult>,
+): Dom.TreeNode => {
+  if (result.type === 'board') {
+    return Dom.button(
+      `board:${result.id}`,
+      `Board: ${result.name}`,
+      'TrelloSearchResult',
+    )
+  }
+  return Dom.div('TrelloSearchResult', [
+    Dom.textNode(`Card: ${result.name}`),
+  ])
+}
+
+const renderSearchContent = (
+  state: Readonly<TrelloViewState>,
+): readonly Dom.TreeNode[] => {
+  if (state.loading) {
+    return [Dom.textNode('Searching...')]
+  }
+  if (state.searchResults.length === 0) {
+    return [
+      renderListTitle(`Search results for "${state.activeSearchQuery}"`),
+      Dom.textNode('No search results'),
+    ]
+  }
+  return [
+    Dom.div('TrelloSearchSection', [
+      renderListTitle(`Search results for "${state.activeSearchQuery}"`),
+      Dom.div(
+        'TrelloSearchResults',
+        state.searchResults.map(renderSearchResult),
+      ),
+    ]),
+  ]
 }
 
 const renderBoards = (
   state: Readonly<TrelloViewState>,
 ): readonly VirtualDomNode[] => {
-  const boardItems = state.boards.map((board) => {
-    return Dom.button(`board:${board.id}`, board.name, 'TrelloBoardButton')
-  })
-  const toolbar = renderToolbar([
+  const toolbarChildren = [
+    ...(state.searchEnabled ? [renderSearchForm(state)] : []),
     Dom.button('refreshBoards', 'Refresh'),
     Dom.button('logout', 'Sign out'),
-  ])
+  ]
+  const toolbar = renderToolbar(toolbarChildren)
   const children = [
     toolbar,
     renderTitle('Boards'),
-    ...renderBoardContent(state, boardItems),
+    ...renderBoardContent(state),
     ...renderError(state.error),
   ]
   return Dom.flatten(Dom.div('TrelloView TrelloBoards', children))
@@ -245,18 +441,24 @@ const renderBoardDetail = (
 
 const createInitialState = (): TrelloViewState => {
   return {
+    activeSearchQuery: '',
     boards: [],
+    draftSearchQuery: '',
     draftApiKey: '',
     draftToken: '',
     error: '',
     loading: false,
+    recentBoardViews: [],
+    searchEnabled: false,
+    searchResults: [],
   }
 }
 
 const createInstance = async (
   context?: ViewContext,
 ): Promise<VirtualDomViewInstance> => {
-  const { client, storage } = dependencyState.factory()
+  const { client, readSearchEnabled, recentStorage, storage } =
+    dependencyState.factory()
   const state = createInitialState()
 
   const requestRerender = (): void => {
@@ -277,6 +479,8 @@ const createInstance = async (
     state.loading = true
     state.error = ''
     state.boardDetail = undefined
+    state.activeSearchQuery = ''
+    state.searchResults = []
     try {
       state.boards = await client.listBoards(state.credentials)
     } catch (error) {
@@ -289,6 +493,10 @@ const createInstance = async (
     }
   }
 
+  if (readSearchEnabled) {
+    state.searchEnabled = await readSearchEnabled()
+  }
+  state.recentBoardViews = await recentStorage.read()
   const storedCredentials = await storage.read()
   if (storedCredentials) {
     state.credentials = storedCredentials
@@ -319,10 +527,14 @@ const createInstance = async (
       state.credentials = credentials
       state.boards = boards
       state.boardDetail = undefined
+      state.activeSearchQuery = ''
+      state.searchResults = []
     } catch (error) {
       state.credentials = undefined
       state.boards = []
       state.boardDetail = undefined
+      state.activeSearchQuery = ''
+      state.searchResults = []
       state.error = getErrorMessage(error)
     } finally {
       state.loading = false
@@ -334,13 +546,25 @@ const createInstance = async (
     if (!state.credentials) {
       return
     }
-    const board = state.boards.find((item) => item.id === boardId)
+    const board =
+      state.boards.find((item) => item.id === boardId) ||
+      state.searchResults.find(
+        (item): item is TrelloBoard & { readonly type: 'board' } => {
+          return item.type === 'board' && item.id === boardId
+        },
+      )
     if (!board) {
       state.error = `Board not found: ${boardId}`
       return
     }
     state.loading = true
     state.error = ''
+    state.recentBoardViews = updateRecentBoardViews(
+      state.recentBoardViews,
+      board.id,
+      new Date().toISOString(),
+    )
+    await recentStorage.write(state.recentBoardViews)
     try {
       state.boardDetail = await client.getBoardDetail(board, state.credentials)
     } catch (error) {
@@ -353,6 +577,7 @@ const createInstance = async (
 
   const logout = async (): Promise<void> => {
     await storage.delete()
+    await recentStorage.delete()
     Object.assign(state, createInitialState())
     requestRerender()
   }
@@ -363,6 +588,34 @@ const createInstance = async (
     requestRerender()
   }
 
+  const submitSearch = async (): Promise<void> => {
+    if (!state.credentials || !state.searchEnabled) {
+      return
+    }
+    const query = state.draftSearchQuery.trim()
+    state.draftSearchQuery = query
+    state.error = ''
+    state.boardDetail = undefined
+    if (!query) {
+      state.activeSearchQuery = ''
+      state.searchResults = []
+      requestRerender()
+      return
+    }
+    state.activeSearchQuery = query
+    state.searchResults = []
+    state.loading = true
+    requestRerender()
+    try {
+      state.searchResults = await client.search(query, state.credentials)
+    } catch (error) {
+      state.error = getErrorMessage(error)
+    } finally {
+      state.loading = false
+    }
+    requestRerender()
+  }
+
   const handleInputEvent = (event: Readonly<ViewEvent>): void => {
     if (event.name === 'apiKey') {
       state.draftApiKey = typeof event.value === 'string' ? event.value : ''
@@ -370,6 +623,11 @@ const createInstance = async (
     }
     if (event.name === 'token') {
       state.draftToken = typeof event.value === 'string' ? event.value : ''
+      return
+    }
+    if (event.name === 'search') {
+      state.draftSearchQuery =
+        typeof event.value === 'string' ? event.value : ''
     }
   }
 
@@ -396,6 +654,14 @@ const createInstance = async (
     }
   }
 
+  const handleSubmitEvent = async (
+    event: Readonly<ViewEvent>,
+  ): Promise<void> => {
+    if (event.name === 'search') {
+      await submitSearch()
+    }
+  }
+
   return {
     async handleEvent(event: Readonly<ViewEvent>): Promise<void> {
       if (event.type === 'input') {
@@ -404,6 +670,10 @@ const createInstance = async (
       }
       if (event.type === 'click') {
         await handleClickEvent(event)
+        return
+      }
+      if (event.type === 'submit') {
+        await handleSubmitEvent(event)
       }
     },
     render(): readonly VirtualDomNode[] {

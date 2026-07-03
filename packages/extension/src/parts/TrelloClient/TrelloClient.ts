@@ -4,6 +4,7 @@ import type {
   TrelloCard,
   TrelloCredentials,
   TrelloList,
+  TrelloSearchResult,
 } from '../TrelloTypes/TrelloTypes.ts'
 
 export interface TrelloClient {
@@ -14,6 +15,10 @@ export interface TrelloClient {
   readonly listBoards: (
     credentials: TrelloCredentials,
   ) => Promise<readonly TrelloBoard[]>
+  readonly search: (
+    query: string,
+    credentials: TrelloCredentials,
+  ) => Promise<readonly TrelloSearchResult[]>
 }
 
 interface TrelloResponse {
@@ -53,6 +58,32 @@ const requestJson = async <T>(
     throw new Error(await getErrorMessage(response))
   }
   return response.json() as Promise<T>
+}
+
+interface TrelloSearchResponse {
+  readonly boards?: readonly TrelloBoard[]
+  readonly cards?: readonly TrelloCard[]
+}
+
+const normalizeSearchResponse = (
+  response: Readonly<TrelloSearchResponse>,
+): readonly TrelloSearchResult[] => {
+  const cards = response.cards || []
+  const boards = response.boards || []
+  return [
+    ...cards.map((card): TrelloSearchResult => {
+      return {
+        ...card,
+        type: 'card',
+      }
+    }),
+    ...boards.map((board): TrelloSearchResult => {
+      return {
+        ...board,
+        type: 'board',
+      }
+    }),
+  ]
 }
 
 export const createTrelloClient = (
@@ -101,9 +132,30 @@ export const createTrelloClient = (
         '/members/me/boards',
         credentials,
         {
-          fields: 'name,url',
+          fields: 'name,url,dateLastView,idOrganization',
+          organization: 'true',
+          organization_fields: 'name,displayName',
         },
       )
+    },
+    async search(
+      query: string,
+      credentials: TrelloCredentials,
+    ): Promise<readonly TrelloSearchResult[]> {
+      const response = await requestJson<TrelloSearchResponse>(
+        fetchLike,
+        '/search',
+        credentials,
+        {
+          board_fields: 'name,url',
+          boards_limit: '10',
+          card_fields: 'name,url,idBoard',
+          cards_limit: '10',
+          modelTypes: 'cards,boards',
+          query,
+        },
+      )
+      return normalizeSearchResponse(response)
     },
   }
 }

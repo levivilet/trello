@@ -2,6 +2,7 @@ import type { TrelloClient } from '../TrelloClient/TrelloClient.ts'
 import type {
   TrelloBoard,
   TrelloBoardDetail,
+  TrelloSearchResult,
 } from '../TrelloTypes/TrelloTypes.ts'
 
 export interface MockTrelloData {
@@ -11,6 +12,8 @@ export interface MockTrelloData {
   readonly error?: string
   readonly listBoardsError?: string
   readonly listBoardsResponses?: readonly (readonly TrelloBoard[])[]
+  readonly searchError?: string
+  readonly searchResults?: readonly TrelloSearchResult[]
 }
 
 export const createMockTrelloClient = (
@@ -48,6 +51,15 @@ export const createMockTrelloClient = (
         return scriptedResponse
       }
       return data.boards || []
+    },
+    async search(): Promise<readonly TrelloSearchResult[]> {
+      if (data.error) {
+        throw new Error(data.error)
+      }
+      if (data.searchError) {
+        throw new Error(data.searchError)
+      }
+      return data.searchResults || []
     },
   }
 }

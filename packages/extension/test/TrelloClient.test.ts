@@ -30,7 +30,11 @@ test('listBoards requests member boards with credentials', async () => {
   expect(url.pathname).toBe('/1/members/me/boards')
   expect(url.searchParams.get('key')).toBe(validApiKey)
   expect(url.searchParams.get('token')).toBe(validToken)
-  expect(url.searchParams.get('fields')).toBe('name,url')
+  expect(url.searchParams.get('fields')).toBe(
+    'name,url,dateLastView,idOrganization',
+  )
+  expect(url.searchParams.get('organization')).toBe('true')
+  expect(url.searchParams.get('organization_fields')).toBe('name,displayName')
 })
 
 test('getBoardDetail requests lists and cards', async () => {
@@ -68,6 +72,39 @@ test('getBoardDetail requests lists and cards', async () => {
   ])
 })
 
+test('search requests trello search with card and board params', async () => {
+  const requests: string[] = []
+  const client = createTrelloClient(async (url) => {
+    requests.push(url)
+    return jsonResponse({
+      boards: [{ id: 'board-1', name: 'Roadmap' }],
+      cards: [{ id: 'card-1', idBoard: 'board-1', name: 'Ship search' }],
+    })
+  })
+
+  await expect(
+    client.search('ship', {
+      apiKey: validApiKey,
+      token: validToken,
+    }),
+  ).resolves.toEqual([
+    { id: 'card-1', idBoard: 'board-1', name: 'Ship search', type: 'card' },
+    { id: 'board-1', name: 'Roadmap', type: 'board' },
+  ])
+
+  expect(requests).toHaveLength(1)
+  const url = new URL(requests[0])
+  expect(url.pathname).toBe('/1/search')
+  expect(url.searchParams.get('key')).toBe(validApiKey)
+  expect(url.searchParams.get('token')).toBe(validToken)
+  expect(url.searchParams.get('query')).toBe('ship')
+  expect(url.searchParams.get('modelTypes')).toBe('cards,boards')
+  expect(url.searchParams.get('card_fields')).toBe('name,url,idBoard')
+  expect(url.searchParams.get('board_fields')).toBe('name,url')
+  expect(url.searchParams.get('cards_limit')).toBe('10')
+  expect(url.searchParams.get('boards_limit')).toBe('10')
+})
+
 test('listBoards throws useful errors for failed requests', async () => {
   const client = createTrelloClient(async () => {
     return new Response('unauthorized', {
@@ -78,6 +115,22 @@ test('listBoards throws useful errors for failed requests', async () => {
 
   await expect(
     client.listBoards({
+      apiKey: 'bad-key',
+      token: 'bad-token',
+    }),
+  ).rejects.toThrow(new Error('Trello request failed: 401 unauthorized'))
+})
+
+test('search throws useful errors for failed requests', async () => {
+  const client = createTrelloClient(async () => {
+    return new Response('unauthorized', {
+      status: 401,
+      statusText: 'Unauthorized',
+    })
+  })
+
+  await expect(
+    client.search('ship', {
       apiKey: 'bad-key',
       token: 'bad-token',
     }),
