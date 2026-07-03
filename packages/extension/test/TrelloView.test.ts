@@ -25,6 +25,36 @@ const getClassNames = (dom: readonly any[]): readonly string[] => {
     .filter((className): className is string => typeof className === 'string')
 }
 
+const getNodeEndIndex = (dom: readonly any[], index: number): number => {
+  let nextIndex = index + 1
+  const childCount = dom[index]?.childCount || 0
+  for (let i = 0; i < childCount; i++) {
+    nextIndex = getNodeEndIndex(dom, nextIndex)
+  }
+  return nextIndex
+}
+
+const hasDirectChildClass = (
+  dom: readonly any[],
+  parentClassName: string,
+  childClassName: string,
+): boolean => {
+  for (let i = 0; i < dom.length; i++) {
+    if (dom[i].className !== parentClassName) {
+      continue
+    }
+    let childIndex = i + 1
+    const childCount = dom[i].childCount || 0
+    for (let j = 0; j < childCount; j++) {
+      if (dom[childIndex]?.className === childClassName) {
+        return true
+      }
+      childIndex = getNodeEndIndex(dom, childIndex)
+    }
+  }
+  return false
+}
+
 test('renders auth inputs when unauthenticated', async () => {
   setTrelloViewDependencyFactory(() => ({
     client: createMockTrelloClient({}),
@@ -91,6 +121,8 @@ test('connect loads boards and clicking board loads detail', async () => {
   expect(detailClassNames).toContain('TrelloLists')
   expect(detailClassNames).toContain('TrelloList')
   expect(detailClassNames).toContain('TrelloCards')
+  expect(hasDirectChildClass(detailDom, 'TrelloList', 'TrelloCards')).toBe(true)
+  expect(hasDirectChildClass(detailDom, 'TrelloCards', 'TrelloCard')).toBe(true)
   resetTrelloViewDependencyFactory()
 })
 
