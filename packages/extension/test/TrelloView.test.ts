@@ -1,10 +1,14 @@
 import type { VirtualDomViewInstance } from '@lvce-editor/api'
 import { expect, test } from '@jest/globals'
+<<<<<<< HEAD
 import type {
   TrelloBoard,
   TrelloBoardDetail,
   TrelloSearchResult,
 } from '../src/parts/TrelloTypes/TrelloTypes.ts'
+=======
+import type { TrelloBoard } from '../src/parts/TrelloTypes/TrelloTypes.ts'
+>>>>>>> origin/main
 import { createMemoryCredentialStorage } from '../src/parts/CredentialStorage/CredentialStorage.ts'
 import { createMockTrelloClient } from '../src/parts/MockTrelloClient/MockTrelloClient.ts'
 import {
@@ -102,6 +106,7 @@ const createAuthenticatedInstance = async (
   return instance
 }
 
+<<<<<<< HEAD
 interface SearchInstanceData {
   readonly boardDetails?: Readonly<Record<string, TrelloBoardDetail>>
   readonly boards?: readonly TrelloBoard[]
@@ -134,6 +139,8 @@ const createSearchEnabledInstance = async (
   return instance
 }
 
+=======
+>>>>>>> origin/main
 test('renders auth inputs when unauthenticated', async () => {
   setTrelloViewDependencyFactory(() => ({
     client: createMockTrelloClient({}),
@@ -405,6 +412,7 @@ test('renders empty board state', async () => {
   expect(getText(await instance.render())).toContain('No boards found')
   resetTrelloViewDependencyFactory()
 })
+<<<<<<< HEAD
 
 test('does not render search when flag is disabled', async () => {
   const instance = await createAuthenticatedInstance([
@@ -546,3 +554,5 @@ test('clicking board search result opens board detail', async () => {
   expect(text).toContain('Found card')
   resetTrelloViewDependencyFactory()
 })
+=======
+>>>>>>> origin/main
