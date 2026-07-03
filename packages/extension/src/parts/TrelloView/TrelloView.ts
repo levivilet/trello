@@ -5,13 +5,17 @@ import {
   type ViewEvent,
   type VirtualDomViewInstance,
 } from '@lvce-editor/api'
+import * as ExtensionApi from '@lvce-editor/api'
 import {
   VirtualDomElements,
   type VirtualDomNode,
 } from '@lvce-editor/virtual-dom-worker'
 import type {
+  TrelloAttachment,
   TrelloBoard,
   TrelloBoardDetail,
+  TrelloCard,
+  TrelloCardDetail,
   TrelloCredentials,
   TrelloSearchResult,
 } from '../TrelloTypes/TrelloTypes.ts'
@@ -36,6 +40,7 @@ export const searchEnabledPreference = 'trello.searchEnabled'
 
 const apiKeyPattern = /^[A-Za-z0-9]{32}$/
 const tokenPattern = /^[A-Za-z0-9]{64}$/
+const imageUrlPattern = /\.(?:avif|gif|jpe?g|png|svg|webp)(?:[?#]|$)/i
 
 interface TrelloViewDependencies {
   readonly client: TrelloClient
@@ -46,23 +51,47 @@ interface TrelloViewDependencies {
 
 interface TrelloViewState {
   activeSearchQuery: string
+<<<<<<< HEAD
   boardDetail?: TrelloBoardDetail
+=======
+  boardDetail: TrelloBoardDetail | undefined
+>>>>>>> origin/main
   boards: readonly TrelloBoard[]
-  credentials?: TrelloCredentials
+  cardDetailLoading: boolean
+  credentials: TrelloCredentials | undefined
   draftApiKey: string
+<<<<<<< HEAD
+=======
+  draftCardDescription: string
+  draftCardTitle: string
+>>>>>>> origin/main
   draftSearchQuery: string
   draftToken: string
   error: string
   loading: boolean
   recentBoardViews: readonly RecentBoardView[]
+<<<<<<< HEAD
   searchEnabled: boolean
   searchResults: readonly TrelloSearchResult[]
+=======
+  savingCardDetail: boolean
+  searchEnabled: boolean
+  searchResults: readonly TrelloSearchResult[]
+  selectedCardDetail: TrelloCardDetail | undefined
+>>>>>>> origin/main
 }
 
 type DependencyFactory = () => TrelloViewDependencies
 
 const readSearchEnabledPreference = async (): Promise<boolean> => {
+<<<<<<< HEAD
   return (await getPreference(searchEnabledPreference)) === true
+=======
+  const api = ExtensionApi as unknown as {
+    readonly getPreference?: (key: string) => Promise<unknown>
+  }
+  return (await api.getPreference?.(searchEnabledPreference)) === true
+>>>>>>> origin/main
 }
 
 const defaultDependencyFactory = (): TrelloViewDependencies => ({
@@ -142,6 +171,20 @@ const renderField = (
   ])
 }
 
+<<<<<<< HEAD
+=======
+const renderTextAreaField = (
+  label: string,
+  name: string,
+  value: string,
+): Dom.TreeNode => {
+  return Dom.div('TrelloField', [
+    Dom.textNode(label),
+    Dom.textArea(name, value, label),
+  ])
+}
+
+>>>>>>> origin/main
 const renderSearchForm = (state: Readonly<TrelloViewState>): Dom.TreeNode => {
   return Dom.form('search', 'TrelloSearchForm', [
     Dom.input('search', state.draftSearchQuery, 'Search Trello'),
@@ -392,15 +435,95 @@ const renderBoards = (
   return Dom.flatten(Dom.div('TrelloView TrelloBoards', children))
 }
 
-const renderCards = (
-  cards: readonly { readonly name: string }[],
-): readonly Dom.TreeNode[] => {
+const renderCards = (cards: readonly TrelloCard[]): readonly Dom.TreeNode[] => {
   if (cards.length === 0) {
     return [Dom.textNode('No cards')]
   }
   return cards.map((card) => {
-    return Dom.div('TrelloCard', [Dom.textNode(card.name)])
+    return Dom.button(`card:${card.id}`, card.name, 'TrelloCard')
   })
+}
+
+const isImageAttachment = (attachment: Readonly<TrelloAttachment>): boolean => {
+  if (attachment.mimeType?.startsWith('image/')) {
+    return true
+  }
+  if (attachment.url && imageUrlPattern.test(attachment.url)) {
+    return true
+  }
+  return Boolean(attachment.previews?.some((preview) => preview.url))
+}
+
+const getAttachmentImageUrl = (
+  attachment: Readonly<TrelloAttachment>,
+): string => {
+  if (attachment.url && imageUrlPattern.test(attachment.url)) {
+    return attachment.url
+  }
+  if (attachment.mimeType?.startsWith('image/') && attachment.url) {
+    return attachment.url
+  }
+  const previews = attachment.previews || []
+  return previews.at(-1)?.url || attachment.url || ''
+}
+
+const renderImageAttachment = (
+  attachment: Readonly<TrelloAttachment>,
+): Dom.TreeNode => {
+  return Dom.image(
+    'TrelloCardDetailImage',
+    getAttachmentImageUrl(attachment),
+    attachment.name || 'Card attachment',
+  )
+}
+
+const renderCardDetailImages = (
+  attachments: readonly TrelloAttachment[],
+): Dom.TreeNode => {
+  const imageAttachments = attachments.filter(isImageAttachment)
+  if (imageAttachments.length === 0) {
+    return Dom.div('TrelloCardDetailEmpty', [Dom.textNode('No images')])
+  }
+  return Dom.div(
+    'TrelloCardDetailImages',
+    imageAttachments.map(renderImageAttachment),
+  )
+}
+
+const renderCardDetailPanel = (
+  state: Readonly<TrelloViewState>,
+): readonly Dom.TreeNode[] => {
+  if (state.cardDetailLoading) {
+    return [
+      Dom.div('TrelloCardDetailPanel', [
+        renderListTitle('Card details'),
+        Dom.textNode('Loading card...'),
+      ]),
+    ]
+  }
+  if (!state.selectedCardDetail) {
+    return []
+  }
+  const { attachments, card } = state.selectedCardDetail
+  const descriptionPreview =
+    state.draftCardDescription.trim() || 'No description'
+  const children = [
+    Dom.button('closeCardDetail', 'Close'),
+    renderField('Title', 'cardTitle', state.draftCardTitle),
+    renderTextAreaField(
+      'Description',
+      'cardDescription',
+      state.draftCardDescription,
+    ),
+    Dom.button('saveCardDetail', state.savingCardDetail ? 'Saving...' : 'Save'),
+    Dom.div('TrelloCardDescription', [Dom.textNode(descriptionPreview)]),
+    renderListTitle('Images'),
+    renderCardDetailImages(attachments),
+    ...(card.url
+      ? [Dom.link('TrelloCardDetailLink', card.url, 'Open in Trello')]
+      : []),
+  ]
+  return [Dom.div('TrelloCardDetailPanel', children)]
 }
 
 const renderBoardDetailContent = (
@@ -410,7 +533,12 @@ const renderBoardDetailContent = (
   if (state.loading) {
     return [Dom.textNode('Loading board...')]
   }
-  return [Dom.div('TrelloLists', lists)]
+  return [
+    Dom.div('TrelloBoardDetailContent', [
+      Dom.div('TrelloLists', lists),
+      ...renderCardDetailPanel(state),
+    ]),
+  ]
 }
 
 const renderBoardDetail = (
@@ -440,15 +568,33 @@ const renderBoardDetail = (
 const createInitialState = (): TrelloViewState => {
   return {
     activeSearchQuery: '',
+<<<<<<< HEAD
+=======
+    boardDetail: undefined,
+>>>>>>> origin/main
     boards: [],
+    cardDetailLoading: false,
+    credentials: undefined,
     draftApiKey: '',
+<<<<<<< HEAD
+=======
+    draftCardDescription: '',
+    draftCardTitle: '',
+>>>>>>> origin/main
     draftSearchQuery: '',
     draftToken: '',
     error: '',
     loading: false,
     recentBoardViews: [],
+<<<<<<< HEAD
     searchEnabled: false,
     searchResults: [],
+=======
+    savingCardDetail: false,
+    searchEnabled: false,
+    searchResults: [],
+    selectedCardDetail: undefined,
+>>>>>>> origin/main
   }
 }
 
@@ -470,13 +616,26 @@ const createInstance = async (
     }, 0)
   }
 
+  const clearBoardSpecificState = (): void => {
+    state.boardDetail = undefined
+    state.selectedCardDetail = undefined
+    state.cardDetailLoading = false
+    state.draftCardDescription = ''
+    state.draftCardTitle = ''
+    state.savingCardDetail = false
+  }
+
   const loadBoards = async (rerender = true): Promise<void> => {
     if (!state.credentials) {
       return
     }
     state.loading = true
     state.error = ''
+<<<<<<< HEAD
     state.boardDetail = undefined
+=======
+    clearBoardSpecificState()
+>>>>>>> origin/main
     state.activeSearchQuery = ''
     state.searchResults = []
     try {
@@ -524,13 +683,21 @@ const createInstance = async (
       await storage.write(credentials)
       state.credentials = credentials
       state.boards = boards
+<<<<<<< HEAD
       state.boardDetail = undefined
+=======
+      clearBoardSpecificState()
+>>>>>>> origin/main
       state.activeSearchQuery = ''
       state.searchResults = []
     } catch (error) {
       state.credentials = undefined
       state.boards = []
+<<<<<<< HEAD
       state.boardDetail = undefined
+=======
+      clearBoardSpecificState()
+>>>>>>> origin/main
       state.activeSearchQuery = ''
       state.searchResults = []
       state.error = getErrorMessage(error)
@@ -553,10 +720,16 @@ const createInstance = async (
       )
     if (!board) {
       state.error = `Board not found: ${boardId}`
+      requestRerender()
       return
     }
     state.loading = true
     state.error = ''
+    state.selectedCardDetail = undefined
+    state.cardDetailLoading = false
+    state.draftCardDescription = ''
+    state.draftCardTitle = ''
+    state.savingCardDetail = false
     state.recentBoardViews = updateRecentBoardViews(
       state.recentBoardViews,
       board.id,
@@ -573,6 +746,117 @@ const createInstance = async (
     requestRerender()
   }
 
+  const findBoardCard = (cardId: string): TrelloCard | undefined => {
+    const lists = state.boardDetail?.lists || []
+    for (const list of lists) {
+      const card = list.cards.find((item) => item.id === cardId)
+      if (card) {
+        return card
+      }
+    }
+    return undefined
+  }
+
+  const openCard = async (cardId: string): Promise<void> => {
+    if (!state.credentials || !state.boardDetail) {
+      return
+    }
+    const card = findBoardCard(cardId)
+    if (!card) {
+      state.error = `Card not found: ${cardId}`
+      requestRerender()
+      return
+    }
+    state.cardDetailLoading = true
+    state.selectedCardDetail = undefined
+    state.error = ''
+    requestRerender()
+    try {
+      const cardDetail = await client.getCardDetail(card, state.credentials)
+      state.selectedCardDetail = cardDetail
+      state.draftCardTitle = cardDetail.card.name
+      state.draftCardDescription = cardDetail.card.desc || ''
+    } catch (error) {
+      state.error = getErrorMessage(error)
+    } finally {
+      state.cardDetailLoading = false
+    }
+    requestRerender()
+  }
+
+  const closeCardDetail = (): void => {
+    state.selectedCardDetail = undefined
+    state.cardDetailLoading = false
+    state.draftCardDescription = ''
+    state.draftCardTitle = ''
+    state.error = ''
+    requestRerender()
+  }
+
+  const updateBoardDetailCard = (card: TrelloCard): void => {
+    if (!state.boardDetail) {
+      return
+    }
+    state.boardDetail = {
+      ...state.boardDetail,
+      lists: state.boardDetail.lists.map((list) => {
+        return {
+          ...list,
+          cards: list.cards.map((item) => {
+            if (item.id !== card.id) {
+              return item
+            }
+            return {
+              ...item,
+              ...card,
+            }
+          }),
+        }
+      }),
+    }
+  }
+
+  const saveCardDetail = async (): Promise<void> => {
+    if (
+      !state.credentials ||
+      !state.selectedCardDetail ||
+      state.savingCardDetail
+    ) {
+      return
+    }
+    const name = state.draftCardTitle.trim()
+    if (!name) {
+      state.error = 'Card title is required.'
+      requestRerender()
+      return
+    }
+    state.error = ''
+    state.savingCardDetail = true
+    requestRerender()
+    try {
+      const card = await client.updateCard(
+        state.selectedCardDetail.card,
+        {
+          desc: state.draftCardDescription,
+          name,
+        },
+        state.credentials,
+      )
+      state.selectedCardDetail = {
+        ...state.selectedCardDetail,
+        card,
+      }
+      state.draftCardTitle = card.name
+      state.draftCardDescription = card.desc || ''
+      updateBoardDetailCard(card)
+    } catch (error) {
+      state.error = getErrorMessage(error)
+    } finally {
+      state.savingCardDetail = false
+    }
+    requestRerender()
+  }
+
   const logout = async (): Promise<void> => {
     await storage.delete()
     await recentStorage.delete()
@@ -581,7 +865,7 @@ const createInstance = async (
   }
 
   const goBackToBoards = (): void => {
-    state.boardDetail = undefined
+    clearBoardSpecificState()
     state.error = ''
     requestRerender()
   }
@@ -593,7 +877,11 @@ const createInstance = async (
     const query = state.draftSearchQuery.trim()
     state.draftSearchQuery = query
     state.error = ''
+<<<<<<< HEAD
     state.boardDetail = undefined
+=======
+    clearBoardSpecificState()
+>>>>>>> origin/main
     if (!query) {
       state.activeSearchQuery = ''
       state.searchResults = []
@@ -626,6 +914,18 @@ const createInstance = async (
     if (event.name === 'search') {
       state.draftSearchQuery =
         typeof event.value === 'string' ? event.value : ''
+<<<<<<< HEAD
+=======
+      return
+    }
+    if (event.name === 'cardTitle') {
+      state.draftCardTitle = typeof event.value === 'string' ? event.value : ''
+      return
+    }
+    if (event.name === 'cardDescription') {
+      state.draftCardDescription =
+        typeof event.value === 'string' ? event.value : ''
+>>>>>>> origin/main
     }
   }
 
@@ -636,6 +936,9 @@ const createInstance = async (
       case 'backToBoards':
         goBackToBoards()
         return
+      case 'closeCardDetail':
+        closeCardDetail()
+        return
       case 'connect':
         await connect()
         return
@@ -645,10 +948,25 @@ const createInstance = async (
       case 'refreshBoards':
         await loadBoards()
         return
+      case 'saveCardDetail':
+        await saveCardDetail()
+        return
       default:
         if (event.name?.startsWith('board:')) {
           await openBoard(event.name.slice('board:'.length))
+          return
         }
+        if (event.name?.startsWith('card:')) {
+          await openCard(event.name.slice('card:'.length))
+        }
+    }
+  }
+
+  const handleSubmitEvent = async (
+    event: Readonly<ViewEvent>,
+  ): Promise<void> => {
+    if (event.name === 'search') {
+      await submitSearch()
     }
   }
 
@@ -686,6 +1004,7 @@ const createInstance = async (
     saveState(): unknown {
       return {
         boardId: state.boardDetail?.board.id,
+        cardId: state.selectedCardDetail?.card.id,
         isAuthenticated: Boolean(state.credentials),
       }
     },

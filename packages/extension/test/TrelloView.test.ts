@@ -3,6 +3,10 @@ import { expect, test } from '@jest/globals'
 import type {
   TrelloBoard,
   TrelloBoardDetail,
+<<<<<<< HEAD
+=======
+  TrelloCardDetail,
+>>>>>>> origin/main
   TrelloSearchResult,
 } from '../src/parts/TrelloTypes/TrelloTypes.ts'
 import { createMemoryCredentialStorage } from '../src/parts/CredentialStorage/CredentialStorage.ts'
@@ -64,6 +68,13 @@ const hasDirectChildClass = (
   return false
 }
 
+const hasNode = (
+  dom: readonly any[],
+  predicate: (node: any) => boolean,
+): boolean => {
+  return dom.some(predicate)
+}
+
 const getBoardButtonLabels = (dom: readonly any[]): readonly string[] => {
   const labels: string[] = []
   for (let i = 0; i < dom.length; i++) {
@@ -105,6 +116,10 @@ const createAuthenticatedInstance = async (
 interface SearchInstanceData {
   readonly boardDetails?: Readonly<Record<string, TrelloBoardDetail>>
   readonly boards?: readonly TrelloBoard[]
+<<<<<<< HEAD
+=======
+  readonly cardDetails?: Readonly<Record<string, TrelloCardDetail>>
+>>>>>>> origin/main
   readonly searchError?: string
   readonly searchResults?: readonly TrelloSearchResult[]
 }
@@ -204,6 +219,173 @@ test('connect loads boards and clicking board loads detail', async () => {
   expect(detailClassNames).toContain('TrelloCards')
   expect(hasDirectChildClass(detailDom, 'TrelloList', 'TrelloCards')).toBe(true)
   expect(hasDirectChildClass(detailDom, 'TrelloCards', 'TrelloCard')).toBe(true)
+  resetTrelloViewDependencyFactory()
+})
+
+test('clicking card renders card detail and close dismisses it', async () => {
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', name: 'Ship Trello view' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      boards: [{ id: 'board-1', name: 'Roadmap' }],
+      cardDetails: {
+        'card-1': {
+          attachments: [
+            {
+              id: 'attachment-1',
+              mimeType: 'image/png',
+              name: 'Screenshot',
+              url: 'https://example.com/screenshot.png',
+            },
+          ],
+          card: {
+            desc: 'Detailed card description',
+            id: 'card-1',
+            name: 'Ship Trello view',
+            url: 'https://trello.com/c/card-1',
+          },
+        },
+      },
+    }),
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage(),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: validApiKey,
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: validToken,
+  })
+  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+
+  const detailDom = await instance.render()
+  const text = getText(detailDom)
+  expect(text).toContain('Detailed card description')
+  expect(text).toContain('Open in Trello')
+  expect(getClassNames(detailDom)).toContain('TrelloCardDetailPanel')
+  expect(getClassNames(detailDom)).toContain('TrelloCardDetailImage')
+  expect(hasDirectChildClass(detailDom, 'TrelloCards', 'TrelloCard')).toBe(true)
+  expect(
+    hasNode(detailDom, (node) => {
+      return (
+        node.className === 'TrelloCardDetailImage' &&
+        node.src === 'https://example.com/screenshot.png'
+      )
+    }),
+  ).toBe(true)
+  expect(
+    hasNode(detailDom, (node) => {
+      return (
+        node.className === 'TrelloCardDetailLink' &&
+        node.href === 'https://trello.com/c/card-1'
+      )
+    }),
+  ).toBe(true)
+  expect(hasNode(detailDom, (node) => node.name === 'closeCardDetail')).toBe(
+    true,
+  )
+
+  await instance.handleEvent?.({ name: 'closeCardDetail', type: 'click' })
+
+  const closedDom = await instance.render()
+  expect(getText(closedDom)).toContain('Todo')
+  expect(getText(closedDom)).toContain('Ship Trello view')
+  expect(getClassNames(closedDom)).not.toContain('TrelloCardDetailPanel')
+  resetTrelloViewDependencyFactory()
+})
+
+test('editing card title and description saves card detail', async () => {
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', name: 'Ship Trello view' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      boards: [{ id: 'board-1', name: 'Roadmap' }],
+      cardDetails: {
+        'card-1': {
+          attachments: [],
+          card: {
+            desc: 'Original description',
+            id: 'card-1',
+            name: 'Ship Trello view',
+          },
+        },
+      },
+    }),
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage(),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: validApiKey,
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: validToken,
+  })
+  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'cardTitle',
+    type: 'input',
+    value: 'Updated title',
+  })
+  await instance.handleEvent?.({
+    name: 'cardDescription',
+    type: 'input',
+    value: 'Updated description',
+  })
+  await instance.handleEvent?.({ name: 'saveCardDetail', type: 'click' })
+
+  const detailDom = await instance.render()
+  const text = getText(detailDom)
+  expect(text).toContain('Updated title')
+  expect(text).toContain('Updated description')
+  expect(text).not.toContain('Original description')
+  expect(
+    hasNode(detailDom, (node) => {
+      return node.name === 'cardTitle' && node.value === 'Updated title'
+    }),
+  ).toBe(true)
+  expect(
+    hasNode(detailDom, (node) => {
+      return (
+        node.name === 'cardDescription' && node.value === 'Updated description'
+      )
+    }),
+  ).toBe(true)
   resetTrelloViewDependencyFactory()
 })
 

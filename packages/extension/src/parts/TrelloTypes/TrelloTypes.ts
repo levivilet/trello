@@ -19,10 +19,37 @@ export interface TrelloBoard {
 }
 
 export interface TrelloCard {
+  readonly desc?: string
   readonly id: string
   readonly idBoard?: string
+<<<<<<< HEAD
+=======
+  readonly idList?: string
+>>>>>>> origin/main
   readonly name: string
   readonly url?: string
+}
+
+export interface TrelloAttachmentPreview {
+  readonly url?: string
+}
+
+export interface TrelloAttachment {
+  readonly id: string
+  readonly mimeType?: string
+  readonly name?: string
+  readonly previews?: readonly TrelloAttachmentPreview[]
+  readonly url?: string
+}
+
+export interface TrelloCardDetail {
+  readonly attachments: readonly TrelloAttachment[]
+  readonly card: TrelloCard
+}
+
+export interface TrelloCardUpdate {
+  readonly desc: string
+  readonly name: string
 }
 
 export interface TrelloList {
