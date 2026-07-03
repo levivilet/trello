@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type, @typescript-eslint/prefer-readonly-parameter-types */
 import type { Test } from '@lvce-editor/test-with-playwright'
 
-export const name = 'trello.virtual-dom-view.board-detail'
+export const name = 'trello.virtual-dom-view.board-detail-empty'
 export const skip = true
 
 const createCards = (count) => {
@@ -82,19 +82,20 @@ const openBoard = async (Locator, expect, boardId = 'board-1') => {
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   const boards = createBoards(1)
-  const mockData = createMockData(boards, {
-    'board-1': {
-      board: boards[0],
-      lists: [createList('list-1', 'Todo', createCards(1))],
-    },
-  })
-  await useMockDataAndShowTrello(Command, mockData)
+  await useMockDataAndShowTrello(
+    Command,
+    createMockData(boards, {
+      'board-1': createBoardDetail(boards[0], []),
+    }),
+  )
   await connectWithCredentials({ expect, Locator })
   await openBoard(Locator, expect)
 
-  const todo = Locator('text=Todo')
-  const card = Locator('text=Card 1')
+  const title = Locator('text=Roadmap')
+  const lists = Locator('.TrelloList')
+  const cards = Locator('.TrelloCard')
 
-  await expect(todo).toBeVisible()
-  await expect(card).toBeVisible()
+  await expect(title).toBeVisible()
+  await expect(lists).toHaveCount(0)
+  await expect(cards).toHaveCount(0)
 }
