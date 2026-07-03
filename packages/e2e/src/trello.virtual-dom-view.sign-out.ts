@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type, @typescript-eslint/prefer-readonly-parameter-types */
 import type { Test } from '@lvce-editor/test-with-playwright'
 
-export const name = 'trello.virtual-dom-view.board-detail'
+export const name = 'trello.virtual-dom-view.sign-out'
 export const skip = true
 
 const createCards = (count) => {
@@ -73,28 +73,21 @@ const connectWithCredentials = async ({ expect, Locator }) => {
   await connect.click()
 }
 
-const openBoard = async (Locator, expect, boardId = 'board-1') => {
-  const board = Locator(`button[name="board:${boardId}"]`)
-  await expect(board).toBeVisible()
-  // eslint-disable-next-line e2e/no-direct-click
-  await board.click()
-}
-
 export const test: Test = async ({ Command, expect, Locator }) => {
   const boards = createBoards(1)
-  const mockData = createMockData(boards, {
-    'board-1': {
-      board: boards[0],
-      lists: [createList('list-1', 'Todo', createCards(1))],
-    },
-  })
-  await useMockDataAndShowTrello(Command, mockData)
+  await useMockDataAndShowTrello(Command, createMockData(boards))
   await connectWithCredentials({ expect, Locator })
-  await openBoard(Locator, expect)
 
-  const todo = Locator('text=Todo')
-  const card = Locator('text=Card 1')
+  const logout = Locator('button[name="logout"]')
+  await expect(logout).toBeVisible()
+  // eslint-disable-next-line e2e/no-direct-click
+  await logout.click()
 
-  await expect(todo).toBeVisible()
-  await expect(card).toBeVisible()
+  const apiKey = Locator('input[name="apiKey"]')
+  const token = Locator('input[name="token"]')
+  const board = Locator('button[name="board:board-1"]')
+
+  await expect(apiKey).toBeVisible()
+  await expect(token).toBeVisible()
+  await expect(board).not.toBeVisible()
 }
