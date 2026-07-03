@@ -15,6 +15,12 @@ const getText = (dom: readonly any[]): string => {
     .join('\n')
 }
 
+const getClassNames = (dom: readonly any[]): readonly string[] => {
+  return dom
+    .map((node) => node.className)
+    .filter((className): className is string => typeof className === 'string')
+}
+
 test('renders auth inputs when unauthenticated', async () => {
   setTrelloViewDependencyFactory(() => ({
     client: createMockTrelloClient({}),
@@ -65,9 +71,14 @@ test('connect loads boards and clicking board loads detail', async () => {
 
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
 
-  const detailText = getText(await instance.render())
+  const detailDom = await instance.render()
+  const detailText = getText(detailDom)
+  const detailClassNames = getClassNames(detailDom)
   expect(detailText).toContain('Todo')
   expect(detailText).toContain('Ship Trello view')
+  expect(detailClassNames).toContain('TrelloLists')
+  expect(detailClassNames).toContain('TrelloList')
+  expect(detailClassNames).toContain('TrelloCards')
   resetTrelloViewDependencyFactory()
 })
 
