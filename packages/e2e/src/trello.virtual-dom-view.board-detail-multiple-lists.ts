@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type, @typescript-eslint/prefer-readonly-parameter-types */
 import type { Test } from '@lvce-editor/test-with-playwright'
 
-export const name = 'trello.virtual-dom-view.board-detail'
+export const name = 'trello.virtual-dom-view.board-detail-multiple-lists'
 export const skip = true
 
 const createCards = (count) => {
@@ -82,19 +82,35 @@ const openBoard = async (Locator, expect, boardId = 'board-1') => {
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   const boards = createBoards(1)
-  const mockData = createMockData(boards, {
-    'board-1': {
-      board: boards[0],
-      lists: [createList('list-1', 'Todo', createCards(1))],
-    },
-  })
-  await useMockDataAndShowTrello(Command, mockData)
+  const listsData = [
+    createList('list-1', 'Todo', [{ id: 'card-1', name: 'Plan work' }]),
+    createList('list-2', 'Doing', [{ id: 'card-2', name: 'Build work' }]),
+    createList('list-3', 'Done', [{ id: 'card-3', name: 'Ship work' }]),
+  ]
+  await useMockDataAndShowTrello(
+    Command,
+    createMockData(boards, {
+      'board-1': createBoardDetail(boards[0], listsData),
+    }),
+  )
   await connectWithCredentials({ expect, Locator })
   await openBoard(Locator, expect)
 
+  const lists = Locator('.TrelloList')
+  const cards = Locator('.TrelloCard')
   const todo = Locator('text=Todo')
-  const card = Locator('text=Card 1')
+  const doing = Locator('text=Doing')
+  const done = Locator('text=Done')
+  const planWork = Locator('text=Plan work')
+  const buildWork = Locator('text=Build work')
+  const shipWork = Locator('text=Ship work')
 
+  await expect(lists).toHaveCount(3)
+  await expect(cards).toHaveCount(3)
   await expect(todo).toBeVisible()
-  await expect(card).toBeVisible()
+  await expect(doing).toBeVisible()
+  await expect(done).toBeVisible()
+  await expect(planWork).toBeVisible()
+  await expect(buildWork).toBeVisible()
+  await expect(shipWork).toBeVisible()
 }

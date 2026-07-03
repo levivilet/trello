@@ -2,48 +2,8 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type, @typescript-eslint/prefer-readonly-parameter-types */
 import type { Test } from '@lvce-editor/test-with-playwright'
 
-export const name = 'trello.virtual-dom-view.boards'
+export const name = 'trello.virtual-dom-view.error-list-boards'
 export const skip = true
-
-const createCards = (count) => {
-  return Array.from({ length: count }, (_, index) => {
-    const number = index + 1
-    return {
-      id: `card-${number}`,
-      name: `Card ${number}`,
-    }
-  })
-}
-
-const createList = (id, name, cards) => {
-  return {
-    cards,
-    id,
-    name,
-  }
-}
-
-const createBoardDetail = (board, lists) => {
-  return {
-    board,
-    lists,
-  }
-}
-
-const createMockData = (
-  boards,
-  boardDetails = Object.fromEntries(
-    boards.map((board) => [
-      board.id,
-      createBoardDetail(board, [createList('list-1', 'Todo', createCards(1))]),
-    ]),
-  ),
-) => {
-  return {
-    boardDetails,
-    boards,
-  }
-}
 
 const createBoards = (count) => {
   return Array.from({ length: count }, (_, index) => {
@@ -75,13 +35,15 @@ const connectWithCredentials = async ({ expect, Locator }) => {
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   const boards = createBoards(1)
-  await useMockDataAndShowTrello(Command, createMockData(boards))
+  await useMockDataAndShowTrello(Command, {
+    boards,
+    listBoardsError: 'Cannot list boards',
+  })
   await connectWithCredentials({ expect, Locator })
 
+  const error = Locator('text=Cannot list boards')
   const board = Locator('button[name="board:board-1"]')
-  await expect(board).toBeVisible()
 
-  const roadmap = Locator('text=Roadmap')
-
-  await expect(roadmap).toBeVisible()
+  await expect(error).toBeVisible()
+  await expect(board).not.toBeVisible()
 }
