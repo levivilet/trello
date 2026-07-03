@@ -45,12 +45,12 @@ interface TrelloViewDependencies {
 }
 
 interface TrelloViewState {
+  activeSearchQuery: string
   boardDetail?: TrelloBoardDetail
   boards: readonly TrelloBoard[]
   credentials?: TrelloCredentials
-  activeSearchQuery: string
-  draftSearchQuery: string
   draftApiKey: string
+  draftSearchQuery: string
   draftToken: string
   error: string
   loading: boolean
@@ -348,9 +348,7 @@ const renderSearchResult = (
       'TrelloSearchResult',
     )
   }
-  return Dom.div('TrelloSearchResult', [
-    Dom.textNode(`Card: ${result.name}`),
-  ])
+  return Dom.div('TrelloSearchResult', [Dom.textNode(`Card: ${result.name}`)])
 }
 
 const renderSearchContent = (
@@ -443,8 +441,8 @@ const createInitialState = (): TrelloViewState => {
   return {
     activeSearchQuery: '',
     boards: [],
-    draftSearchQuery: '',
     draftApiKey: '',
+    draftSearchQuery: '',
     draftToken: '',
     error: '',
     loading: false,

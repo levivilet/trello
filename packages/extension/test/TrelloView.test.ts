@@ -114,7 +114,7 @@ const createSearchEnabledInstance = async (
 ): Promise<VirtualDomViewInstance> => {
   setTrelloViewDependencyFactory(() => ({
     client: createMockTrelloClient(data),
-    readSearchEnabled: async () => true,
+    readSearchEnabled: async (): Promise<boolean> => true,
     recentStorage: createMemoryRecentBoardStorage(),
     storage: createMemoryCredentialStorage(),
   }))
@@ -480,7 +480,7 @@ test('submitting empty search clears search results', async () => {
   await instance.handleEvent?.({
     name: 'search',
     type: 'input',
-    value: '   ',
+    value: ' '.repeat(3),
   })
   await instance.handleEvent?.({ name: 'search', type: 'submit' })
 
