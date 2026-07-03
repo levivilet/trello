@@ -1,10 +1,10 @@
-import {
-  getPreference,
-  type View,
-  type ViewContext,
-  type ViewEvent,
-  type VirtualDomViewInstance,
+import type {
+  View,
+  ViewContext,
+  ViewEvent,
+  VirtualDomViewInstance,
 } from '@lvce-editor/api'
+import * as ExtensionApi from '@lvce-editor/api'
 import {
   VirtualDomElements,
   type VirtualDomNode,
@@ -50,10 +50,10 @@ interface TrelloViewDependencies {
 
 interface TrelloViewState {
   activeSearchQuery: string
-  boardDetail?: TrelloBoardDetail
+  boardDetail: TrelloBoardDetail | undefined
   boards: readonly TrelloBoard[]
   cardDetailLoading: boolean
-  credentials?: TrelloCredentials
+  credentials: TrelloCredentials | undefined
   draftApiKey: string
   draftCardDescription: string
   draftCardTitle: string
@@ -65,13 +65,16 @@ interface TrelloViewState {
   savingCardDetail: boolean
   searchEnabled: boolean
   searchResults: readonly TrelloSearchResult[]
-  selectedCardDetail?: TrelloCardDetail
+  selectedCardDetail: TrelloCardDetail | undefined
 }
 
 type DependencyFactory = () => TrelloViewDependencies
 
 const readSearchEnabledPreference = async (): Promise<boolean> => {
-  return (await getPreference(searchEnabledPreference)) === true
+  const api = ExtensionApi as unknown as {
+    readonly getPreference?: (key: string) => Promise<unknown>
+  }
+  return (await api.getPreference?.(searchEnabledPreference)) === true
 }
 
 const defaultDependencyFactory = (): TrelloViewDependencies => ({
@@ -545,8 +548,10 @@ const renderBoardDetail = (
 const createInitialState = (): TrelloViewState => {
   return {
     activeSearchQuery: '',
+    boardDetail: undefined,
     boards: [],
     cardDetailLoading: false,
+    credentials: undefined,
     draftApiKey: '',
     draftCardDescription: '',
     draftCardTitle: '',
@@ -558,6 +563,7 @@ const createInitialState = (): TrelloViewState => {
     savingCardDetail: false,
     searchEnabled: false,
     searchResults: [],
+    selectedCardDetail: undefined,
   }
 }
 
