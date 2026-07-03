@@ -214,6 +214,7 @@ const createInstance = async (
   const state = createInitialState()
 
   const requestRerender = (): void => {
+    // @ts-ignore
     const request = context?.requestRerender
     if (!request) {
       return
