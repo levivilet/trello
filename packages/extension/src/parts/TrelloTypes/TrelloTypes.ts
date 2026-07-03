@@ -3,9 +3,18 @@ export interface TrelloCredentials {
   readonly token: string
 }
 
-export interface TrelloBoard {
+export interface TrelloOrganization {
+  readonly displayName?: string
   readonly id: string
   readonly name: string
+}
+
+export interface TrelloBoard {
+  readonly dateLastView?: string
+  readonly id: string
+  readonly idOrganization?: string
+  readonly name: string
+  readonly organization?: TrelloOrganization
   readonly url?: string
 }
 

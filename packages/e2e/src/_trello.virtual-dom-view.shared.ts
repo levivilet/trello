@@ -109,8 +109,10 @@ export const connectWithCredentials = async ({
   const token = Locator('input[name="token"]')
   await expect(apiKey).toBeVisible()
   await expect(token).toBeVisible()
-  await apiKey.type('key')
-  await token.type('token')
+  await apiKey.type('abcdefghijklmnopqrstuvwxyz123456')
+  await token.type(
+    'abcdefghijklmnopqrstuvwxyz123456abcdefghijklmnopqrstuvwxyz123456',
+  )
   const connect = Locator('button[name="connect"]')
   await expect(connect).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click

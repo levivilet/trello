@@ -101,7 +101,9 @@ export const createTrelloClient = (
         '/members/me/boards',
         credentials,
         {
-          fields: 'name,url',
+          fields: 'name,url,dateLastView,idOrganization',
+          organization: 'true',
+          organization_fields: 'name,displayName',
         },
       )
     },

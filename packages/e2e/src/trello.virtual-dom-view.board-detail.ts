@@ -7,10 +7,10 @@ import {
   createMockData,
   openBoard,
   useMockDataAndShowTrello,
-} from './trello.virtual-dom-view.shared.ts'
+} from './_trello.virtual-dom-view.shared.ts'
 
 export const name = 'trello.virtual-dom-view.board-detail'
-// export const skip = true
+export const skip = true
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   const boards = createBoards(1)

@@ -18,6 +18,12 @@ import {
   type CredentialStorage,
 } from '../CredentialStorage/CredentialStorage.ts'
 import {
+  createCacheRecentBoardStorage,
+  type RecentBoardStorage,
+  type RecentBoardView,
+  updateRecentBoardViews,
+} from '../RecentBoardStorage/RecentBoardStorage.ts'
+import {
   createTrelloClient,
   type TrelloClient,
 } from '../TrelloClient/TrelloClient.ts'
@@ -25,8 +31,12 @@ import * as Dom from '../VirtualDom/VirtualDom.ts'
 
 export const viewId = 'trello.views.boards'
 
+const apiKeyPattern = /^[A-Za-z0-9]{32}$/
+const tokenPattern = /^[A-Za-z0-9]{64}$/
+
 interface TrelloViewDependencies {
   readonly client: TrelloClient
+  readonly recentStorage: RecentBoardStorage
   readonly storage: CredentialStorage
 }
 
@@ -38,12 +48,14 @@ interface TrelloViewState {
   draftToken: string
   error: string
   loading: boolean
+  recentBoardViews: readonly RecentBoardView[]
 }
 
 type DependencyFactory = () => TrelloViewDependencies
 
 const defaultDependencyFactory = (): TrelloViewDependencies => ({
   client: createTrelloClient(),
+  recentStorage: createCacheRecentBoardStorage(),
   storage: createCacheCredentialStorage(),
 })
 
@@ -66,6 +78,21 @@ const getErrorMessage = (error: unknown): string => {
     return error.message
   }
   return String(error)
+}
+
+const validateCredentials = (
+  credentials: Readonly<TrelloCredentials>,
+): string => {
+  if (!credentials.apiKey || !credentials.token) {
+    return 'Enter an API key and token.'
+  }
+  if (!apiKeyPattern.test(credentials.apiKey)) {
+    return 'API key must be 32 alphanumeric characters.'
+  }
+  if (!tokenPattern.test(credentials.token)) {
+    return 'Token must be 64 alphanumeric characters.'
+  }
+  return ''
 }
 
 const renderError = (error: string): readonly Dom.TreeNode[] => {
@@ -102,6 +129,30 @@ const renderField = (
   ])
 }
 
+const renderWelcomeText = (text: string): Dom.TreeNode => {
+  return Dom.div('TrelloWelcomeText', [Dom.textNode(text)])
+}
+
+const renderWelcome = (): Dom.TreeNode => {
+  return Dom.div('TrelloWelcome', [
+    Dom.node(VirtualDomElements.H3, { className: 'TrelloWelcomeTitle' }, [
+      Dom.textNode('Welcome to Trello'),
+    ]),
+    renderWelcomeText(
+      'Connect your Trello account to browse your boards from Lvce Editor.',
+    ),
+    renderWelcomeText(
+      'Create or open a Trello Power-Up at https://trello.com/power-ups/admin, then open the API Key tab and generate an API key.',
+    ),
+    renderWelcomeText(
+      "Use that key to generate a token from Trello's authorization page, then paste both values here.",
+    ),
+    renderWelcomeText(
+      'The API key identifies the app. The token grants access to your Trello account, so keep the token private.',
+    ),
+  ])
+}
+
 const renderAuth = (
   state: Readonly<TrelloViewState>,
 ): readonly VirtualDomNode[] => {
@@ -119,13 +170,13 @@ const renderAuth = (
       token,
       connect,
       ...renderError(state.error),
+      renderWelcome(),
     ]),
   )
 }
 
 const renderBoardContent = (
   state: Readonly<TrelloViewState>,
-  boardItems: readonly Dom.TreeNode[],
 ): readonly Dom.TreeNode[] => {
   if (state.loading) {
     return [Dom.textNode('Loading boards...')]
@@ -133,15 +184,141 @@ const renderBoardContent = (
   if (state.boards.length === 0) {
     return [Dom.textNode('No boards found')]
   }
-  return boardItems
+  const recentBoards = getRecentlyViewedBoards(state)
+  const workspaceSections = getWorkspaceSections(state)
+  return [
+    ...renderRecentlyViewed(recentBoards),
+    Dom.div('TrelloWorkspaces', [
+      renderListTitle('Your workspaces'),
+      ...workspaceSections.map(renderWorkspaceSection),
+    ]),
+  ]
+}
+
+const parseDate = (value: string | undefined): number => {
+  if (!value) {
+    return 0
+  }
+  const time = Date.parse(value)
+  if (Number.isNaN(time)) {
+    return 0
+  }
+  return time
+}
+
+const getLocalViewedAt = (
+  recentBoardViews: readonly RecentBoardView[],
+  boardId: string,
+): number => {
+  const recentBoardView = recentBoardViews.find(
+    (item) => item.boardId === boardId,
+  )
+  return parseDate(recentBoardView?.viewedAt)
+}
+
+const getBoardViewedAt = (
+  state: Readonly<TrelloViewState>,
+  board: TrelloBoard,
+): number => {
+  return Math.max(
+    parseDate(board.dateLastView),
+    getLocalViewedAt(state.recentBoardViews, board.id),
+  )
+}
+
+const sortBoardsByViewedAt = (
+  state: Readonly<TrelloViewState>,
+  boards: readonly TrelloBoard[],
+): readonly TrelloBoard[] => {
+  const originalIndexes = new Map(
+    state.boards.map((board, index) => [board.id, index]),
+  )
+  return boards.toSorted((a, b) => {
+    const viewedAtDiff = getBoardViewedAt(state, b) - getBoardViewedAt(state, a)
+    if (viewedAtDiff !== 0) {
+      return viewedAtDiff
+    }
+    return (originalIndexes.get(a.id) ?? 0) - (originalIndexes.get(b.id) ?? 0)
+  })
+}
+
+const getRecentlyViewedBoards = (
+  state: Readonly<TrelloViewState>,
+): readonly TrelloBoard[] => {
+  return sortBoardsByViewedAt(state, state.boards)
+    .filter((board) => getBoardViewedAt(state, board) > 0)
+    .slice(0, 4)
+}
+
+interface WorkspaceSection {
+  readonly boards: readonly TrelloBoard[]
+  readonly name: string
+}
+
+const getWorkspaceName = (board: TrelloBoard): string => {
+  return (
+    board.organization?.displayName ||
+    board.organization?.name ||
+    'Personal boards'
+  )
+}
+
+const getWorkspaceSections = (
+  state: Readonly<TrelloViewState>,
+): readonly WorkspaceSection[] => {
+  const sections = new Map<string, TrelloBoard[]>()
+  for (const board of state.boards) {
+    const name = getWorkspaceName(board)
+    const boards = sections.get(name) || []
+    boards.push(board)
+    sections.set(name, boards)
+  }
+  return Array.from(
+    sections,
+    (entry: readonly [string, readonly TrelloBoard[]]): WorkspaceSection => {
+      const [name, boards] = entry
+      return {
+        boards: sortBoardsByViewedAt(state, boards),
+        name,
+      }
+    },
+  )
+}
+
+const renderBoardButton = (board: TrelloBoard): Dom.TreeNode => {
+  return Dom.button(`board:${board.id}`, board.name, 'TrelloBoardButton')
+}
+
+const renderBoardGrid = (boards: readonly TrelloBoard[]): Dom.TreeNode => {
+  return Dom.div('TrelloBoardGrid', boards.map(renderBoardButton))
+}
+
+const renderRecentlyViewed = (
+  boards: readonly TrelloBoard[],
+): readonly Dom.TreeNode[] => {
+  if (boards.length === 0) {
+    return []
+  }
+  return [
+    Dom.div('TrelloSection', [
+      renderListTitle('Recently viewed'),
+      renderBoardGrid(boards),
+    ]),
+  ]
+}
+
+const renderWorkspaceSection = (
+  section: Readonly<WorkspaceSection>,
+): Dom.TreeNode => {
+  return Dom.div('TrelloWorkspace', [
+    renderListTitle(section.name),
+    renderBoardGrid(section.boards),
+  ])
 }
 
 const renderBoards = (
   state: Readonly<TrelloViewState>,
 ): readonly VirtualDomNode[] => {
-  const boardItems = state.boards.map((board) => {
-    return Dom.button(`board:${board.id}`, board.name, 'TrelloBoardButton')
-  })
   const toolbar = renderToolbar([
     Dom.button('refreshBoards', 'Refresh'),
     Dom.button('logout', 'Sign out'),
@@ -149,7 +326,7 @@ const renderBoards = (
   const children = [
     toolbar,
     renderTitle('Boards'),
-    ...renderBoardContent(state, boardItems),
+    ...renderBoardContent(state),
     ...renderError(state.error),
   ]
   return Dom.flatten(Dom.div('TrelloView TrelloBoards', children))
@@ -173,7 +350,7 @@ const renderBoardDetailContent = (
   if (state.loading) {
     return [Dom.textNode('Loading board...')]
   }
-  return lists
+  return [Dom.div('TrelloLists', lists)]
 }
 
 const renderBoardDetail = (
@@ -182,7 +359,10 @@ const renderBoardDetail = (
 ): readonly VirtualDomNode[] => {
   const lists = detail.lists.map((list) => {
     const cards = renderCards(list.cards)
-    return Dom.div('TrelloList', [renderListTitle(list.name), ...cards])
+    return Dom.div('TrelloList', [
+      renderListTitle(list.name),
+      Dom.div('TrelloCards', cards),
+    ])
   })
   const toolbar = renderToolbar([
     Dom.button('backToBoards', 'Back'),
@@ -206,13 +386,14 @@ const createInitialState = (): TrelloViewState => {
     draftToken: '',
     error: '',
     loading: false,
+    recentBoardViews: [],
   }
 }
 
 const createInstance = async (
   context?: ViewContext,
 ): Promise<VirtualDomViewInstance> => {
-  const { client, storage } = dependencyState.factory()
+  const { client, recentStorage, storage } = dependencyState.factory()
   const state = createInitialState()
 
   const requestRerender = (): void => {
@@ -245,6 +426,7 @@ const createInstance = async (
     }
   }
 
+  state.recentBoardViews = await recentStorage.read()
   const storedCredentials = await storage.read()
   if (storedCredentials) {
     state.credentials = storedCredentials
@@ -254,17 +436,36 @@ const createInstance = async (
   }
 
   const connect = async (): Promise<void> => {
-    if (!state.draftApiKey || !state.draftToken) {
-      state.error = 'Enter an API key and token.'
+    const credentials = {
+      apiKey: state.draftApiKey.trim(),
+      token: state.draftToken.trim(),
+    }
+    state.draftApiKey = credentials.apiKey
+    state.draftToken = credentials.token
+    const validationError = validateCredentials(credentials)
+    if (validationError) {
+      state.error = validationError
       requestRerender()
       return
     }
-    state.credentials = {
-      apiKey: state.draftApiKey,
-      token: state.draftToken,
+    state.loading = true
+    state.error = ''
+    requestRerender()
+    try {
+      const boards = await client.listBoards(credentials)
+      await storage.write(credentials)
+      state.credentials = credentials
+      state.boards = boards
+      state.boardDetail = undefined
+    } catch (error) {
+      state.credentials = undefined
+      state.boards = []
+      state.boardDetail = undefined
+      state.error = getErrorMessage(error)
+    } finally {
+      state.loading = false
     }
-    await storage.write(state.credentials)
-    await loadBoards()
+    requestRerender()
   }
 
   const openBoard = async (boardId: string): Promise<void> => {
@@ -278,6 +479,12 @@ const createInstance = async (
     }
     state.loading = true
     state.error = ''
+    state.recentBoardViews = updateRecentBoardViews(
+      state.recentBoardViews,
+      board.id,
+      new Date().toISOString(),
+    )
+    await recentStorage.write(state.recentBoardViews)
     try {
       state.boardDetail = await client.getBoardDetail(board, state.credentials)
     } catch (error) {
@@ -290,6 +497,7 @@ const createInstance = async (
 
   const logout = async (): Promise<void> => {
     await storage.delete()
+    await recentStorage.delete()
     Object.assign(state, createInitialState())
     requestRerender()
   }

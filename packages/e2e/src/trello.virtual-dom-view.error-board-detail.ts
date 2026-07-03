@@ -5,7 +5,7 @@ import {
   createMockData,
   openBoard,
   useMockDataAndShowTrello,
-} from './trello.virtual-dom-view.shared.ts'
+} from './_trello.virtual-dom-view.shared.ts'
 
 export const name = 'trello.virtual-dom-view.error-board-detail'
 export const skip = true

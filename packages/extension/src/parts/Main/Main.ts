@@ -9,6 +9,7 @@ import {
   createMockTrelloClient,
   type MockTrelloData,
 } from '../MockTrelloClient/MockTrelloClient.ts'
+import { createMemoryRecentBoardStorage } from '../RecentBoardStorage/RecentBoardStorage.ts'
 import * as TrelloView from '../TrelloView/TrelloView.ts'
 
 const state = {
@@ -32,6 +33,7 @@ export const activate = async (): Promise<void> => {
     execute(data: Readonly<MockTrelloData>) {
       TrelloView.setTrelloViewDependencyFactory(() => ({
         client: createMockTrelloClient(data),
+        recentStorage: createMemoryRecentBoardStorage(),
         storage: createMemoryCredentialStorage(),
       }))
       return { ok: true }

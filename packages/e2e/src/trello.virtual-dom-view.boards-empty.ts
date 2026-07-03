@@ -3,7 +3,7 @@ import {
   connectWithCredentials,
   createMockData,
   useMockDataAndShowTrello,
-} from './trello.virtual-dom-view.shared.ts'
+} from './_trello.virtual-dom-view.shared.ts'
 
 export const name = 'trello.virtual-dom-view.boards-empty'
 export const skip = true

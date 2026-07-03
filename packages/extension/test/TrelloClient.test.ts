@@ -1,6 +1,10 @@
 import { expect, test } from '@jest/globals'
 import { createTrelloClient } from '../src/parts/TrelloClient/TrelloClient.ts'
 
+const validApiKey = 'abcdefghijklmnopqrstuvwxyz123456'
+const validToken =
+  'abcdefghijklmnopqrstuvwxyz123456abcdefghijklmnopqrstuvwxyz123456'
+
 const jsonResponse = (value: unknown): Response => {
   return Response.json(value, {
     status: 200,
@@ -16,17 +20,21 @@ test('listBoards requests member boards with credentials', async () => {
 
   await expect(
     client.listBoards({
-      apiKey: 'key',
-      token: 'token',
+      apiKey: validApiKey,
+      token: validToken,
     }),
   ).resolves.toEqual([{ id: 'board-1', name: 'Roadmap' }])
 
   expect(requests).toHaveLength(1)
   const url = new URL(requests[0])
   expect(url.pathname).toBe('/1/members/me/boards')
-  expect(url.searchParams.get('key')).toBe('key')
-  expect(url.searchParams.get('token')).toBe('token')
-  expect(url.searchParams.get('fields')).toBe('name,url')
+  expect(url.searchParams.get('key')).toBe(validApiKey)
+  expect(url.searchParams.get('token')).toBe(validToken)
+  expect(url.searchParams.get('fields')).toBe(
+    'name,url,dateLastView,idOrganization',
+  )
+  expect(url.searchParams.get('organization')).toBe('true')
+  expect(url.searchParams.get('organization_fields')).toBe('name,displayName')
 })
 
 test('getBoardDetail requests lists and cards', async () => {
@@ -43,8 +51,8 @@ test('getBoardDetail requests lists and cards', async () => {
     client.getBoardDetail(
       { id: 'board-1', name: 'Roadmap' },
       {
-        apiKey: 'key',
-        token: 'token',
+        apiKey: validApiKey,
+        token: validToken,
       },
     ),
   ).resolves.toEqual({

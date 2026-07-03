@@ -2,7 +2,7 @@ import type { Test } from '@lvce-editor/test-with-playwright'
 import {
   createBoards,
   createMockData,
-} from './trello.virtual-dom-view.shared.ts'
+} from './_trello.virtual-dom-view.shared.ts'
 
 export const name = 'trello.virtual-dom-view.credentials'
 export const skip = true
