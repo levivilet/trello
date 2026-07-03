@@ -3,15 +3,13 @@ import { nodeResolve } from '@rollup/plugin-node-resolve'
 import fs from 'node:fs'
 import { createRequire } from 'node:module'
 import path, { join } from 'node:path'
-import { rollup } from 'rollup'
+import { type Plugin, rollup } from 'rollup'
 import esbuild from 'rollup-plugin-esbuild'
-import { root } from './root.js'
+import { root } from './root.ts'
 
 const extension = path.join(root, 'packages', 'extension')
 const require = createRequire(import.meta.url)
-const commonjs = /** @type {() => import('rollup').Plugin} */ (
-  require('@rollup/plugin-commonjs')
-)
+const commonjs = require('@rollup/plugin-commonjs') as () => Plugin
 
 fs.rmSync(join(root, 'dist'), { recursive: true, force: true })
 
