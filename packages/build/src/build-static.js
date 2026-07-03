@@ -1,7 +1,23 @@
-import { exportStatic } from '@lvce-editor/shared-process'
 import { cp } from 'node:fs/promises'
-import path from 'node:path'
+import path, { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { root } from './root.js'
+
+const sharedProcessPath = join(
+  root,
+  'packages',
+  'server',
+  'node_modules',
+  '@lvce-editor',
+  'shared-process',
+  'index.js',
+)
+
+const sharedProcessUrl = pathToFileURL(sharedProcessPath).toString()
+
+const sharedProcess = await import(sharedProcessUrl)
+
+const { exportStatic } = sharedProcess
 
 await import('./build.js')
 
