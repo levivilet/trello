@@ -1,4 +1,9 @@
-import type { View, ViewEvent, VirtualDomViewInstance } from '@lvce-editor/api'
+import type {
+  View,
+  ViewContext,
+  ViewEvent,
+  VirtualDomViewInstance,
+} from '@lvce-editor/api'
 import {
   VirtualDomElements,
   type VirtualDomNode,
@@ -202,11 +207,23 @@ const createInitialState = (): TrelloViewState => {
   }
 }
 
-const createInstance = async (): Promise<VirtualDomViewInstance> => {
+const createInstance = async (
+  context?: ViewContext,
+): Promise<VirtualDomViewInstance> => {
   const { client, storage } = dependencyState.factory()
   const state = createInitialState()
 
-  const loadBoards = async (): Promise<void> => {
+  const requestRerender = (): void => {
+    const request = context?.requestRerender
+    if (!request) {
+      return
+    }
+    globalThis.setTimeout(() => {
+      void request()
+    }, 0)
+  }
+
+  const loadBoards = async (rerender = true): Promise<void> => {
     if (!state.credentials) {
       return
     }
@@ -220,6 +237,9 @@ const createInstance = async (): Promise<VirtualDomViewInstance> => {
     } finally {
       state.loading = false
     }
+    if (rerender) {
+      requestRerender()
+    }
   }
 
   const storedCredentials = await storage.read()
@@ -227,7 +247,7 @@ const createInstance = async (): Promise<VirtualDomViewInstance> => {
     state.credentials = storedCredentials
     state.draftApiKey = storedCredentials.apiKey
     state.draftToken = storedCredentials.token
-    await loadBoards()
+    await loadBoards(false)
   }
 
   const connect = async (): Promise<void> => {
@@ -261,16 +281,19 @@ const createInstance = async (): Promise<VirtualDomViewInstance> => {
     } finally {
       state.loading = false
     }
+    requestRerender()
   }
 
   const logout = async (): Promise<void> => {
     await storage.delete()
     Object.assign(state, createInitialState())
+    requestRerender()
   }
 
   const goBackToBoards = (): void => {
     state.boardDetail = undefined
     state.error = ''
+    requestRerender()
   }
 
   const handleInputEvent = (event: Readonly<ViewEvent>): void => {
@@ -336,6 +359,7 @@ const createInstance = async (): Promise<VirtualDomViewInstance> => {
 
 export const view: View = {
   create: createInstance,
+  displayName: 'Trello',
   icon: 'list-tree',
   id: viewId,
   kind: 'virtualDom',
