@@ -336,6 +336,7 @@ const createInstance = async (): Promise<VirtualDomViewInstance> => {
 
 export const view: View = {
   create: createInstance,
+  // @ts-ignore
   displayName: 'Trello',
   icon: 'list-tree',
   id: viewId,
