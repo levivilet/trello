@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type, @typescript-eslint/prefer-readonly-parameter-types */
 import type { Test } from '@lvce-editor/test-with-playwright'
 
-export const name = 'trello.virtual-dom-view.credentials'
+export const name = 'trello.virtual-dom-view.sign-out'
 
 const createCards = (count) => {
   return Array.from({ length: count }, (_, index) => {
@@ -59,33 +59,34 @@ const useMockDataAndShowTrello = async (Command, mockData) => {
   await Command.executeExtensionCommand('trello.show')
 }
 
+const connectWithCredentials = async ({ expect, Locator }) => {
+  const apiKey = Locator('input[name="apiKey"]')
+  const token = Locator('input[name="token"]')
+  await expect(apiKey).toBeVisible()
+  await expect(token).toBeVisible()
+  await apiKey.type('key')
+  await token.type('token')
+  const connect = Locator('button[name="connect"]')
+  await expect(connect).toBeVisible()
+  // eslint-disable-next-line e2e/no-direct-click
+  await connect.click()
+}
+
 export const test: Test = async ({ Command, expect, Locator }) => {
-  let step = 'start'
-  try {
-    step = 'create boards'
-    const boards = createBoards(1)
-    const mockData = createMockData(boards)
-    step = 'reset'
-    step = 'use mock data'
-    await Command.executeExtensionCommand('trello.test.useMockData', mockData)
-    step = 'show trello'
-    await Command.executeExtensionCommand('trello.show')
+  const boards = createBoards(1)
+  await useMockDataAndShowTrello(Command, createMockData(boards))
+  await connectWithCredentials({ expect, Locator })
 
-    step = 'locate inputs'
-    const apiKeyInput = Locator('input[name="apiKey"]')
-    const tokenInput = Locator('input[name="token"]')
-    step = 'expect inputs'
-    await expect(apiKeyInput).toBeVisible()
-    await expect(tokenInput).toBeVisible()
+  const logout = Locator('button[name="logout"]')
+  await expect(logout).toBeVisible()
+  // eslint-disable-next-line e2e/no-direct-click
+  await logout.click()
 
-    step = 'locate labels'
-    const apiKey = Locator('text=API key')
-    const token = Locator('text=Token')
+  const apiKey = Locator('input[name="apiKey"]')
+  const token = Locator('input[name="token"]')
+  const board = Locator('button[name="board:board-1"]')
 
-    step = 'expect labels'
-    await expect(apiKey).toBeVisible()
-    await expect(token).toBeVisible()
-  } catch (error) {
-    throw new Error(`credentials failed at ${step}: ${error}`)
-  }
+  await expect(apiKey).toBeVisible()
+  await expect(token).toBeVisible()
+  await expect(board).not.toBeVisible()
 }
