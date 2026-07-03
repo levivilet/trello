@@ -30,7 +30,11 @@ test('listBoards requests member boards with credentials', async () => {
   expect(url.pathname).toBe('/1/members/me/boards')
   expect(url.searchParams.get('key')).toBe(validApiKey)
   expect(url.searchParams.get('token')).toBe(validToken)
-  expect(url.searchParams.get('fields')).toBe('name,url')
+  expect(url.searchParams.get('fields')).toBe(
+    'name,url,dateLastView,idOrganization',
+  )
+  expect(url.searchParams.get('organization')).toBe('true')
+  expect(url.searchParams.get('organization_fields')).toBe('name,displayName')
 })
 
 test('getBoardDetail requests lists and cards', async () => {

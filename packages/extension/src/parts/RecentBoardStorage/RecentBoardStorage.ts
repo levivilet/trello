@@ -1,0 +1,91 @@
+export interface RecentBoardView {
+  readonly boardId: string
+  readonly viewedAt: string
+}
+
+export interface RecentBoardStorage {
+  readonly delete: () => Promise<void>
+  readonly read: () => Promise<readonly RecentBoardView[]>
+  readonly write: (
+    recentBoardViews: readonly RecentBoardView[],
+  ) => Promise<void>
+}
+
+export const cacheName = 'builtin.trello.recent-boards'
+export const recentBoardsRequestUrl = '/recent-boards.json'
+export const maxRecentBoards = 20
+
+const isRecentBoardView = (value: unknown): value is RecentBoardView => {
+  if (!value || typeof value !== 'object') {
+    return false
+  }
+  const record = value as Record<string, unknown>
+  return (
+    typeof record.boardId === 'string' && typeof record.viewedAt === 'string'
+  )
+}
+
+const isRecentBoardViews = (
+  value: unknown,
+): value is readonly RecentBoardView[] => {
+  return Array.isArray(value) && value.every(isRecentBoardView)
+}
+
+export const updateRecentBoardViews = (
+  recentBoardViews: readonly RecentBoardView[],
+  boardId: string,
+  viewedAt: string,
+): readonly RecentBoardView[] => {
+  return [
+    {
+      boardId,
+      viewedAt,
+    },
+    ...recentBoardViews.filter((item) => item.boardId !== boardId),
+  ].slice(0, maxRecentBoards)
+}
+
+export const createCacheRecentBoardStorage = (): RecentBoardStorage => {
+  return {
+    async delete(): Promise<void> {
+      const cache = await caches.open(cacheName)
+      await cache.delete(recentBoardsRequestUrl)
+    },
+    async read(): Promise<readonly RecentBoardView[]> {
+      const cache = await caches.open(cacheName)
+      const response = await cache.match(recentBoardsRequestUrl)
+      if (!response) {
+        return []
+      }
+      const value = await response.json()
+      if (!isRecentBoardViews(value)) {
+        return []
+      }
+      return value.slice(0, maxRecentBoards)
+    },
+    async write(recentBoardViews: readonly RecentBoardView[]): Promise<void> {
+      const cache = await caches.open(cacheName)
+      await cache.put(
+        recentBoardsRequestUrl,
+        Response.json(recentBoardViews.slice(0, maxRecentBoards)),
+      )
+    },
+  }
+}
+
+export const createMemoryRecentBoardStorage = (
+  initial: readonly RecentBoardView[] = [],
+): RecentBoardStorage => {
+  let value = initial
+  return {
+    async delete(): Promise<void> {
+      value = []
+    },
+    async read(): Promise<readonly RecentBoardView[]> {
+      return value
+    },
+    async write(recentBoardViews: readonly RecentBoardView[]): Promise<void> {
+      value = recentBoardViews.slice(0, maxRecentBoards)
+    },
+  }
+}

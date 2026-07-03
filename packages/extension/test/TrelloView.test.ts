@@ -1,7 +1,12 @@
 import type { VirtualDomViewInstance } from '@lvce-editor/api'
 import { expect, test } from '@jest/globals'
+import type { TrelloBoard } from '../src/parts/TrelloTypes/TrelloTypes.ts'
 import { createMemoryCredentialStorage } from '../src/parts/CredentialStorage/CredentialStorage.ts'
 import { createMockTrelloClient } from '../src/parts/MockTrelloClient/MockTrelloClient.ts'
+import {
+  createMemoryRecentBoardStorage,
+  type RecentBoardView,
+} from '../src/parts/RecentBoardStorage/RecentBoardStorage.ts'
 import {
   resetTrelloViewDependencyFactory,
   setTrelloViewDependencyFactory,
@@ -55,9 +60,48 @@ const hasDirectChildClass = (
   return false
 }
 
+const getBoardButtonLabels = (dom: readonly any[]): readonly string[] => {
+  const labels: string[] = []
+  for (let i = 0; i < dom.length; i++) {
+    const node = dom[i]
+    if (typeof node.name === 'string' && node.name.startsWith('board:')) {
+      labels.push(dom[i + 1]?.text || '')
+    }
+  }
+  return labels
+}
+
+const createAuthenticatedInstance = async (
+  boards: readonly TrelloBoard[],
+  recentBoardViews: readonly RecentBoardView[] = [],
+): Promise<VirtualDomViewInstance> => {
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({
+      boards,
+    }),
+    recentStorage: createMemoryRecentBoardStorage(recentBoardViews),
+    storage: createMemoryCredentialStorage(),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: validApiKey,
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: validToken,
+  })
+  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+  return instance
+}
+
 test('renders auth inputs when unauthenticated', async () => {
   setTrelloViewDependencyFactory(() => ({
     client: createMockTrelloClient({}),
+    recentStorage: createMemoryRecentBoardStorage(),
     storage: createMemoryCredentialStorage(),
   }))
 
@@ -90,6 +134,7 @@ test('connect loads boards and clicking board loads detail', async () => {
       },
       boards: [{ id: 'board-1', name: 'Roadmap' }],
     }),
+    recentStorage: createMemoryRecentBoardStorage(),
     storage: createMemoryCredentialStorage(),
   }))
 
@@ -129,6 +174,7 @@ test('connect loads boards and clicking board loads detail', async () => {
 test('connect shows validation error for missing credentials', async () => {
   setTrelloViewDependencyFactory(() => ({
     client: createMockTrelloClient({}),
+    recentStorage: createMemoryRecentBoardStorage(),
     storage: createMemoryCredentialStorage(),
   }))
 
@@ -146,6 +192,7 @@ test('connect shows validation error for invalid api key shape', async () => {
     client: createMockTrelloClient({
       boards: [{ id: 'board-1', name: 'Roadmap' }],
     }),
+    recentStorage: createMemoryRecentBoardStorage(),
     storage: createMemoryCredentialStorage(),
   }))
 
@@ -174,6 +221,7 @@ test('connect shows validation error for invalid token shape', async () => {
     client: createMockTrelloClient({
       boards: [{ id: 'board-1', name: 'Roadmap' }],
     }),
+    recentStorage: createMemoryRecentBoardStorage(),
     storage: createMemoryCredentialStorage(),
   }))
 
@@ -203,6 +251,7 @@ test('connect shows trello error on auth form when credentials fail', async () =
     client: createMockTrelloClient({
       listBoardsError: 'Trello request failed: 401 invalid key',
     }),
+    recentStorage: createMemoryRecentBoardStorage(),
     storage,
   }))
 
@@ -223,5 +272,100 @@ test('connect shows trello error on auth form when credentials fail', async () =
   expect(text).toContain('Trello request failed: 401 invalid key')
   expect(text).toContain('API key')
   await expect(storage.read()).resolves.toBeUndefined()
+  resetTrelloViewDependencyFactory()
+})
+
+test('renders recently viewed before workspaces', async () => {
+  const instance = await createAuthenticatedInstance([
+    {
+      dateLastView: '2026-01-02T00:00:00.000Z',
+      id: 'board-1',
+      name: 'Roadmap',
+      organization: {
+        displayName: 'Engineering',
+        id: 'org-1',
+        name: 'engineering',
+      },
+    },
+  ])
+
+  const text = getText(await instance.render())
+  expect(text.indexOf('Recently viewed')).toBeLessThan(
+    text.indexOf('Your workspaces'),
+  )
+  resetTrelloViewDependencyFactory()
+})
+
+test('orders recently viewed boards by trello dateLastView', async () => {
+  const instance = await createAuthenticatedInstance([
+    {
+      dateLastView: '2026-01-01T00:00:00.000Z',
+      id: 'board-1',
+      name: 'Older',
+    },
+    {
+      dateLastView: '2026-01-03T00:00:00.000Z',
+      id: 'board-2',
+      name: 'Newer',
+    },
+  ])
+
+  expect(getBoardButtonLabels(await instance.render()).slice(0, 2)).toEqual([
+    'Newer',
+    'Older',
+  ])
+  resetTrelloViewDependencyFactory()
+})
+
+test('local recent board views override missing trello dates', async () => {
+  const instance = await createAuthenticatedInstance([
+    {
+      dateLastView: '2026-01-01T00:00:00.000Z',
+      id: 'board-1',
+      name: 'Previously viewed',
+    },
+    {
+      id: 'board-2',
+      name: 'Opened locally',
+    },
+  ])
+
+  await instance.handleEvent?.({ name: 'board:board-2', type: 'click' })
+  await instance.handleEvent?.({ name: 'backToBoards', type: 'click' })
+
+  expect(getBoardButtonLabels(await instance.render()).slice(0, 2)).toEqual([
+    'Opened locally',
+    'Previously viewed',
+  ])
+  resetTrelloViewDependencyFactory()
+})
+
+test('groups boards by workspace with personal fallback', async () => {
+  const instance = await createAuthenticatedInstance([
+    {
+      id: 'board-1',
+      name: 'Team board',
+      organization: {
+        displayName: 'Product',
+        id: 'org-1',
+        name: 'product',
+      },
+    },
+    {
+      id: 'board-2',
+      name: 'Personal board',
+    },
+  ])
+
+  const text = getText(await instance.render())
+  expect(text).toContain('Product')
+  expect(text).toContain('Personal boards')
+  resetTrelloViewDependencyFactory()
+})
+
+test('renders empty board state', async () => {
+  const instance = await createAuthenticatedInstance([])
+
+  expect(getText(await instance.render())).toContain('No boards found')
   resetTrelloViewDependencyFactory()
 })
