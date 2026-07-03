@@ -8,6 +8,10 @@ import {
   view,
 } from '../src/parts/TrelloView/TrelloView.ts'
 
+const validApiKey = 'abcdefghijklmnopqrstuvwxyz123456'
+const validToken =
+  'abcdefghijklmnopqrstuvwxyz123456abcdefghijklmnopqrstuvwxyz123456'
+
 const getText = (dom: readonly any[]): string => {
   return dom
     .filter((node) => typeof node.text === 'string')
@@ -54,8 +58,16 @@ test('connect loads boards and clicking board loads detail', async () => {
   }))
 
   const instance = (await view.create()) as VirtualDomViewInstance
-  await instance.handleEvent?.({ name: 'apiKey', type: 'input', value: 'key' })
-  await instance.handleEvent?.({ name: 'token', type: 'input', value: 'token' })
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: validApiKey,
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: validToken,
+  })
   await instance.handleEvent?.({ name: 'connect', type: 'click' })
 
   const boardsText = getText(await instance.render())
@@ -83,5 +95,90 @@ test('connect shows validation error for missing credentials', async () => {
   expect(getText(await instance.render())).toContain(
     'Enter an API key and token.',
   )
+  resetTrelloViewDependencyFactory()
+})
+
+test('connect shows validation error for invalid api key shape', async () => {
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({
+      boards: [{ id: 'board-1', name: 'Roadmap' }],
+    }),
+    storage: createMemoryCredentialStorage(),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: 'bad-key',
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: validToken,
+  })
+  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+
+  const text = getText(await instance.render())
+  expect(text).toContain('API key must be 32 alphanumeric characters.')
+  expect(text).toContain('API key')
+  expect(text).not.toContain('Roadmap')
+  resetTrelloViewDependencyFactory()
+})
+
+test('connect shows validation error for invalid token shape', async () => {
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({
+      boards: [{ id: 'board-1', name: 'Roadmap' }],
+    }),
+    storage: createMemoryCredentialStorage(),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: validApiKey,
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: 'bad-token',
+  })
+  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+
+  const text = getText(await instance.render())
+  expect(text).toContain('Token must be 64 alphanumeric characters.')
+  expect(text).toContain('Token')
+  expect(text).not.toContain('Roadmap')
+  resetTrelloViewDependencyFactory()
+})
+
+test('connect shows trello error on auth form when credentials fail', async () => {
+  const storage = createMemoryCredentialStorage()
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({
+      listBoardsError: 'Trello request failed: 401 invalid key',
+    }),
+    storage,
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: validApiKey,
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: validToken,
+  })
+  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+
+  const text = getText(await instance.render())
+  expect(text).toContain('Trello request failed: 401 invalid key')
+  expect(text).toContain('API key')
+  await expect(storage.read()).resolves.toBeUndefined()
   resetTrelloViewDependencyFactory()
 })
