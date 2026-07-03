@@ -88,6 +88,22 @@
   text-align: left;
 }
 
+.TrelloSection,
+.TrelloWorkspaces,
+.TrelloWorkspace {
+  display: grid;
+  gap: 8px;
+}
+
+.TrelloWorkspaces {
+  margin-top: 4px;
+}
+
+.TrelloBoardGrid {
+  display: grid;
+  gap: 8px;
+}
+
 .TrelloBoardDetail {
   min-height: 0;
   overflow: hidden;
