@@ -1,9 +1,7 @@
-// @ts-nocheck
-/* eslint-disable @typescript-eslint/explicit-function-return-type, @typescript-eslint/prefer-readonly-parameter-types */
 import type { Test } from '@lvce-editor/test-with-playwright'
 
 export const name = 'trello.virtual-dom-view.board-detail'
-export const skip = true
+// export const skip = true
 
 const createCards = (count) => {
   return Array.from({ length: count }, (_, index) => {
