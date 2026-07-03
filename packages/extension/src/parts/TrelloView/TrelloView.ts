@@ -49,11 +49,17 @@ interface TrelloViewDependencies {
 }
 
 interface TrelloViewState {
+<<<<<<< HEAD
   activeSearchQuery: string
   boardDetail?: TrelloBoardDetail
   boards: readonly TrelloBoard[]
   cardDetailLoading: boolean
   credentials?: TrelloCredentials
+=======
+  boardDetail: TrelloBoardDetail | undefined
+  boards: readonly TrelloBoard[]
+  credentials: TrelloCredentials | undefined
+>>>>>>> origin/main
   draftApiKey: string
   draftCardDescription: string
   draftCardTitle: string
@@ -544,9 +550,15 @@ const renderBoardDetail = (
 
 const createInitialState = (): TrelloViewState => {
   return {
+<<<<<<< HEAD
     activeSearchQuery: '',
     boards: [],
     cardDetailLoading: false,
+=======
+    boardDetail: undefined,
+    boards: [],
+    credentials: undefined,
+>>>>>>> origin/main
     draftApiKey: '',
     draftCardDescription: '',
     draftCardTitle: '',
