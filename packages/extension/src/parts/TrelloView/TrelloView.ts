@@ -25,6 +25,9 @@ import * as Dom from '../VirtualDom/VirtualDom.ts'
 
 export const viewId = 'trello.views.boards'
 
+const apiKeyPattern = /^[A-Za-z0-9]{32}$/
+const tokenPattern = /^[A-Za-z0-9]{64}$/
+
 interface TrelloViewDependencies {
   readonly client: TrelloClient
   readonly storage: CredentialStorage
@@ -66,6 +69,21 @@ const getErrorMessage = (error: unknown): string => {
     return error.message
   }
   return String(error)
+}
+
+const validateCredentials = (
+  credentials: Readonly<TrelloCredentials>,
+): string => {
+  if (!credentials.apiKey || !credentials.token) {
+    return 'Enter an API key and token.'
+  }
+  if (!apiKeyPattern.test(credentials.apiKey)) {
+    return 'API key must be 32 alphanumeric characters.'
+  }
+  if (!tokenPattern.test(credentials.token)) {
+    return 'Token must be 64 alphanumeric characters.'
+  }
+  return ''
 }
 
 const renderError = (error: string): readonly Dom.TreeNode[] => {
@@ -280,17 +298,36 @@ const createInstance = async (
   }
 
   const connect = async (): Promise<void> => {
-    if (!state.draftApiKey || !state.draftToken) {
-      state.error = 'Enter an API key and token.'
+    const credentials = {
+      apiKey: state.draftApiKey.trim(),
+      token: state.draftToken.trim(),
+    }
+    state.draftApiKey = credentials.apiKey
+    state.draftToken = credentials.token
+    const validationError = validateCredentials(credentials)
+    if (validationError) {
+      state.error = validationError
       requestRerender()
       return
     }
-    state.credentials = {
-      apiKey: state.draftApiKey,
-      token: state.draftToken,
+    state.loading = true
+    state.error = ''
+    requestRerender()
+    try {
+      const boards = await client.listBoards(credentials)
+      await storage.write(credentials)
+      state.credentials = credentials
+      state.boards = boards
+      state.boardDetail = undefined
+    } catch (error) {
+      state.credentials = undefined
+      state.boards = []
+      state.boardDetail = undefined
+      state.error = getErrorMessage(error)
+    } finally {
+      state.loading = false
     }
-    await storage.write(state.credentials)
-    await loadBoards()
+    requestRerender()
   }
 
   const openBoard = async (boardId: string): Promise<void> => {
