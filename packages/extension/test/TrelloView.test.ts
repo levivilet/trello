@@ -23,9 +23,13 @@ test('renders auth inputs when unauthenticated', async () => {
 
   const instance = (await view.create()) as VirtualDomViewInstance
   const dom = await instance.render()
+  const text = getText(dom)
 
-  expect(getText(dom)).toContain('API key')
-  expect(getText(dom)).toContain('Token')
+  expect(text).toContain('API key')
+  expect(text).toContain('Token')
+  expect(text).toContain('Welcome to Trello')
+  expect(text).toContain('https://trello.com/power-ups/admin')
+  expect(text).toContain('The token grants access to your Trello account')
   resetTrelloViewDependencyFactory()
 })
 
@@ -54,7 +58,10 @@ test('connect loads boards and clicking board loads detail', async () => {
   await instance.handleEvent?.({ name: 'token', type: 'input', value: 'token' })
   await instance.handleEvent?.({ name: 'connect', type: 'click' })
 
-  expect(getText(await instance.render())).toContain('Roadmap')
+  const boardsText = getText(await instance.render())
+  expect(boardsText).toContain('Roadmap')
+  expect(boardsText).not.toContain('Welcome to Trello')
+  expect(boardsText).not.toContain('https://trello.com/power-ups/admin')
 
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
 
