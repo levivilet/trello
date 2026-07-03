@@ -99,23 +99,17 @@
   text-align: left;
 }
 
-<<<<<<< HEAD
 .TrelloSearchForm {
   flex: 1 1 160px;
   contain: content;
 }
 
-=======
->>>>>>> origin/main
 .TrelloSection,
 .TrelloWorkspaces,
 .TrelloWorkspace {
   display: grid;
   gap: 8px;
-<<<<<<< HEAD
   contain: content;
-=======
->>>>>>> origin/main
 }
 
 .TrelloWorkspaces {
@@ -125,7 +119,6 @@
 .TrelloBoardGrid {
   display: grid;
   gap: 8px;
-<<<<<<< HEAD
   contain: content;
 }
 
@@ -149,8 +142,6 @@
 
 button.TrelloSearchResult:hover {
   background: var(--ButtonHoverBackground, #087d90);
-=======
->>>>>>> origin/main
 }
 
 .TrelloBoardDetail {

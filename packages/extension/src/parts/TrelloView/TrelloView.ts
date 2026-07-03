@@ -39,10 +39,7 @@ const tokenPattern = /^[A-Za-z0-9]{64}$/
 
 interface TrelloViewDependencies {
   readonly client: TrelloClient
-<<<<<<< HEAD
   readonly readSearchEnabled?: () => Promise<boolean>
-=======
->>>>>>> origin/main
   readonly recentStorage: RecentBoardStorage
   readonly storage: CredentialStorage
 }
@@ -58,11 +55,8 @@ interface TrelloViewState {
   error: string
   loading: boolean
   recentBoardViews: readonly RecentBoardView[]
-<<<<<<< HEAD
   searchEnabled: boolean
   searchResults: readonly TrelloSearchResult[]
-=======
->>>>>>> origin/main
 }
 
 type DependencyFactory = () => TrelloViewDependencies
@@ -73,10 +67,7 @@ const readSearchEnabledPreference = async (): Promise<boolean> => {
 
 const defaultDependencyFactory = (): TrelloViewDependencies => ({
   client: createTrelloClient(),
-<<<<<<< HEAD
   readSearchEnabled: readSearchEnabledPreference,
-=======
->>>>>>> origin/main
   recentStorage: createCacheRecentBoardStorage(),
   storage: createCacheCredentialStorage(),
 })
@@ -345,7 +336,6 @@ const renderWorkspaceSection = (
     renderListTitle(section.name),
     renderBoardGrid(section.boards),
   ])
-<<<<<<< HEAD
 }
 
 const renderSearchResult = (
@@ -384,19 +374,13 @@ const renderSearchContent = (
       ),
     ]),
   ]
-=======
->>>>>>> origin/main
 }
 
 const renderBoards = (
   state: Readonly<TrelloViewState>,
 ): readonly VirtualDomNode[] => {
-<<<<<<< HEAD
   const toolbarChildren = [
     ...(state.searchEnabled ? [renderSearchForm(state)] : []),
-=======
-  const toolbar = renderToolbar([
->>>>>>> origin/main
     Dom.button('refreshBoards', 'Refresh'),
     Dom.button('logout', 'Sign out'),
   ]
@@ -465,23 +449,16 @@ const createInitialState = (): TrelloViewState => {
     error: '',
     loading: false,
     recentBoardViews: [],
-<<<<<<< HEAD
     searchEnabled: false,
     searchResults: [],
-=======
->>>>>>> origin/main
   }
 }
 
 const createInstance = async (
   context?: ViewContext,
 ): Promise<VirtualDomViewInstance> => {
-<<<<<<< HEAD
   const { client, readSearchEnabled, recentStorage, storage } =
     dependencyState.factory()
-=======
-  const { client, recentStorage, storage } = dependencyState.factory()
->>>>>>> origin/main
   const state = createInitialState()
 
   const requestRerender = (): void => {
@@ -516,12 +493,9 @@ const createInstance = async (
     }
   }
 
-<<<<<<< HEAD
   if (readSearchEnabled) {
     state.searchEnabled = await readSearchEnabled()
   }
-=======
->>>>>>> origin/main
   state.recentBoardViews = await recentStorage.read()
   const storedCredentials = await storage.read()
   if (storedCredentials) {
