@@ -3,10 +3,7 @@ import { expect, test } from '@jest/globals'
 import type {
   TrelloBoard,
   TrelloBoardDetail,
-<<<<<<< HEAD
-=======
   TrelloCardDetail,
->>>>>>> origin/main
   TrelloSearchResult,
 } from '../src/parts/TrelloTypes/TrelloTypes.ts'
 import { createMemoryCredentialStorage } from '../src/parts/CredentialStorage/CredentialStorage.ts'
@@ -116,10 +113,7 @@ const createAuthenticatedInstance = async (
 interface SearchInstanceData {
   readonly boardDetails?: Readonly<Record<string, TrelloBoardDetail>>
   readonly boards?: readonly TrelloBoard[]
-<<<<<<< HEAD
-=======
   readonly cardDetails?: Readonly<Record<string, TrelloCardDetail>>
->>>>>>> origin/main
   readonly searchError?: string
   readonly searchResults?: readonly TrelloSearchResult[]
 }

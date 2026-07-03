@@ -170,10 +170,7 @@ button.TrelloSearchResult:hover {
   flex: 1 1 auto;
   gap: 12px;
   contain: strict;
-<<<<<<< HEAD
-=======
   min-width: 0;
->>>>>>> origin/main
   min-height: 0;
   overflow-x: auto;
   overflow-y: hidden;
@@ -204,10 +201,7 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloCard {
-<<<<<<< HEAD
-=======
   width: 100%;
->>>>>>> origin/main
   contain: content;
   padding: 8px;
   text-align: left;

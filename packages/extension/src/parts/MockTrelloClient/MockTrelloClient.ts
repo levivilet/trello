@@ -2,12 +2,9 @@ import type { TrelloClient } from '../TrelloClient/TrelloClient.ts'
 import type {
   TrelloBoard,
   TrelloBoardDetail,
-<<<<<<< HEAD
-=======
   TrelloCard,
   TrelloCardDetail,
   TrelloCardUpdate,
->>>>>>> origin/main
   TrelloSearchResult,
 } from '../TrelloTypes/TrelloTypes.ts'
 
@@ -103,8 +100,6 @@ export const createMockTrelloClient = (
       }
       return data.searchResults || []
     },
-<<<<<<< HEAD
-=======
     async updateCard(
       card: TrelloCard,
       update: TrelloCardUpdate,
@@ -129,6 +124,5 @@ export const createMockTrelloClient = (
       }
       return updatedCard
     },
->>>>>>> origin/main
   }
 }

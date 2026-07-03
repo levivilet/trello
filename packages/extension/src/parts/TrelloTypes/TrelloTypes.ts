@@ -22,10 +22,7 @@ export interface TrelloCard {
   readonly desc?: string
   readonly id: string
   readonly idBoard?: string
-<<<<<<< HEAD
-=======
   readonly idList?: string
->>>>>>> origin/main
   readonly name: string
   readonly url?: string
 }

@@ -1,9 +1,8 @@
-import {
-  getPreference,
-  type View,
-  type ViewContext,
-  type ViewEvent,
-  type VirtualDomViewInstance,
+import type {
+  View,
+  ViewContext,
+  ViewEvent,
+  VirtualDomViewInstance,
 } from '@lvce-editor/api'
 import * as ExtensionApi from '@lvce-editor/api'
 import {
@@ -51,47 +50,31 @@ interface TrelloViewDependencies {
 
 interface TrelloViewState {
   activeSearchQuery: string
-<<<<<<< HEAD
-  boardDetail?: TrelloBoardDetail
-=======
   boardDetail: TrelloBoardDetail | undefined
->>>>>>> origin/main
   boards: readonly TrelloBoard[]
   cardDetailLoading: boolean
   credentials: TrelloCredentials | undefined
   draftApiKey: string
-<<<<<<< HEAD
-=======
   draftCardDescription: string
   draftCardTitle: string
->>>>>>> origin/main
   draftSearchQuery: string
   draftToken: string
   error: string
   loading: boolean
   recentBoardViews: readonly RecentBoardView[]
-<<<<<<< HEAD
-  searchEnabled: boolean
-  searchResults: readonly TrelloSearchResult[]
-=======
   savingCardDetail: boolean
   searchEnabled: boolean
   searchResults: readonly TrelloSearchResult[]
   selectedCardDetail: TrelloCardDetail | undefined
->>>>>>> origin/main
 }
 
 type DependencyFactory = () => TrelloViewDependencies
 
 const readSearchEnabledPreference = async (): Promise<boolean> => {
-<<<<<<< HEAD
-  return (await getPreference(searchEnabledPreference)) === true
-=======
   const api = ExtensionApi as unknown as {
     readonly getPreference?: (key: string) => Promise<unknown>
   }
   return (await api.getPreference?.(searchEnabledPreference)) === true
->>>>>>> origin/main
 }
 
 const defaultDependencyFactory = (): TrelloViewDependencies => ({
@@ -171,8 +154,6 @@ const renderField = (
   ])
 }
 
-<<<<<<< HEAD
-=======
 const renderTextAreaField = (
   label: string,
   name: string,
@@ -184,7 +165,6 @@ const renderTextAreaField = (
   ])
 }
 
->>>>>>> origin/main
 const renderSearchForm = (state: Readonly<TrelloViewState>): Dom.TreeNode => {
   return Dom.form('search', 'TrelloSearchForm', [
     Dom.input('search', state.draftSearchQuery, 'Search Trello'),
@@ -568,33 +548,22 @@ const renderBoardDetail = (
 const createInitialState = (): TrelloViewState => {
   return {
     activeSearchQuery: '',
-<<<<<<< HEAD
-=======
     boardDetail: undefined,
->>>>>>> origin/main
     boards: [],
     cardDetailLoading: false,
     credentials: undefined,
     draftApiKey: '',
-<<<<<<< HEAD
-=======
     draftCardDescription: '',
     draftCardTitle: '',
->>>>>>> origin/main
     draftSearchQuery: '',
     draftToken: '',
     error: '',
     loading: false,
     recentBoardViews: [],
-<<<<<<< HEAD
-    searchEnabled: false,
-    searchResults: [],
-=======
     savingCardDetail: false,
     searchEnabled: false,
     searchResults: [],
     selectedCardDetail: undefined,
->>>>>>> origin/main
   }
 }
 
@@ -631,11 +600,7 @@ const createInstance = async (
     }
     state.loading = true
     state.error = ''
-<<<<<<< HEAD
-    state.boardDetail = undefined
-=======
     clearBoardSpecificState()
->>>>>>> origin/main
     state.activeSearchQuery = ''
     state.searchResults = []
     try {
@@ -683,21 +648,13 @@ const createInstance = async (
       await storage.write(credentials)
       state.credentials = credentials
       state.boards = boards
-<<<<<<< HEAD
-      state.boardDetail = undefined
-=======
       clearBoardSpecificState()
->>>>>>> origin/main
       state.activeSearchQuery = ''
       state.searchResults = []
     } catch (error) {
       state.credentials = undefined
       state.boards = []
-<<<<<<< HEAD
-      state.boardDetail = undefined
-=======
       clearBoardSpecificState()
->>>>>>> origin/main
       state.activeSearchQuery = ''
       state.searchResults = []
       state.error = getErrorMessage(error)
@@ -877,11 +834,7 @@ const createInstance = async (
     const query = state.draftSearchQuery.trim()
     state.draftSearchQuery = query
     state.error = ''
-<<<<<<< HEAD
-    state.boardDetail = undefined
-=======
     clearBoardSpecificState()
->>>>>>> origin/main
     if (!query) {
       state.activeSearchQuery = ''
       state.searchResults = []
@@ -914,8 +867,6 @@ const createInstance = async (
     if (event.name === 'search') {
       state.draftSearchQuery =
         typeof event.value === 'string' ? event.value : ''
-<<<<<<< HEAD
-=======
       return
     }
     if (event.name === 'cardTitle') {
@@ -925,7 +876,6 @@ const createInstance = async (
     if (event.name === 'cardDescription') {
       state.draftCardDescription =
         typeof event.value === 'string' ? event.value : ''
->>>>>>> origin/main
     }
   }
 
@@ -959,14 +909,6 @@ const createInstance = async (
         if (event.name?.startsWith('card:')) {
           await openCard(event.name.slice('card:'.length))
         }
-    }
-  }
-
-  const handleSubmitEvent = async (
-    event: Readonly<ViewEvent>,
-  ): Promise<void> => {
-    if (event.name === 'search') {
-      await submitSearch()
     }
   }
 

@@ -25,14 +25,11 @@ export interface TrelloClient {
     query: string,
     credentials: TrelloCredentials,
   ) => Promise<readonly TrelloSearchResult[]>
-<<<<<<< HEAD
-=======
   readonly updateCard: (
     card: TrelloCard,
     update: TrelloCardUpdate,
     credentials: TrelloCredentials,
   ) => Promise<TrelloCard>
->>>>>>> origin/main
 }
 
 interface TrelloResponse {
@@ -201,8 +198,6 @@ export const createTrelloClient = (
       )
       return normalizeSearchResponse(response)
     },
-<<<<<<< HEAD
-=======
     async updateCard(
       card: TrelloCard,
       update: TrelloCardUpdate,
@@ -222,6 +217,5 @@ export const createTrelloClient = (
         },
       )
     },
->>>>>>> origin/main
   }
 }
