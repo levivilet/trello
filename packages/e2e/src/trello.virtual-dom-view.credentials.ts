@@ -1,62 +1,11 @@
 import type { Test } from '@lvce-editor/test-with-playwright'
+import {
+  createBoards,
+  createMockData,
+} from './trello.virtual-dom-view.shared.ts'
 
 export const name = 'trello.virtual-dom-view.credentials'
 export const skip = true
-
-const createCards = (count) => {
-  return Array.from({ length: count }, (_, index) => {
-    const number = index + 1
-    return {
-      id: `card-${number}`,
-      name: `Card ${number}`,
-    }
-  })
-}
-
-const createList = (id, name, cards) => {
-  return {
-    cards,
-    id,
-    name,
-  }
-}
-
-const createBoardDetail = (board, lists) => {
-  return {
-    board,
-    lists,
-  }
-}
-
-const createMockData = (
-  boards,
-  boardDetails = Object.fromEntries(
-    boards.map((board) => [
-      board.id,
-      createBoardDetail(board, [createList('list-1', 'Todo', createCards(1))]),
-    ]),
-  ),
-) => {
-  return {
-    boardDetails,
-    boards,
-  }
-}
-
-const createBoards = (count) => {
-  return Array.from({ length: count }, (_, index) => {
-    const number = index + 1
-    return {
-      id: `board-${number}`,
-      name: number === 1 ? 'Roadmap' : `Board ${number}`,
-    }
-  })
-}
-
-const useMockDataAndShowTrello = async (Command, mockData) => {
-  await Command.executeExtensionCommand('trello.test.useMockData', mockData)
-  await Command.executeExtensionCommand('trello.show')
-}
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   let step = 'start'
