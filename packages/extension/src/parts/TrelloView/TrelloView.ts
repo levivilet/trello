@@ -253,6 +253,7 @@ const createInstance = async (
   const connect = async (): Promise<void> => {
     if (!state.draftApiKey || !state.draftToken) {
       state.error = 'Enter an API key and token.'
+      requestRerender()
       return
     }
     state.credentials = {
