@@ -210,6 +210,57 @@ test('comment helpers use trello member metadata with fallbacks', () => {
       },
     }),
   ).toBe('https://example.com/avatar.png')
+  expect(
+    getCommentAvatarUrl({
+      data: { text: 'Hello' },
+      id: 'comment-7',
+      memberCreator: {
+        avatarUrl: 'https://trello-members.s3.amazonaws.com/member/hash',
+      },
+    }),
+  ).toBe('https://trello-members.s3.amazonaws.com/member/hash/50.png')
+  expect(
+    getCommentAvatarUrl({
+      data: { text: 'Hello' },
+      id: 'comment-8',
+      memberCreator: {
+        avatarUrl: 'https://trello-members.s3.amazonaws.com/member/hash/',
+      },
+    }),
+  ).toBe('https://trello-members.s3.amazonaws.com/member/hash/50.png')
+  expect(
+    getCommentAvatarUrl({
+      data: { text: 'Hello' },
+      id: 'comment-9',
+      memberCreator: {
+        avatarUrl: 'https://trello-avatars.s3.amazonaws.com/hash/30.png',
+      },
+    }),
+  ).toBe('https://trello-avatars.s3.amazonaws.com/hash/30.png')
+  expect(
+    getCommentAvatarUrl({
+      data: { text: 'Hello' },
+      id: 'comment-10',
+      memberCreator: {
+        avatarUrl: '   ',
+      },
+    }),
+  ).toBe('')
+  expect(
+    getCommentAvatarUrl({
+      data: { text: 'Hello' },
+      id: 'comment-11',
+    }),
+  ).toBe('')
+  expect(
+    getCommentAvatarUrl({
+      data: { text: 'Hello' },
+      id: 'comment-12',
+      memberCreator: {
+        avatarUrl: 'https://example.com/avatar',
+      },
+    }),
+  ).toBe('https://example.com/avatar')
 })
 
 test('comment date helper formats valid dates and omits missing dates', () => {
