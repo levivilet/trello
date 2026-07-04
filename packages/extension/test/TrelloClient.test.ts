@@ -1,11 +1,13 @@
 // cspell:ignore prefs
 
 import { expect, test } from '@jest/globals'
+import { createMemoryTrelloApiCache } from '../src/parts/TrelloClient/TrelloApiCache.ts'
 import { createTrelloClient } from '../src/parts/TrelloClient/TrelloClient.ts'
 
 const validApiKey = 'abcdefghijklmnopqrstuvwxyz123456'
 const validToken =
   'abcdefghijklmnopqrstuvwxyz123456abcdefghijklmnopqrstuvwxyz123456'
+const credentialFingerprintPattern = /^[a-f0-9]{64}$/
 
 const jsonResponse = (value: unknown): Response => {
   return Response.json(value, {
@@ -37,6 +39,76 @@ test('listBoards requests member boards with credentials', async () => {
   )
   expect(url.searchParams.get('organization')).toBe('true')
   expect(url.searchParams.get('organization_fields')).toBe('name,displayName')
+})
+
+test('listBoards caches responses without storing credentials in cache keys', async () => {
+  const cache = createMemoryTrelloApiCache()
+  const client = createTrelloClient(async () => {
+    return jsonResponse([{ id: 'board-1', name: 'Roadmap' }])
+  }, cache)
+  const credentials = {
+    apiKey: validApiKey,
+    token: validToken,
+  }
+
+  await expect(client.listBoards(credentials)).resolves.toEqual([
+    { id: 'board-1', name: 'Roadmap' },
+  ])
+
+  const keys = cache.keys()
+  expect(keys).toHaveLength(1)
+  const cacheUrl = new URL(keys[0])
+  expect(cacheUrl.searchParams.get('key')).toBeNull()
+  expect(cacheUrl.searchParams.get('token')).toBeNull()
+  expect(cacheUrl.href).not.toContain(validApiKey)
+  expect(cacheUrl.href).not.toContain(validToken)
+  expect(cacheUrl.searchParams.get('credential')).toMatch(
+    credentialFingerprintPattern,
+  )
+  expect(cacheUrl.searchParams.get('fields')).toBe(
+    'name,url,dateLastView,idOrganization,prefs',
+  )
+})
+
+test('getCardDetailCacheFirst returns cached data before fresh data', async () => {
+  const cache = createMemoryTrelloApiCache()
+  let cardName = 'Cached card'
+  const client = createTrelloClient(async (url) => {
+    if (url.includes('/cards/card-1/attachments')) {
+      return jsonResponse([])
+    }
+    if (url.includes('/cards/card-1/actions')) {
+      return jsonResponse([])
+    }
+    return jsonResponse({
+      desc: 'Detailed card description',
+      id: 'card-1',
+      name: cardName,
+    })
+  }, cache)
+  const credentials = {
+    apiKey: validApiKey,
+    token: validToken,
+  }
+
+  await client.getCardDetail({ id: 'card-1', name: 'Cached card' }, credentials)
+  cardName = 'Fresh card'
+
+  const result = await client.getCardDetailCacheFirst(
+    { id: 'card-1', name: 'Cached card' },
+    credentials,
+  )
+
+  expect(result.cached?.card.name).toBe('Cached card')
+  await expect(result.fresh).resolves.toEqual({
+    attachments: [],
+    card: {
+      desc: 'Detailed card description',
+      id: 'card-1',
+      name: 'Fresh card',
+    },
+    comments: [],
+  })
 })
 
 test('getBoardDetail requests lists and cards', async () => {

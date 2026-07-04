@@ -1,4 +1,5 @@
 import type { TrelloClient } from '../TrelloClient/TrelloClient.ts'
+import type { TrelloCacheFirstResult } from '../TrelloClient/TrelloClientTypes.ts'
 import type {
   TrelloBoard,
   TrelloBoardDetail,
@@ -48,7 +49,7 @@ export const createMockTrelloClient = (
     return undefined
   }
 
-  return {
+  const client: TrelloClient = {
     async getBoardDetail(board: TrelloBoard): Promise<TrelloBoardDetail> {
       if (data.error) {
         throw new Error(data.error)
@@ -65,6 +66,17 @@ export const createMockTrelloClient = (
         }
       }
       return detail
+    },
+    async getBoardDetailCacheFirst(
+      board: TrelloBoard,
+    ): Promise<TrelloCacheFirstResult<TrelloBoardDetail>> {
+      return {
+        cached: undefined,
+        fresh: client.getBoardDetail(board, {
+          apiKey: '',
+          token: '',
+        }),
+      }
     },
     async getCardDetail(card: TrelloCard): Promise<TrelloCardDetail> {
       if (data.error) {
@@ -87,6 +99,17 @@ export const createMockTrelloClient = (
         comments: [],
       }
     },
+    async getCardDetailCacheFirst(
+      card: TrelloCard,
+    ): Promise<TrelloCacheFirstResult<TrelloCardDetail>> {
+      return {
+        cached: undefined,
+        fresh: client.getCardDetail(card, {
+          apiKey: '',
+          token: '',
+        }),
+      }
+    },
     async listBoards(): Promise<readonly TrelloBoard[]> {
       if (data.error) {
         throw new Error(data.error)
@@ -101,6 +124,17 @@ export const createMockTrelloClient = (
       }
       return data.boards || []
     },
+    async listBoardsCacheFirst(): Promise<
+      TrelloCacheFirstResult<readonly TrelloBoard[]>
+    > {
+      return {
+        cached: undefined,
+        fresh: client.listBoards({
+          apiKey: '',
+          token: '',
+        }),
+      }
+    },
     async search(): Promise<readonly TrelloSearchResult[]> {
       if (data.error) {
         throw new Error(data.error)
@@ -109,6 +143,17 @@ export const createMockTrelloClient = (
         throw new Error(data.searchError)
       }
       return data.searchResults || []
+    },
+    async searchCacheFirst(): Promise<
+      TrelloCacheFirstResult<readonly TrelloSearchResult[]>
+    > {
+      return {
+        cached: undefined,
+        fresh: client.search('', {
+          apiKey: '',
+          token: '',
+        }),
+      }
     },
     async updateCard(
       card: TrelloCard,
@@ -161,4 +206,5 @@ export const createMockTrelloClient = (
       return updatedList
     },
   }
+  return client
 }

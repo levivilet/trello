@@ -3,6 +3,7 @@ import type {
   TrelloViewState,
 } from '../state/TrelloViewState.ts'
 import { getErrorMessage } from '../GetErrorMessage.ts'
+import { isSameJson } from './CacheFirstHelpers.ts'
 import { clearBoardSpecificState } from './ClearBoardSpecificState.ts'
 
 export const submitSearch = async (
@@ -28,7 +29,19 @@ export const submitSearch = async (
   state.loading = true
   requestRerender()
   try {
-    state.searchResults = await client.search(query, state.credentials)
+    const result = await client.searchCacheFirst(query, state.credentials)
+    if (result.cached) {
+      state.searchResults = result.cached
+      state.loading = false
+      requestRerender()
+    }
+    const fresh = await result.fresh
+    if (state.activeSearchQuery === query) {
+      if (!isSameJson(state.searchResults, fresh)) {
+        state.searchResults = fresh
+      }
+      state.loading = false
+    }
   } catch (error) {
     state.error = getErrorMessage(error)
   } finally {
