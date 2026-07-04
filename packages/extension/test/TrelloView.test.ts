@@ -245,6 +245,14 @@ test('clicking card renders card detail and close dismisses it', async () => {
           card: {
             desc: 'Detailed card description',
             id: 'card-1',
+            labels: [
+              {
+                color: 'blue',
+                id: 'label-1',
+                idBoard: 'board-1',
+                name: 'Extension Api',
+              },
+            ],
             name: 'Ship Trello view',
             url: 'https://trello.com/c/card-1',
           },
@@ -284,9 +292,13 @@ test('clicking card renders card detail and close dismisses it', async () => {
   const detailDom = await instance.render()
   const text = getText(detailDom)
   expect(text).toContain('Detailed card description')
+<<<<<<< HEAD
   expect(text).toContain('Comments')
   expect(text).toContain('Simon Siefke')
   expect(text).toContain('This should show under the description.')
+=======
+  expect(text).toContain('Extension Api')
+>>>>>>> origin/main
   expect(text).toContain('Open in Trello')
   expect(text.indexOf('Detailed card description')).toBeLessThan(
     text.indexOf('Comments'),
@@ -306,6 +318,15 @@ test('clicking card renders card detail and close dismisses it', async () => {
       return (
         node.className === 'TrelloCardDetailImage' &&
         node.src === 'https://example.com/screenshot.png'
+      )
+    }),
+  ).toBe(true)
+  expect(
+    hasNode(detailDom, (node) => {
+      return (
+        typeof node.className === 'string' &&
+        node.className.includes('TrelloCardLabel') &&
+        node.className.includes('TrelloCardLabelColorBlue')
       )
     }),
   ).toBe(true)

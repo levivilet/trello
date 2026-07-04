@@ -124,6 +124,14 @@ test('getCardDetail requests card detail, attachments, and comments', async () =
       id: 'card-1',
       idBoard: 'board-1',
       idList: 'list-1',
+      labels: [
+        {
+          color: 'blue',
+          id: 'label-1',
+          idBoard: 'board-1',
+          name: 'Extension Api',
+        },
+      ],
       name: 'Ship Trello view',
       url: 'https://trello.com/c/card-1',
     })
@@ -152,6 +160,14 @@ test('getCardDetail requests card detail, attachments, and comments', async () =
       id: 'card-1',
       idBoard: 'board-1',
       idList: 'list-1',
+      labels: [
+        {
+          color: 'blue',
+          id: 'label-1',
+          idBoard: 'board-1',
+          name: 'Extension Api',
+        },
+      ],
       name: 'Ship Trello view',
       url: 'https://trello.com/c/card-1',
     },
@@ -188,7 +204,7 @@ test('getCardDetail requests card detail, attachments, and comments', async () =
   expect(attachmentsRequest).toBeDefined()
   expect(commentsRequest).toBeDefined()
   expect(new URL(cardRequest || '').searchParams.get('fields')).toBe(
-    'name,desc,url,idBoard,idList',
+    'name,desc,url,idBoard,idList,labels',
   )
   expect(new URL(attachmentsRequest || '').searchParams.get('fields')).toBe(
     'name,url,mimeType,previews',

@@ -18,11 +18,19 @@ export interface TrelloBoard {
   readonly url?: string
 }
 
+export interface TrelloLabel {
+  readonly color?: string
+  readonly id: string
+  readonly idBoard?: string
+  readonly name?: string
+}
+
 export interface TrelloCard {
   readonly desc?: string
   readonly id: string
   readonly idBoard?: string
   readonly idList?: string
+  readonly labels?: readonly TrelloLabel[]
   readonly name: string
   readonly url?: string
 }
