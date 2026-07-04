@@ -76,7 +76,12 @@ export interface TrelloCommentData {
 }
 
 export interface TrelloCommentMember {
+  readonly avatarHash?: string
+  readonly avatarUrl?: string
   readonly fullName?: string
+  readonly id?: string
+  readonly initials?: string
+  readonly username?: string
 }
 
 export interface TrelloComment {
