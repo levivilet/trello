@@ -25,7 +25,12 @@ export interface TrelloLabel {
   readonly name?: string
 }
 
+export interface TrelloCardBadges {
+  readonly comments?: number
+}
+
 export interface TrelloCard {
+  readonly badges?: TrelloCardBadges
   readonly desc?: string
   readonly id: string
   readonly idBoard?: string
