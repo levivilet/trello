@@ -11,6 +11,10 @@
     "trello.searchEnabled": {
       "type": "boolean",
       "default": false
+    },
+    "trello.boardBackgroundEnabled": {
+      "type": "boolean",
+      "default": false
     }
   },
   "activation": [

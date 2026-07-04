@@ -1,3 +1,5 @@
+// cspell:ignore prefs
+
 import type {
   TrelloCredentials,
   TrelloSearchResult,
@@ -19,7 +21,7 @@ export const search = async (
     '/search',
     credentials,
     {
-      board_fields: 'name,url',
+      board_fields: 'name,url,prefs',
       boards_limit: '10',
       card_fields: 'name,url,idBoard',
       cards_limit: '10',

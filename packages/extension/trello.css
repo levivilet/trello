@@ -241,6 +241,17 @@ button.TrelloSearchResult:hover {
   overflow: hidden;
 }
 
+.TrelloBoardDetailWithBackground {
+  background-color: var(
+    --TrelloBoardBackgroundColor,
+    var(--MainBackground, #181f1f)
+  );
+  background-image: var(--TrelloBoardBackgroundImage, none);
+  background-position: center;
+  background-repeat: var(--TrelloBoardBackgroundRepeat, no-repeat);
+  background-size: var(--TrelloBoardBackgroundSize, cover);
+}
+
 .TrelloBoardDetailContent {
   display: flex;
   flex: 1 1 auto;

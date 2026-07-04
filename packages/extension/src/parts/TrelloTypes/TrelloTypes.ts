@@ -1,3 +1,5 @@
+// cspell:ignore prefs
+
 export interface TrelloCredentials {
   readonly apiKey: string
   readonly token: string
@@ -9,12 +11,29 @@ export interface TrelloOrganization {
   readonly name: string
 }
 
+export interface TrelloBoardBackgroundImage {
+  readonly height?: number
+  readonly url?: string
+  readonly width?: number
+}
+
+export interface TrelloBoardPreferences {
+  readonly backgroundBottomColor?: string
+  readonly backgroundBrightness?: string
+  readonly backgroundColor?: string
+  readonly backgroundImage?: string | null
+  readonly backgroundImageScaled?: readonly TrelloBoardBackgroundImage[]
+  readonly backgroundTile?: boolean
+  readonly backgroundTopColor?: string
+}
+
 export interface TrelloBoard {
   readonly dateLastView?: string
   readonly id: string
   readonly idOrganization?: string
   readonly name: string
   readonly organization?: TrelloOrganization
+  readonly prefs?: TrelloBoardPreferences
   readonly url?: string
 }
 
