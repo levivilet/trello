@@ -87,6 +87,12 @@ const getNodeByClass = (dom: readonly any[], className: string): any => {
   return dom.find((node) => hasClass(node, className))
 }
 
+const getListTitleInput = (dom: readonly any[], listId: string): any => {
+  return dom.find((node) => {
+    return node.name === `listTitle:${listId}`
+  })
+}
+
 const getBoardButtonLabels = (dom: readonly any[]): readonly string[] => {
   const labels: string[] = []
   for (let i = 0; i < dom.length; i++) {
@@ -103,11 +109,16 @@ const createAuthenticatedInstance = async (
   recentBoardViews: readonly RecentBoardView[] = [],
   options: {
     readonly boardBackgroundEnabled?: boolean
+    readonly boardDetails?: Readonly<Record<string, TrelloBoardDetail>>
+    readonly listUpdateErrors?: Readonly<Record<string, string>>
   } = {},
 ): Promise<VirtualDomViewInstance> => {
+  const { boardDetails, listUpdateErrors } = options
   setTrelloViewDependencyFactory(() => ({
     client: createMockTrelloClient({
       boards,
+      ...(boardDetails && { boardDetails }),
+      ...(listUpdateErrors && { listUpdateErrors }),
     }),
     readBoardBackgroundEnabled: async (): Promise<boolean> => {
       return options.boardBackgroundEnabled === true
@@ -261,7 +272,7 @@ test('connect loads boards and clicking board loads detail', async () => {
   const detailDom = await instance.render()
   const detailText = getText(detailDom)
   const detailClassNames = getClassNames(detailDom)
-  expect(detailText).toContain('Todo')
+  expect(getListTitleInput(detailDom, 'list-1')?.value).toBe('Todo')
   expect(detailText).toContain('Ship Trello view')
   expect(detailText).toContain('3 comments')
   expect(detailText).toContain('Quiet card')
@@ -277,6 +288,143 @@ test('connect loads boards and clicking board loads detail', async () => {
   resetTrelloViewDependencyFactory()
 })
 
+test('list title renders as editable input', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+
+  const title = getListTitleInput(await instance.render(), 'list-1')
+  expect(title).toEqual(
+    expect.objectContaining({
+      className: 'TrelloListTitleInput',
+      name: 'listTitle:list-1',
+      onBlur: 'handleBlur',
+      onInput: 'handleInput',
+      value: 'Todo',
+    }),
+  )
+  resetTrelloViewDependencyFactory()
+})
+
+test('editing list title saves on blur', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'listTitle:list-1',
+    type: 'input',
+    value: 'Doing',
+  })
+  await instance.handleEvent?.({ name: 'listTitle:list-1', type: 'blur' })
+
+  const title = getListTitleInput(await instance.render(), 'list-1')
+  expect(title?.value).toBe('Doing')
+  expect(getText(await instance.render())).not.toContain(
+    'List title is required.',
+  )
+  resetTrelloViewDependencyFactory()
+})
+
+test('empty list title restores old title on blur', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'listTitle:list-1',
+    type: 'input',
+    value: ' '.repeat(3),
+  })
+  await instance.handleEvent?.({ name: 'listTitle:list-1', type: 'blur' })
+
+  const dom = await instance.render()
+  expect(getListTitleInput(dom, 'list-1')?.value).toBe('Todo')
+  expect(getText(dom)).toContain('List title is required.')
+  resetTrelloViewDependencyFactory()
+})
+
+test('failed list title update restores old title on blur', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      listUpdateErrors: {
+        'list-1': 'Trello request failed: 500 unavailable',
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'listTitle:list-1',
+    type: 'input',
+    value: 'Doing',
+  })
+  await instance.handleEvent?.({ name: 'listTitle:list-1', type: 'blur' })
+
+  const dom = await instance.render()
+  expect(getListTitleInput(dom, 'list-1')?.value).toBe('Todo')
+  expect(getText(dom)).toContain('Trello request failed: 500 unavailable')
+  resetTrelloViewDependencyFactory()
+})
 test('clicking card renders card detail and close dismisses it', async () => {
   setTrelloViewDependencyFactory(() => ({
     client: createMockTrelloClient({
@@ -403,7 +551,7 @@ test('clicking card renders card detail and close dismisses it', async () => {
   await instance.handleEvent?.({ name: 'closeCardDetail', type: 'click' })
 
   const closedDom = await instance.render()
-  expect(getText(closedDom)).toContain('Todo')
+  expect(getListTitleInput(closedDom, 'list-1')?.value).toBe('Todo')
   expect(getText(closedDom)).toContain('Ship Trello view')
   expect(getClassNames(closedDom)).not.toContain('TrelloCardDetailPanel')
   resetTrelloViewDependencyFactory()
@@ -916,8 +1064,9 @@ test('clicking board search result opens board detail', async () => {
   await instance.handleEvent?.({ name: 'search', type: 'submit' })
   await instance.handleEvent?.({ name: 'board:board-2', type: 'click' })
 
-  const text = getText(await instance.render())
-  expect(text).toContain('Todo')
+  const dom = await instance.render()
+  const text = getText(dom)
+  expect(getListTitleInput(dom, 'list-1')?.value).toBe('Todo')
   expect(text).toContain('Found card')
   resetTrelloViewDependencyFactory()
 })

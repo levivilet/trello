@@ -103,6 +103,10 @@ export interface TrelloList {
   readonly name: string
 }
 
+export interface TrelloListUpdate {
+  readonly name: string
+}
+
 export interface TrelloBoardDetail {
   readonly board: TrelloBoard
   readonly lists: readonly TrelloList[]

@@ -24,7 +24,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await connectWithCredentials({ expect, Locator })
   await openBoard(Locator, expect)
 
-  const todo = Locator('text=Todo')
+  const todo = Locator('input[name="listTitle:list-1"]')
   const card = Locator('text=Card 1')
 
   await expect(todo).toBeVisible()

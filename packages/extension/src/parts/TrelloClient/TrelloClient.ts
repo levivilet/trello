@@ -4,6 +4,7 @@ import { getCardDetail } from './operations/GetCardDetail.ts'
 import { listBoards } from './operations/ListBoards.ts'
 import { search } from './operations/Search.ts'
 import { updateCard } from './operations/UpdateCard.ts'
+import { updateList } from './operations/UpdateList.ts'
 
 export type { FetchLike, TrelloClient } from './TrelloClientTypes.ts'
 
@@ -35,6 +36,13 @@ export const createTrelloClient = (
       credentials,
     ): ReturnType<TrelloClient['updateCard']> {
       return updateCard(fetchLike, card, update, credentials)
+    },
+    updateList(
+      list,
+      update,
+      credentials,
+    ): ReturnType<TrelloClient['updateList']> {
+      return updateList(fetchLike, list, update, credentials)
     },
   }
 }

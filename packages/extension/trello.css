@@ -26,6 +26,32 @@
   text-transform: uppercase;
 }
 
+.TrelloListTitleInput {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 28px;
+  contain: content;
+  margin: 0 0 8px;
+  padding: 4px 6px;
+  overflow: hidden;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ForegroundMuted, #aeb8b8);
+  text-overflow: ellipsis;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.TrelloListTitleInput:focus {
+  color: var(--InputForeground, #f7f7f7);
+  background: var(--InputBackground, #111616);
+  border-color: var(--InputBorder, #394545);
+  outline: none;
+}
+
 .TrelloToolbar {
   display: flex;
   flex-wrap: wrap;

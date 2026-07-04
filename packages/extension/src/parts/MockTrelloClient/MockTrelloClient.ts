@@ -5,6 +5,8 @@ import type {
   TrelloCard,
   TrelloCardDetail,
   TrelloCardUpdate,
+  TrelloList,
+  TrelloListUpdate,
   TrelloSearchResult,
 } from '../TrelloTypes/TrelloTypes.ts'
 
@@ -18,6 +20,7 @@ export interface MockTrelloData {
   readonly error?: string
   readonly listBoardsError?: string
   readonly listBoardsResponses?: readonly (readonly TrelloBoard[])[]
+  readonly listUpdateErrors?: Readonly<Record<string, string>>
   readonly searchError?: string
   readonly searchResults?: readonly TrelloSearchResult[]
 }
@@ -29,9 +32,12 @@ export const createMockTrelloClient = (
   const cardDetails: Record<string, TrelloCardDetail> = {
     ...data.cardDetails,
   }
+  const boardDetails: Record<string, TrelloBoardDetail> = {
+    ...data.boardDetails,
+  }
   const findCard = (cardId: string): TrelloCard | undefined => {
-    const boardDetails = Object.values(data.boardDetails || {})
-    for (const detail of boardDetails) {
+    const details = Object.values(boardDetails)
+    for (const detail of details) {
       for (const list of detail.lists) {
         const card = list.cards.find((item) => item.id === cardId)
         if (card) {
@@ -51,7 +57,7 @@ export const createMockTrelloClient = (
       if (detailError) {
         throw new Error(detailError)
       }
-      const detail = data.boardDetails?.[board.id]
+      const detail = boardDetails[board.id]
       if (!detail) {
         return {
           board,
@@ -128,6 +134,31 @@ export const createMockTrelloClient = (
         comments: previousDetail?.comments || [],
       }
       return updatedCard
+    },
+    async updateList(
+      list: TrelloList,
+      update: TrelloListUpdate,
+    ): Promise<TrelloList> {
+      if (data.error) {
+        throw new Error(data.error)
+      }
+      const updateError = data.listUpdateErrors?.[list.id]
+      if (updateError) {
+        throw new Error(updateError)
+      }
+      const updatedList = {
+        ...list,
+        name: update.name,
+      }
+      for (const [boardId, detail] of Object.entries(boardDetails)) {
+        boardDetails[boardId] = {
+          ...detail,
+          lists: detail.lists.map((item) => {
+            return item.id === list.id ? updatedList : item
+          }),
+        }
+      }
+      return updatedList
     },
   }
 }

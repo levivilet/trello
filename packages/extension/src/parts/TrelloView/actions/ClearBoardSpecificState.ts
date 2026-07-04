@@ -9,5 +9,6 @@ export const clearBoardSpecificState = (
   mutableState.cardDetailLoading = false
   mutableState.draftCardDescription = ''
   mutableState.draftCardTitle = ''
+  mutableState.draftListTitles = {}
   mutableState.savingCardDetail = false
 }
