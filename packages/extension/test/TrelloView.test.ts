@@ -263,7 +263,7 @@ test('clicking card renders card detail and close dismisses it', async () => {
               },
               id: 'comment-1',
               memberCreator: {
-                fullName: 'Simon Siefke',
+                fullName: 'Alex Morgan',
               },
             },
           ],
@@ -292,13 +292,10 @@ test('clicking card renders card detail and close dismisses it', async () => {
   const detailDom = await instance.render()
   const text = getText(detailDom)
   expect(text).toContain('Detailed card description')
-<<<<<<< HEAD
   expect(text).toContain('Comments')
-  expect(text).toContain('Simon Siefke')
+  expect(text).toContain('Alex Morgan')
   expect(text).toContain('This should show under the description.')
-=======
   expect(text).toContain('Extension Api')
->>>>>>> origin/main
   expect(text).toContain('Open in Trello')
   expect(text.indexOf('Detailed card description')).toBeLessThan(
     text.indexOf('Comments'),

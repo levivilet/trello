@@ -472,7 +472,6 @@ const renderCardDetailImages = (
   )
 }
 
-<<<<<<< HEAD
 const getCommentAuthor = (comment: Readonly<TrelloComment>): string => {
   return comment.memberCreator?.fullName?.trim() || 'Unknown member'
 }
@@ -484,11 +483,11 @@ const getCommentText = (comment: Readonly<TrelloComment>): string => {
 const renderCardDetailComment = (
   comment: Readonly<TrelloComment>,
 ): Dom.TreeNode => {
+  const author = Dom.textNode(getCommentAuthor(comment))
+  const text = Dom.textNode(getCommentText(comment))
   return Dom.div('TrelloCardComment', [
-    Dom.div('TrelloCardCommentAuthor', [
-      Dom.textNode(getCommentAuthor(comment)),
-    ]),
-    Dom.div('TrelloCardCommentText', [Dom.textNode(getCommentText(comment))]),
+    Dom.div('TrelloCardCommentAuthor', [author]),
+    Dom.div('TrelloCardCommentText', [text]),
   ])
 }
 
@@ -499,7 +498,8 @@ const renderCardDetailComments = (
     return Dom.div('TrelloCardDetailEmpty', [Dom.textNode('No comments')])
   }
   return Dom.div('TrelloCardComments', comments.map(renderCardDetailComment))
-=======
+}
+
 const getLabelText = (label: Readonly<TrelloLabel>): string => {
   return label.name?.trim() || label.color?.trim() || 'Label'
 }
@@ -535,7 +535,6 @@ const renderCardDetailLabels = (
     return []
   }
   return [Dom.div('TrelloCardLabels', labels.map(renderCardDetailLabel))]
->>>>>>> origin/main
 }
 
 const renderCardDetailPanel = (
