@@ -113,7 +113,7 @@ test('getCardDetail requests card detail, attachments, and comments', async () =
           date: '2026-07-03T10:11:00.000Z',
           id: 'comment-1',
           memberCreator: {
-            fullName: 'Alex Morgan',
+            fullName: 'Test User',
           },
           type: 'commentCard',
         },
@@ -179,7 +179,7 @@ test('getCardDetail requests card detail, attachments, and comments', async () =
         date: '2026-07-03T10:11:00.000Z',
         id: 'comment-1',
         memberCreator: {
-          fullName: 'Alex Morgan',
+          fullName: 'Test User',
         },
         type: 'commentCard',
       },

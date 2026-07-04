@@ -263,7 +263,7 @@ test('clicking card renders card detail and close dismisses it', async () => {
               },
               id: 'comment-1',
               memberCreator: {
-                fullName: 'Alex Morgan',
+                fullName: 'Test User',
               },
             },
           ],
@@ -293,7 +293,7 @@ test('clicking card renders card detail and close dismisses it', async () => {
   const text = getText(detailDom)
   expect(text).toContain('Detailed card description')
   expect(text).toContain('Comments')
-  expect(text).toContain('Alex Morgan')
+  expect(text).toContain('Test User')
   expect(text).toContain('This should show under the description.')
   expect(text).toContain('Extension Api')
   expect(text).toContain('Open in Trello')
