@@ -14,6 +14,8 @@ export const createInitialState = (): TrelloViewState => {
     draftListTitles: {},
     draftSearchQuery: '',
     draftToken: '',
+    editingCardDescription: false,
+    editingCardTitle: false,
     error: '',
     loading: false,
     recentBoardViews: [],

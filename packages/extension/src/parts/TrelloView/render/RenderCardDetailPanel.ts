@@ -1,3 +1,4 @@
+import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import type {
   TrelloAttachment,
   TrelloComment,
@@ -11,11 +12,8 @@ import {
 } from '../AttachmentHelpers.ts'
 import { getCommentAuthor, getCommentText } from '../CommentHelpers.ts'
 import { getLabelColorClassName, getLabelText } from '../LabelHelpers.ts'
-import {
-  renderField,
-  renderListTitle,
-  renderTextAreaField,
-} from './RenderShared.ts'
+import { renderMarkdown } from './RenderMarkdown.ts'
+import { renderListTitle } from './RenderShared.ts'
 
 const renderImageAttachment = (
   attachment: Readonly<TrelloAttachment>,
@@ -75,6 +73,89 @@ const renderCardDetailLabels = (
   return [Dom.div('TrelloCardLabels', labels.map(renderCardDetailLabel))]
 }
 
+const renderCardDetailTitle = (
+  state: Readonly<TrelloViewState>,
+): Dom.TreeNode => {
+  const className = state.editingCardTitle
+    ? 'TrelloCardDetailTitleInput TrelloCardDetailTitleInputEditing'
+    : 'TrelloCardDetailTitleInput'
+  return Dom.node(VirtualDomElements.Input, {
+    className,
+    name: 'cardTitle',
+    onBlur: 'handleBlur',
+    onClick: 'handleClick',
+    onInput: 'handleInput',
+    value: state.draftCardTitle,
+  })
+}
+
+const renderCardDescriptionEditor = (
+  state: Readonly<TrelloViewState>,
+): Dom.TreeNode => {
+  return Dom.div('TrelloCardDescriptionEditor', [
+    Dom.node(VirtualDomElements.TextArea, {
+      className: 'TrelloTextArea TrelloCardDescriptionTextArea',
+      name: 'cardDescription',
+      onInput: 'handleInput',
+      placeholder: 'Add a more detailed description...',
+      value: state.draftCardDescription,
+    }),
+    Dom.div('TrelloCardDetailActions', [
+      Dom.button(
+        'saveCardDetail',
+        state.savingCardDetail ? 'Saving...' : 'Save',
+        'TrelloButton TrelloCardDetailSaveButton',
+      ),
+      Dom.button(
+        'cancelCardDescriptionEdit',
+        'Cancel',
+        'TrelloButton TrelloCardDetailCancelButton',
+      ),
+    ]),
+  ])
+}
+
+const renderCardDescriptionPreview = (description: string): Dom.TreeNode => {
+  const trimmedDescription = description.trim()
+  if (!trimmedDescription) {
+    return Dom.node(
+      VirtualDomElements.Div,
+      {
+        className:
+          'TrelloCardDescriptionPreview TrelloCardDescriptionPlaceholder',
+        name: 'editCardDescription',
+        onClick: 'handleClick',
+      },
+      [Dom.textNode('Add a more detailed description...')],
+    )
+  }
+  return Dom.node(
+    VirtualDomElements.Div,
+    {
+      className: 'TrelloCardDescriptionPreview',
+      name: 'editCardDescription',
+      onClick: 'handleClick',
+    },
+    renderMarkdown(description),
+  )
+}
+
+const renderCardDescription = (
+  state: Readonly<TrelloViewState>,
+  description: string,
+): Dom.TreeNode => {
+  return Dom.div('TrelloCardDescriptionSection', [
+    Dom.node(
+      VirtualDomElements.H3,
+      { className: 'TrelloCardDetailSectionTitle' },
+      [Dom.textNode('Description')],
+    ),
+    state.editingCardDescription
+      ? renderCardDescriptionEditor(state)
+      : renderCardDescriptionPreview(description),
+  ])
+}
+
 export const renderCardDetailPanel = (
   state: Readonly<TrelloViewState>,
 ): readonly Dom.TreeNode[] => {
@@ -90,19 +171,17 @@ export const renderCardDetailPanel = (
     return []
   }
   const { attachments, card, comments } = state.selectedCardDetail
-  const descriptionPreview =
-    state.draftCardDescription.trim() || 'No description'
   const children = [
-    Dom.button('closeCardDetail', 'Close'),
-    renderField('Title', 'cardTitle', state.draftCardTitle),
+    Dom.div('TrelloCardDetailHeader', [
+      renderCardDetailTitle(state),
+      Dom.button(
+        'closeCardDetail',
+        'Close',
+        'TrelloButton TrelloCardDetailCloseButton',
+      ),
+    ]),
     ...renderCardDetailLabels(card.labels),
-    renderTextAreaField(
-      'Description',
-      'cardDescription',
-      state.draftCardDescription,
-    ),
-    Dom.button('saveCardDetail', state.savingCardDetail ? 'Saving...' : 'Save'),
-    Dom.div('TrelloCardDescription', [Dom.textNode(descriptionPreview)]),
+    renderCardDescription(state, card.desc || ''),
     renderListTitle('Comments'),
     renderCardDetailComments(comments),
     renderListTitle('Images'),

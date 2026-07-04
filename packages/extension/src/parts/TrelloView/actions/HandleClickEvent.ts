@@ -2,6 +2,11 @@ import type { ViewEvent } from '@lvce-editor/api'
 import type { TrelloViewActionContext } from '../state/TrelloViewState.ts'
 import { closeCardDetail } from './CloseCardDetail.ts'
 import { connect } from './Connect.ts'
+import {
+  cancelCardDescriptionEdit,
+  editCardDescription,
+  editCardTitle,
+} from './EditCardDetail.ts'
 import { goBackToBoards } from './GoBackToBoards.ts'
 import { loadBoards } from './LoadBoards.ts'
 import { logout } from './Logout.ts'
@@ -13,15 +18,25 @@ export const handleClickEvent = async (
   context: TrelloViewActionContext,
   event: Readonly<ViewEvent>,
 ): Promise<void> => {
+  if (event.name === 'cardTitle' || event.name === 'editCardTitle') {
+    editCardTitle(context)
+    return
+  }
   switch (event.name) {
     case 'backToBoards':
       await goBackToBoards(context)
+      return
+    case 'cancelCardDescriptionEdit':
+      cancelCardDescriptionEdit(context)
       return
     case 'closeCardDetail':
       closeCardDetail(context)
       return
     case 'connect':
       await connect(context)
+      return
+    case 'editCardDescription':
+      editCardDescription(context)
       return
     case 'logout':
       await logout(context)

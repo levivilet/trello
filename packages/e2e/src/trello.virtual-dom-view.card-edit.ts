@@ -87,10 +87,16 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await openCard(Locator, expect)
 
   const title = Locator('input[name="cardTitle"]')
-  const description = Locator('textarea[name="cardDescription"]')
   await expect(title).toBeVisible()
-  await expect(description).toBeVisible()
   await title.type(' edited')
+
+  const descriptionPreview = Locator('.TrelloCardDescriptionPreview')
+  await expect(descriptionPreview).toBeVisible()
+  // eslint-disable-next-line e2e/no-direct-click
+  await descriptionPreview.click()
+
+  const description = Locator('textarea[name="cardDescription"]')
+  await expect(description).toBeVisible()
   await description.type(' edited')
 
   const save = Locator('button[name="saveCardDetail"]')
