@@ -17,20 +17,25 @@ import { validateCredentials } from '../src/parts/TrelloView/ValidateCredentials
 const validApiKey = 'abcdefghijklmnopqrstuvwxyz123456'
 const validToken =
   'abcdefghijklmnopqrstuvwxyz123456abcdefghijklmnopqrstuvwxyz123456'
+const validLongToken =
+  'abcdefghijklmnopqrstuvwxyz123456abcdefghijklmnopqrstuvwxyz123456abcdefghijkl'
 
 test('validateCredentials returns the expected validation messages', () => {
   expect(validateCredentials({ apiKey: '', token: '' })).toBe(
     'Enter an API key and token.',
   )
+  expect(
+    validateCredentials({ apiKey: validApiKey, token: ' '.repeat(3) }),
+  ).toBe('Enter an API key and token.')
   expect(validateCredentials({ apiKey: 'bad-key', token: validToken })).toBe(
     'API key must be 32 alphanumeric characters.',
-  )
-  expect(validateCredentials({ apiKey: validApiKey, token: 'bad-token' })).toBe(
-    'Token must be 64 alphanumeric characters.',
   )
   expect(validateCredentials({ apiKey: validApiKey, token: validToken })).toBe(
     '',
   )
+  expect(
+    validateCredentials({ apiKey: validApiKey, token: validLongToken }),
+  ).toBe('')
 })
 
 test('getRecentlyViewedBoards sorts by trello and local viewed dates', () => {
