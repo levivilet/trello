@@ -47,11 +47,11 @@ const openBoard = async (Locator, expect, boardId = 'board-1') => {
   await board.click()
 }
 
-const openCard = async (Locator, expect, cardId = 'card-1') => {
-  const card = Locator(`button[name="card:${cardId}"]`)
-  await expect(card).toBeVisible()
+const openCard = async (Locator, expect) => {
+  const commentCount = Locator('text=1 comment')
+  await expect(commentCount).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
-  await card.click()
+  await commentCount.click({ force: true })
 }
 
 export const test: Test = async ({ Command, expect, Locator }) => {
@@ -60,6 +60,9 @@ export const test: Test = async ({ Command, expect, Locator }) => {
     name: 'Roadmap',
   }
   const card = {
+    badges: {
+      comments: 1,
+    },
     id: 'card-1',
     name: 'Card 1',
   }
