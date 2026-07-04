@@ -92,7 +92,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
             },
             id: 'comment-1',
             memberCreator: {
-              fullName: 'Alex Morgan',
+              fullName: 'Test User',
             },
           },
         ],
@@ -104,7 +104,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await openCard(Locator, expect)
 
   const description = Locator('text=Detailed card description')
-  const commentAuthor = Locator('text=Alex Morgan')
+  const commentAuthor = Locator('text=Test User')
   const commentText = Locator('text=This should show under the description.')
   const image = Locator('.TrelloCardDetailImage')
 
