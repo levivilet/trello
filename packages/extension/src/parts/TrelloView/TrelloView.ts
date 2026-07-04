@@ -416,13 +416,51 @@ const renderBoards = (
   return Dom.flatten(Dom.div('TrelloView TrelloBoards', children))
 }
 
+const getCardCommentCount = (card: Readonly<TrelloCard>): number => {
+  return card.badges?.comments || 0
+}
+
+const getCardCommentCountText = (count: number): string => {
+  if (count === 1) {
+    return '1 comment'
+  }
+  return `${count} comments`
+}
+
+const renderCardCommentCount = (
+  card: Readonly<TrelloCard>,
+): readonly Dom.TreeNode[] => {
+  const commentCount = getCardCommentCount(card)
+  if (commentCount <= 0) {
+    return []
+  }
+  return [
+    Dom.div('TrelloCardMeta', [
+      Dom.textNode(getCardCommentCountText(commentCount)),
+    ]),
+  ]
+}
+
+const renderCard = (card: Readonly<TrelloCard>): Dom.TreeNode => {
+  return Dom.node(
+    VirtualDomElements.Button,
+    {
+      className: 'TrelloCard',
+      name: `card:${card.id}`,
+      onClick: 'handleClick',
+    },
+    [
+      Dom.div('TrelloCardTitle', [Dom.textNode(card.name)]),
+      ...renderCardCommentCount(card),
+    ],
+  )
+}
+
 const renderCards = (cards: readonly TrelloCard[]): readonly Dom.TreeNode[] => {
   if (cards.length === 0) {
     return [Dom.textNode('No cards')]
   }
-  return cards.map((card) => {
-    return Dom.button(`card:${card.id}`, card.name, 'TrelloCard')
-  })
+  return cards.map(renderCard)
 }
 
 const isImageAttachment = (attachment: Readonly<TrelloAttachment>): boolean => {
@@ -473,6 +511,46 @@ const renderCardDetailImages = (
 
 const getLabelText = (label: Readonly<TrelloLabel>): string => {
   return label.name?.trim() || label.color?.trim() || 'Label'
+<<<<<<< Updated upstream
+=======
+}
+
+const getLabelColorClassName = (color: string | undefined): string => {
+  switch (color) {
+    case 'black':
+    case 'blue':
+    case 'green':
+    case 'lime':
+    case 'orange':
+    case 'pink':
+    case 'purple':
+    case 'red':
+    case 'sky':
+    case 'yellow':
+      return `TrelloCardLabelColor${color[0].toUpperCase()}${color.slice(1)}`
+    default:
+      return 'TrelloCardLabelColorNeutral'
+  }
+}
+
+const renderCardDetailLabel = (label: Readonly<TrelloLabel>): Dom.TreeNode => {
+  return Dom.div(`TrelloCardLabel ${getLabelColorClassName(label.color)}`, [
+    Dom.textNode(getLabelText(label)),
+  ])
+}
+
+const renderCardDetailLabels = (
+  labels: readonly TrelloLabel[] | undefined,
+): readonly Dom.TreeNode[] => {
+  if (!labels || labels.length === 0) {
+    return []
+  }
+  return [Dom.div('TrelloCardLabels', labels.map(renderCardDetailLabel))]
+}
+
+const getCommentAuthor = (comment: Readonly<TrelloComment>): string => {
+  return comment.memberCreator?.fullName?.trim() || 'Unknown member'
+>>>>>>> Stashed changes
 }
 
 const getLabelColorClassName = (color: string | undefined): string => {

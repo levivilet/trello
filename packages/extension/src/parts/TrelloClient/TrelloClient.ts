@@ -128,7 +128,7 @@ export const createTrelloClient = (
             `/lists/${list.id}/cards`,
             credentials,
             {
-              fields: 'name,url,idBoard,idList',
+              fields: 'name,url,idBoard,idList,badges',
             },
           )
           return {
