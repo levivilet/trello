@@ -15,6 +15,7 @@ import type {
   TrelloBoardDetail,
   TrelloCard,
   TrelloCardDetail,
+  TrelloComment,
   TrelloCredentials,
   TrelloLabel,
   TrelloSearchResult,
@@ -480,6 +481,34 @@ const renderCardDetailImages = (
   )
 }
 
+const getCommentAuthor = (comment: Readonly<TrelloComment>): string => {
+  return comment.memberCreator?.fullName?.trim() || 'Unknown member'
+}
+
+const getCommentText = (comment: Readonly<TrelloComment>): string => {
+  return comment.data.text?.trim() || 'No comment text'
+}
+
+const renderCardDetailComment = (
+  comment: Readonly<TrelloComment>,
+): Dom.TreeNode => {
+  const author = Dom.textNode(getCommentAuthor(comment))
+  const text = Dom.textNode(getCommentText(comment))
+  return Dom.div('TrelloCardComment', [
+    Dom.div('TrelloCardCommentAuthor', [author]),
+    Dom.div('TrelloCardCommentText', [text]),
+  ])
+}
+
+const renderCardDetailComments = (
+  comments: readonly TrelloComment[],
+): Dom.TreeNode => {
+  if (comments.length === 0) {
+    return Dom.div('TrelloCardDetailEmpty', [Dom.textNode('No comments')])
+  }
+  return Dom.div('TrelloCardComments', comments.map(renderCardDetailComment))
+}
+
 const getLabelText = (label: Readonly<TrelloLabel>): string => {
   return label.name?.trim() || label.color?.trim() || 'Label'
 }
@@ -531,7 +560,7 @@ const renderCardDetailPanel = (
   if (!state.selectedCardDetail) {
     return []
   }
-  const { attachments, card } = state.selectedCardDetail
+  const { attachments, card, comments } = state.selectedCardDetail
   const descriptionPreview =
     state.draftCardDescription.trim() || 'No description'
   const children = [
@@ -545,6 +574,8 @@ const renderCardDetailPanel = (
     ),
     Dom.button('saveCardDetail', state.savingCardDetail ? 'Saving...' : 'Save'),
     Dom.div('TrelloCardDescription', [Dom.textNode(descriptionPreview)]),
+    renderListTitle('Comments'),
+    renderCardDetailComments(comments),
     renderListTitle('Images'),
     renderCardDetailImages(attachments),
     ...(card.url
