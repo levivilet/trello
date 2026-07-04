@@ -176,7 +176,7 @@ export const renderCardDetailPanel = (
       renderCardDetailTitle(state),
       Dom.button(
         'closeCardDetail',
-        'Close',
+        'x',
         'TrelloButton TrelloCardDetailCloseButton',
       ),
     ]),

@@ -544,9 +544,16 @@ test('clicking card renders card detail and close dismisses it', async () => {
       )
     }),
   ).toBe(true)
-  expect(hasNode(detailDom, (node) => node.name === 'closeCardDetail')).toBe(
-    true,
-  )
+  expect(text).not.toContain('Close')
+  expect(
+    hasNode(detailDom, (node) => {
+      return (
+        node.name === 'closeCardDetail' &&
+        typeof node.className === 'string' &&
+        node.className.includes('TrelloCardDetailCloseButton')
+      )
+    }),
+  ).toBe(true)
 
   await instance.handleEvent?.({ name: 'closeCardDetail', type: 'click' })
 
