@@ -85,6 +85,17 @@ export const test: Test = async ({ Command, expect, Locator }) => {
           id: 'card-1',
           name: 'Card 1',
         },
+        comments: [
+          {
+            data: {
+              text: 'This should show under the description.',
+            },
+            id: 'comment-1',
+            memberCreator: {
+              fullName: 'Simon Siefke',
+            },
+          },
+        ],
       },
     },
   })
@@ -93,8 +104,12 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await openCard(Locator, expect)
 
   const description = Locator('text=Detailed card description')
+  const commentAuthor = Locator('text=Simon Siefke')
+  const commentText = Locator('text=This should show under the description.')
   const image = Locator('.TrelloCardDetailImage')
 
   await expect(description).toBeVisible()
+  await expect(commentAuthor).toBeVisible()
+  await expect(commentText).toBeVisible()
   await expect(image).toBeVisible()
 }

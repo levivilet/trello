@@ -78,6 +78,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
           id: 'card-1',
           name: 'Card 1',
         },
+        comments: [],
       },
     },
   })
