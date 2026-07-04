@@ -5,6 +5,7 @@ import type {
   TrelloBoardDetail,
   TrelloCard,
   TrelloCardDetail,
+  TrelloCardMove,
   TrelloCardUpdate,
   TrelloList,
   TrelloListUpdate,
@@ -17,6 +18,7 @@ export interface MockTrelloData {
   readonly boards?: readonly TrelloBoard[]
   readonly cardDetailErrors?: Readonly<Record<string, string>>
   readonly cardDetails?: Readonly<Record<string, TrelloCardDetail>>
+  readonly cardMoveErrors?: Readonly<Record<string, string>>
   readonly cardUpdateErrors?: Readonly<Record<string, string>>
   readonly error?: string
   readonly listBoardsError?: string
@@ -134,6 +136,60 @@ export const createMockTrelloClient = (
           token: '',
         }),
       }
+    },
+    async moveCard(
+      card: TrelloCard,
+      move: TrelloCardMove,
+    ): Promise<TrelloCard> {
+      if (data.error) {
+        throw new Error(data.error)
+      }
+      const moveError = data.cardMoveErrors?.[card.id]
+      if (moveError) {
+        throw new Error(moveError)
+      }
+      const existingCard = findCard(card.id) || card
+      const movedCard = {
+        ...existingCard,
+        idList: move.idList,
+      }
+      for (const [boardId, detail] of Object.entries(boardDetails)) {
+        const hasCard = detail.lists.some((list) => {
+          return list.cards.some((item) => item.id === card.id)
+        })
+        if (!hasCard) {
+          continue
+        }
+        boardDetails[boardId] = {
+          ...detail,
+          lists: detail.lists.map((list) => {
+            const cardsWithoutMoved = list.cards.filter((item) => {
+              return item.id !== card.id
+            })
+            if (list.id !== move.idList) {
+              return {
+                ...list,
+                cards: cardsWithoutMoved,
+              }
+            }
+            return {
+              ...list,
+              cards: [...cardsWithoutMoved, movedCard],
+            }
+          }),
+        }
+      }
+      const previousDetail = cardDetails[card.id]
+      if (previousDetail) {
+        cardDetails[card.id] = {
+          ...previousDetail,
+          card: {
+            ...previousDetail.card,
+            idList: move.idList,
+          },
+        }
+      }
+      return movedCard
     },
     async search(): Promise<readonly TrelloSearchResult[]> {
       if (data.error) {

@@ -8,6 +8,13 @@ import type { TrelloViewActionContext } from './state/TrelloViewState.ts'
 import { createMemoryCurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
 import { handleBlurEvent } from './actions/HandleBlurEvent.ts'
 import { handleClickEvent } from './actions/HandleClickEvent.ts'
+import {
+  handleDragEndEvent,
+  handleDragLeaveEvent,
+  handleDragOverEvent,
+  handleDragStartEvent,
+  handleDropEvent,
+} from './actions/HandleDragEvent.ts'
 import { handleInputEvent } from './actions/HandleInputEvent.ts'
 import { handleSubmitEvent } from './actions/HandleSubmitEvent.ts'
 import { loadBoards } from './actions/LoadBoards.ts'
@@ -85,6 +92,26 @@ export const createInstance = async (
       }
       if (event.type === 'blur') {
         await handleBlurEvent(viewContext, event)
+        return
+      }
+      if (event.type === 'dragstart') {
+        handleDragStartEvent(viewContext, event)
+        return
+      }
+      if (event.type === 'dragover') {
+        handleDragOverEvent(viewContext, event)
+        return
+      }
+      if (event.type === 'dragleave') {
+        handleDragLeaveEvent(viewContext)
+        return
+      }
+      if (event.type === 'dragend') {
+        handleDragEndEvent(viewContext)
+        return
+      }
+      if (event.type === 'drop') {
+        await handleDropEvent(viewContext, event)
       }
     },
     render(): readonly VirtualDomNode[] {

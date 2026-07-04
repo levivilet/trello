@@ -32,8 +32,11 @@ const renderCard = (card: Readonly<TrelloCard>): Dom.TreeNode => {
     VirtualDomElements.Button,
     {
       className: 'TrelloCard',
+      draggable: true,
       name: `card:${card.id}`,
       onClick: 'handleClick',
+      onDragEnd: 'handleDragEnd',
+      onDragStart: 'handleDragStart',
     },
     [
       Dom.div('TrelloCardTitle', [Dom.textNode(card.name)]),

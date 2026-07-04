@@ -20,6 +20,7 @@ import {
   readCachedCardDetail,
 } from './operations/GetCardDetail.ts'
 import { listBoards, readCachedListBoards } from './operations/ListBoards.ts'
+import { moveCard } from './operations/MoveCard.ts'
 import { readCachedSearch, search } from './operations/Search.ts'
 import { updateCard } from './operations/UpdateCard.ts'
 import { updateList } from './operations/UpdateList.ts'
@@ -75,6 +76,9 @@ export const createTrelloClient = (
         cached: await readCachedListBoards(cache, credentials),
         fresh: listBoards(fetchLike, credentials, cache),
       }
+    },
+    moveCard(card, move, credentials): ReturnType<TrelloClient['moveCard']> {
+      return moveCard(fetchLike, card, move, credentials, cache)
     },
     search(query, credentials): ReturnType<TrelloClient['search']> {
       return search(fetchLike, query, credentials, cache)

@@ -44,16 +44,33 @@ const renderBoardDetailContent = (
   ]
 }
 
+const getListClassName = (
+  state: Readonly<TrelloViewState>,
+  list: Readonly<TrelloList>,
+): string => {
+  if (state.dragTargetListId === list.id) {
+    return 'TrelloList TrelloListDragTarget'
+  }
+  return 'TrelloList'
+}
+
 export const renderBoardDetail = (
   state: Readonly<TrelloViewState>,
   detail: Readonly<TrelloBoardDetail>,
 ): readonly VirtualDomNode[] => {
   const lists = detail.lists.map((list) => {
     const cards = renderCards(list.cards)
-    return Dom.div('TrelloList', [
-      renderListTitleInput(state, list),
-      Dom.div('TrelloCards', cards),
-    ])
+    return Dom.node(
+      VirtualDomElements.Div,
+      {
+        className: getListClassName(state, list),
+        name: `list:${list.id}`,
+        onDragLeave: 'handleDragLeave',
+        onDragOver: 'handleDragOver',
+        onDrop: 'handleDrop',
+      },
+      [renderListTitleInput(state, list), Dom.div('TrelloCards', cards)],
+    )
   })
   const toolbar = renderToolbar([
     Dom.button('backToBoards', 'Back'),
