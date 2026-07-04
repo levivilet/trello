@@ -1,7 +1,18 @@
-import { exportStatic } from '@lvce-editor/shared-process'
 import { cp } from 'node:fs/promises'
-import path from 'node:path'
+import { createRequire } from 'node:module'
+import path, { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { root } from './root.ts'
+
+const serverPackagePath = join(root, 'packages', 'server', 'package.json')
+const serverRequire = createRequire(serverPackagePath)
+const sharedProcessPath = serverRequire.resolve('@lvce-editor/shared-process')
+
+const sharedProcessUrl = pathToFileURL(sharedProcessPath).toString()
+
+const sharedProcess = await import(sharedProcessUrl)
+
+const { exportStatic } = sharedProcess
 
 await import('./build.ts')
 
