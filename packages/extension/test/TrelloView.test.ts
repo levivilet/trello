@@ -7,6 +7,7 @@ import type {
   TrelloSearchResult,
 } from '../src/parts/TrelloTypes/TrelloTypes.ts'
 import { createMemoryCredentialStorage } from '../src/parts/CredentialStorage/CredentialStorage.ts'
+import { createMemoryCurrentBoardStorage } from '../src/parts/CurrentBoardStorage/CurrentBoardStorage.ts'
 import { createMockTrelloClient } from '../src/parts/MockTrelloClient/MockTrelloClient.ts'
 import {
   createMemoryRecentBoardStorage,
@@ -247,6 +248,183 @@ test('connect loads boards and clicking board loads detail', async () => {
   expect(detailClassNames).toContain('TrelloCardMeta')
   expect(hasDirectChildClass(detailDom, 'TrelloList', 'TrelloCards')).toBe(true)
   expect(hasDirectChildClass(detailDom, 'TrelloCards', 'TrelloCard')).toBe(true)
+  resetTrelloViewDependencyFactory()
+})
+
+test('clicking board remembers current board', async () => {
+  const currentBoardStorage = createMemoryCurrentBoardStorage()
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [],
+        },
+      },
+      boards: [{ id: 'board-1', name: 'Roadmap' }],
+    }),
+    currentBoardStorage,
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage(),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: validApiKey,
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: validToken,
+  })
+  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+
+  await expect(currentBoardStorage.read()).resolves.toBe('board-1')
+  resetTrelloViewDependencyFactory()
+})
+
+test('stored current board restores board detail on create', async () => {
+  const currentBoardStorage = createMemoryCurrentBoardStorage('board-1')
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', name: 'Ship restore' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      boards: [{ id: 'board-1', name: 'Roadmap' }],
+    }),
+    currentBoardStorage,
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage({
+      apiKey: validApiKey,
+      token: validToken,
+    }),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+
+  const text = getText(await instance.render())
+  expect(text).toContain('Todo')
+  expect(text).toContain('Ship restore')
+  expect(text).not.toContain('Your workspaces')
+  resetTrelloViewDependencyFactory()
+})
+
+test('back clears stored current board', async () => {
+  const currentBoardStorage = createMemoryCurrentBoardStorage()
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [],
+        },
+      },
+      boards: [{ id: 'board-1', name: 'Roadmap' }],
+    }),
+    currentBoardStorage,
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage(),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: validApiKey,
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: validToken,
+  })
+  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'backToBoards', type: 'click' })
+
+  await expect(currentBoardStorage.read()).resolves.toBeUndefined()
+  expect(getText(await instance.render())).toContain('Your workspaces')
+  resetTrelloViewDependencyFactory()
+})
+
+test('logout clears stored current board', async () => {
+  const currentBoardStorage = createMemoryCurrentBoardStorage('board-1')
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({
+      boards: [{ id: 'board-1', name: 'Roadmap' }],
+    }),
+    currentBoardStorage,
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage({
+      apiKey: validApiKey,
+      token: validToken,
+    }),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  await instance.handleEvent?.({ name: 'logout', type: 'click' })
+
+  await expect(currentBoardStorage.read()).resolves.toBeUndefined()
+  expect(getText(await instance.render())).toContain('Welcome to Trello')
+  resetTrelloViewDependencyFactory()
+})
+
+test('missing stored current board is cleared on create', async () => {
+  const currentBoardStorage = createMemoryCurrentBoardStorage('missing-board')
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({
+      boards: [{ id: 'board-1', name: 'Roadmap' }],
+    }),
+    currentBoardStorage,
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage({
+      apiKey: validApiKey,
+      token: validToken,
+    }),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+
+  await expect(currentBoardStorage.read()).resolves.toBeUndefined()
+  expect(getText(await instance.render())).toContain('Your workspaces')
+  resetTrelloViewDependencyFactory()
+})
+
+test('stored current board is cleared when restore fails', async () => {
+  const currentBoardStorage = createMemoryCurrentBoardStorage('board-1')
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({
+      boardDetailErrors: {
+        'board-1': 'Trello request failed: board unavailable',
+      },
+      boards: [{ id: 'board-1', name: 'Roadmap' }],
+    }),
+    currentBoardStorage,
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage({
+      apiKey: validApiKey,
+      token: validToken,
+    }),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+
+  await expect(currentBoardStorage.read()).resolves.toBeUndefined()
+  expect(getText(await instance.render())).toContain(
+    'Trello request failed: board unavailable',
+  )
+  expect(getText(await instance.render())).toContain('Your workspaces')
   resetTrelloViewDependencyFactory()
 })
 

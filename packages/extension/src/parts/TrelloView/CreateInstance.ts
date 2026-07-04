@@ -9,17 +9,21 @@ import { handleClickEvent } from './actions/HandleClickEvent.ts'
 import { handleInputEvent } from './actions/HandleInputEvent.ts'
 import { handleSubmitEvent } from './actions/HandleSubmitEvent.ts'
 import { loadBoards } from './actions/LoadBoards.ts'
+import { restoreCurrentBoard } from './actions/RestoreCurrentBoard.ts'
 import { renderAuth } from './render/RenderAuth.ts'
 import { renderBoardDetail } from './render/RenderBoardDetail.ts'
 import { renderBoards } from './render/RenderBoards.ts'
 import { createInitialState } from './state/CreateInitialState.ts'
 import { dependencyState } from './state/DependencyFactory.ts'
+import { createMemoryCurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
 
 export const createInstance = async (
   context?: ViewContext,
 ): Promise<VirtualDomViewInstance> => {
-  const { client, readSearchEnabled, recentStorage, storage } =
-    dependencyState.factory()
+  const dependencies = dependencyState.factory()
+  const { client, readSearchEnabled, recentStorage, storage } = dependencies
+  const currentBoardStorage =
+    dependencies.currentBoardStorage || createMemoryCurrentBoardStorage()
   const state = createInitialState()
 
   const requestRerender = (): void => {
@@ -35,6 +39,7 @@ export const createInstance = async (
 
   const viewContext: TrelloViewActionContext = {
     client,
+    currentBoardStorage,
     recentStorage,
     requestRerender,
     state,
@@ -51,6 +56,7 @@ export const createInstance = async (
     state.draftApiKey = storedCredentials.apiKey
     state.draftToken = storedCredentials.token
     await loadBoards(viewContext, false)
+    await restoreCurrentBoard(viewContext)
   }
 
   return {

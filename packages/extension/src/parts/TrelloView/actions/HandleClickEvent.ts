@@ -15,7 +15,7 @@ export const handleClickEvent = async (
 ): Promise<void> => {
   switch (event.name) {
     case 'backToBoards':
-      goBackToBoards(context)
+      await goBackToBoards(context)
       return
     case 'closeCardDetail':
       closeCardDetail(context)

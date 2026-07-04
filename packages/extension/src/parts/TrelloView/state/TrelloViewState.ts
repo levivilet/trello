@@ -1,4 +1,5 @@
 import type { CredentialStorage } from '../../CredentialStorage/CredentialStorage.ts'
+import type { CurrentBoardStorage } from '../../CurrentBoardStorage/CurrentBoardStorage.ts'
 import type {
   RecentBoardStorage,
   RecentBoardView,
@@ -14,6 +15,7 @@ import type {
 
 export interface TrelloViewDependencies {
   readonly client: TrelloClient
+  readonly currentBoardStorage?: CurrentBoardStorage
   readonly readSearchEnabled?: () => Promise<boolean>
   readonly recentStorage: RecentBoardStorage
   readonly storage: CredentialStorage
@@ -41,6 +43,7 @@ export interface TrelloViewState {
 
 export interface TrelloViewContext {
   readonly client: TrelloClient
+  readonly currentBoardStorage: CurrentBoardStorage
   readonly recentStorage: RecentBoardStorage
   readonly requestRerender: () => void
   readonly state: TrelloViewState
@@ -49,6 +52,7 @@ export interface TrelloViewContext {
 
 export interface TrelloViewActionContext {
   readonly client: TrelloClient
+  readonly currentBoardStorage: CurrentBoardStorage
   readonly recentStorage: RecentBoardStorage
   readonly requestRerender: () => void
   readonly state: Readonly<TrelloViewState>

@@ -9,7 +9,7 @@ import { clearBoardSpecificState } from './ClearBoardSpecificState.ts'
 export const connect = async (
   context: TrelloViewActionContext,
 ): Promise<void> => {
-  const { client, requestRerender, storage } = context
+  const { client, currentBoardStorage, requestRerender, storage } = context
   const state = context.state as TrelloViewState
   const credentials = {
     apiKey: state.draftApiKey.trim(),
@@ -29,6 +29,7 @@ export const connect = async (
   try {
     const boards = await client.listBoards(credentials)
     await storage.write(credentials)
+    await currentBoardStorage.delete()
     state.credentials = credentials
     state.boards = boards
     clearBoardSpecificState(state)

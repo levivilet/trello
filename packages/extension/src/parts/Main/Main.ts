@@ -5,6 +5,7 @@ import {
   registerView,
 } from '@lvce-editor/api'
 import { createMemoryCredentialStorage } from '../CredentialStorage/CredentialStorage.ts'
+import { createMemoryCurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
 import {
   createMockTrelloClient,
   type MockTrelloData,
@@ -31,10 +32,14 @@ export const activate = async (): Promise<void> => {
   })
   registerCommand({
     execute(data: Readonly<MockTrelloData>) {
+      const storage = createMemoryCredentialStorage()
+      const currentBoardStorage = createMemoryCurrentBoardStorage()
+      const recentStorage = createMemoryRecentBoardStorage()
       TrelloView.setTrelloViewDependencyFactory(() => ({
         client: createMockTrelloClient(data),
-        recentStorage: createMemoryRecentBoardStorage(),
-        storage: createMemoryCredentialStorage(),
+        currentBoardStorage,
+        recentStorage,
+        storage,
       }))
       return { ok: true }
     },
