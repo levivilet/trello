@@ -417,13 +417,51 @@ const renderBoards = (
   return Dom.flatten(Dom.div('TrelloView TrelloBoards', children))
 }
 
+const getCardCommentCount = (card: Readonly<TrelloCard>): number => {
+  return card.badges?.comments || 0
+}
+
+const getCardCommentCountText = (count: number): string => {
+  if (count === 1) {
+    return '1 comment'
+  }
+  return `${count} comments`
+}
+
+const renderCardCommentCount = (
+  card: Readonly<TrelloCard>,
+): readonly Dom.TreeNode[] => {
+  const commentCount = getCardCommentCount(card)
+  if (commentCount <= 0) {
+    return []
+  }
+  return [
+    Dom.div('TrelloCardMeta', [
+      Dom.textNode(getCardCommentCountText(commentCount)),
+    ]),
+  ]
+}
+
+const renderCard = (card: Readonly<TrelloCard>): Dom.TreeNode => {
+  return Dom.node(
+    VirtualDomElements.Button,
+    {
+      className: 'TrelloCard',
+      name: `card:${card.id}`,
+      onClick: 'handleClick',
+    },
+    [
+      Dom.div('TrelloCardTitle', [Dom.textNode(card.name)]),
+      ...renderCardCommentCount(card),
+    ],
+  )
+}
+
 const renderCards = (cards: readonly TrelloCard[]): readonly Dom.TreeNode[] => {
   if (cards.length === 0) {
     return [Dom.textNode('No cards')]
   }
-  return cards.map((card) => {
-    return Dom.button(`card:${card.id}`, card.name, 'TrelloCard')
-  })
+  return cards.map(renderCard)
 }
 
 const isImageAttachment = (attachment: Readonly<TrelloAttachment>): boolean => {

@@ -170,7 +170,26 @@ test('connect loads boards and clicking board loads detail', async () => {
           board: { id: 'board-1', name: 'Roadmap' },
           lists: [
             {
-              cards: [{ id: 'card-1', name: 'Ship Trello view' }],
+              cards: [
+                {
+                  badges: {
+                    comments: 3,
+                  },
+                  id: 'card-1',
+                  name: 'Ship Trello view',
+                },
+                {
+                  badges: {
+                    comments: 0,
+                  },
+                  id: 'card-2',
+                  name: 'Quiet card',
+                },
+                {
+                  id: 'card-3',
+                  name: 'Plain card',
+                },
+              ],
               id: 'list-1',
               name: 'Todo',
             },
@@ -208,9 +227,15 @@ test('connect loads boards and clicking board loads detail', async () => {
   const detailClassNames = getClassNames(detailDom)
   expect(detailText).toContain('Todo')
   expect(detailText).toContain('Ship Trello view')
+  expect(detailText).toContain('3 comments')
+  expect(detailText).toContain('Quiet card')
+  expect(detailText).toContain('Plain card')
+  expect(detailText).not.toContain('0 comments')
   expect(detailClassNames).toContain('TrelloLists')
   expect(detailClassNames).toContain('TrelloList')
   expect(detailClassNames).toContain('TrelloCards')
+  expect(detailClassNames).toContain('TrelloCardTitle')
+  expect(detailClassNames).toContain('TrelloCardMeta')
   expect(hasDirectChildClass(detailDom, 'TrelloList', 'TrelloCards')).toBe(true)
   expect(hasDirectChildClass(detailDom, 'TrelloCards', 'TrelloCard')).toBe(true)
   resetTrelloViewDependencyFactory()

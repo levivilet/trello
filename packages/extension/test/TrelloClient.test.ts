@@ -46,6 +46,9 @@ test('getBoardDetail requests lists and cards', async () => {
     }
     return jsonResponse([
       {
+        badges: {
+          comments: 3,
+        },
         id: 'card-1',
         idBoard: 'board-1',
         idList: 'list-1',
@@ -68,6 +71,9 @@ test('getBoardDetail requests lists and cards', async () => {
       {
         cards: [
           {
+            badges: {
+              comments: 3,
+            },
             id: 'card-1',
             idBoard: 'board-1',
             idList: 'list-1',
@@ -85,7 +91,7 @@ test('getBoardDetail requests lists and cards', async () => {
     '/1/lists/list-1/cards',
   ])
   expect(new URL(requests[1]).searchParams.get('fields')).toBe(
-    'name,url,idBoard,idList',
+    'name,url,idBoard,idList,badges',
   )
 })
 
