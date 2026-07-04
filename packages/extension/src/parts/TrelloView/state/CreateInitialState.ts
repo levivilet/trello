@@ -3,6 +3,7 @@ import type { TrelloViewState } from './TrelloViewState.ts'
 export const createInitialState = (): TrelloViewState => {
   return {
     activeSearchQuery: '',
+    boardBackgroundEnabled: false,
     boardDetail: undefined,
     boards: [],
     cardDetailLoading: false,

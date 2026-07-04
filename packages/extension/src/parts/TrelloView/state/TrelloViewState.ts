@@ -14,6 +14,7 @@ import type {
 
 export interface TrelloViewDependencies {
   readonly client: TrelloClient
+  readonly readBoardBackgroundEnabled?: () => Promise<boolean>
   readonly readSearchEnabled?: () => Promise<boolean>
   readonly recentStorage: RecentBoardStorage
   readonly storage: CredentialStorage
@@ -21,6 +22,7 @@ export interface TrelloViewDependencies {
 
 export interface TrelloViewState {
   activeSearchQuery: string
+  boardBackgroundEnabled: boolean
   boardDetail: TrelloBoardDetail | undefined
   boards: readonly TrelloBoard[]
   cardDetailLoading: boolean

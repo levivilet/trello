@@ -1,7 +1,14 @@
-import type { VirtualDomNode } from '@lvce-editor/virtual-dom-worker'
+import {
+  VirtualDomElements,
+  type VirtualDomNode,
+} from '@lvce-editor/virtual-dom-worker'
 import type { TrelloBoardDetail } from '../../TrelloTypes/TrelloTypes.ts'
 import type { TrelloViewState } from '../state/TrelloViewState.ts'
 import * as Dom from '../../VirtualDom/VirtualDom.ts'
+import {
+  getBoardBackgroundClassName,
+  getBoardBackgroundStyle,
+} from './BoardBackground.ts'
 import { renderCardDetailPanel } from './RenderCardDetailPanel.ts'
 import { renderCards } from './RenderCards.ts'
 import {
@@ -47,5 +54,20 @@ export const renderBoardDetail = (
     ...renderBoardDetailContent(state, lists),
     ...renderError(state.error),
   ]
-  return Dom.flatten(Dom.div('TrelloView TrelloBoardDetail', children))
+  return Dom.flatten(
+    Dom.node(
+      VirtualDomElements.Div,
+      {
+        className: getBoardBackgroundClassName(
+          detail.board,
+          state.boardBackgroundEnabled,
+        ),
+        style: getBoardBackgroundStyle(
+          detail.board,
+          state.boardBackgroundEnabled,
+        ),
+      },
+      children,
+    ),
+  )
 }

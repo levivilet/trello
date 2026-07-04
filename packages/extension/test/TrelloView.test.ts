@@ -1,3 +1,5 @@
+// cspell:ignore prefs
+
 import type { VirtualDomViewInstance } from '@lvce-editor/api'
 import { expect, test } from '@jest/globals'
 import type {
@@ -74,6 +76,17 @@ const hasNode = (
   return dom.some(predicate)
 }
 
+const hasClass = (node: any, className: string): boolean => {
+  if (typeof node.className !== 'string') {
+    return false
+  }
+  return node.className.split(' ').includes(className)
+}
+
+const getNodeByClass = (dom: readonly any[], className: string): any => {
+  return dom.find((node) => hasClass(node, className))
+}
+
 const getBoardButtonLabels = (dom: readonly any[]): readonly string[] => {
   const labels: string[] = []
   for (let i = 0; i < dom.length; i++) {
@@ -88,11 +101,17 @@ const getBoardButtonLabels = (dom: readonly any[]): readonly string[] => {
 const createAuthenticatedInstance = async (
   boards: readonly TrelloBoard[],
   recentBoardViews: readonly RecentBoardView[] = [],
+  options: {
+    readonly boardBackgroundEnabled?: boolean
+  } = {},
 ): Promise<VirtualDomViewInstance> => {
   setTrelloViewDependencyFactory(() => ({
     client: createMockTrelloClient({
       boards,
     }),
+    readBoardBackgroundEnabled: async (): Promise<boolean> => {
+      return options.boardBackgroundEnabled === true
+    },
     recentStorage: createMemoryRecentBoardStorage(recentBoardViews),
     storage: createMemoryCredentialStorage(),
   }))
@@ -122,9 +141,15 @@ interface SearchInstanceData {
 
 const createSearchEnabledInstance = async (
   data: Readonly<SearchInstanceData>,
+  options: {
+    readonly boardBackgroundEnabled?: boolean
+  } = {},
 ): Promise<VirtualDomViewInstance> => {
   setTrelloViewDependencyFactory(() => ({
     client: createMockTrelloClient(data),
+    readBoardBackgroundEnabled: async (): Promise<boolean> => {
+      return options.boardBackgroundEnabled === true
+    },
     readSearchEnabled: async (): Promise<boolean> => true,
     recentStorage: createMemoryRecentBoardStorage(),
     storage: createMemoryCredentialStorage(),
@@ -660,6 +685,102 @@ test('renders empty board state', async () => {
   resetTrelloViewDependencyFactory()
 })
 
+test('does not use trello board background when flag is disabled', async () => {
+  const instance = await createAuthenticatedInstance([
+    {
+      id: 'board-1',
+      name: 'Roadmap',
+      prefs: {
+        backgroundImage: 'https://example.com/background.jpg',
+      },
+    },
+  ])
+
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+
+  const boardDetail = getNodeByClass(
+    await instance.render(),
+    'TrelloBoardDetail',
+  )
+  expect(hasClass(boardDetail, 'TrelloBoardDetailWithBackground')).toBe(false)
+  expect(boardDetail.style).toBeUndefined()
+  resetTrelloViewDependencyFactory()
+})
+
+test('uses largest trello board background image when flag is enabled', async () => {
+  const instance = await createAuthenticatedInstance(
+    [
+      {
+        id: 'board-1',
+        name: 'Roadmap',
+        prefs: {
+          backgroundImage: 'https://example.com/original.jpg',
+          backgroundImageScaled: [
+            {
+              height: 120,
+              url: 'https://example.com/small.jpg',
+              width: 160,
+            },
+            {
+              height: 1080,
+              url: 'https://example.com/large.jpg',
+              width: 1920,
+            },
+          ],
+        },
+      },
+    ],
+    [],
+    {
+      boardBackgroundEnabled: true,
+    },
+  )
+
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+
+  const boardDetail = getNodeByClass(
+    await instance.render(),
+    'TrelloBoardDetail',
+  )
+  expect(hasClass(boardDetail, 'TrelloBoardDetailWithBackground')).toBe(true)
+  expect(boardDetail.style).toContain(
+    '--TrelloBoardBackgroundImage: url("https://example.com/large.jpg")',
+  )
+  expect(boardDetail.style).toContain(
+    '--TrelloBoardBackgroundRepeat: no-repeat',
+  )
+  expect(boardDetail.style).toContain('--TrelloBoardBackgroundSize: cover')
+  resetTrelloViewDependencyFactory()
+})
+
+test('uses trello board background color when no image exists', async () => {
+  const instance = await createAuthenticatedInstance(
+    [
+      {
+        id: 'board-1',
+        name: 'Roadmap',
+        prefs: {
+          backgroundBottomColor: '#0c66e4',
+        },
+      },
+    ],
+    [],
+    {
+      boardBackgroundEnabled: true,
+    },
+  )
+
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+
+  const boardDetail = getNodeByClass(
+    await instance.render(),
+    'TrelloBoardDetail',
+  )
+  expect(hasClass(boardDetail, 'TrelloBoardDetailWithBackground')).toBe(true)
+  expect(boardDetail.style).toBe('--TrelloBoardBackgroundColor: #0c66e4')
+  resetTrelloViewDependencyFactory()
+})
+
 test('does not render search when flag is disabled', async () => {
   const instance = await createAuthenticatedInstance([
     { id: 'board-1', name: 'Roadmap' },
@@ -798,5 +919,47 @@ test('clicking board search result opens board detail', async () => {
   const text = getText(await instance.render())
   expect(text).toContain('Todo')
   expect(text).toContain('Found card')
+  resetTrelloViewDependencyFactory()
+})
+
+test('uses trello background for board opened from search', async () => {
+  const instance = await createSearchEnabledInstance(
+    {
+      boards: [{ id: 'board-1', name: 'Roadmap' }],
+      searchResults: [
+        {
+          id: 'board-2',
+          name: 'Search Board',
+          prefs: {
+            backgroundImage: 'https://example.com/search-board.jpg',
+            backgroundTile: true,
+          },
+          type: 'board',
+        },
+      ],
+    },
+    {
+      boardBackgroundEnabled: true,
+    },
+  )
+
+  await instance.handleEvent?.({
+    name: 'search',
+    type: 'input',
+    value: 'search board',
+  })
+  await instance.handleEvent?.({ name: 'search', type: 'submit' })
+  await instance.handleEvent?.({ name: 'board:board-2', type: 'click' })
+
+  const boardDetail = getNodeByClass(
+    await instance.render(),
+    'TrelloBoardDetail',
+  )
+  expect(hasClass(boardDetail, 'TrelloBoardDetailWithBackground')).toBe(true)
+  expect(boardDetail.style).toContain(
+    '--TrelloBoardBackgroundImage: url("https://example.com/search-board.jpg")',
+  )
+  expect(boardDetail.style).toContain('--TrelloBoardBackgroundRepeat: repeat')
+  expect(boardDetail.style).toContain('--TrelloBoardBackgroundSize: auto')
   resetTrelloViewDependencyFactory()
 })

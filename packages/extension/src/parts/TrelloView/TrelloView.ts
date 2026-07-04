@@ -16,4 +16,8 @@ export {
   resetTrelloViewDependencyFactory,
   setTrelloViewDependencyFactory,
 } from './state/DependencyFactory.ts'
-export { searchEnabledPreference, viewId } from './Constants.ts'
+export {
+  boardBackgroundEnabledPreference,
+  searchEnabledPreference,
+  viewId,
+} from './Constants.ts'

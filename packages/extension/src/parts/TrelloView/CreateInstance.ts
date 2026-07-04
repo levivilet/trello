@@ -18,8 +18,13 @@ import { dependencyState } from './state/DependencyFactory.ts'
 export const createInstance = async (
   context?: ViewContext,
 ): Promise<VirtualDomViewInstance> => {
-  const { client, readSearchEnabled, recentStorage, storage } =
-    dependencyState.factory()
+  const {
+    client,
+    readBoardBackgroundEnabled,
+    readSearchEnabled,
+    recentStorage,
+    storage,
+  } = dependencyState.factory()
   const state = createInitialState()
 
   const requestRerender = (): void => {
@@ -43,6 +48,9 @@ export const createInstance = async (
 
   if (readSearchEnabled) {
     state.searchEnabled = await readSearchEnabled()
+  }
+  if (readBoardBackgroundEnabled) {
+    state.boardBackgroundEnabled = await readBoardBackgroundEnabled()
   }
   state.recentBoardViews = await recentStorage.read()
   const storedCredentials = await storage.read()

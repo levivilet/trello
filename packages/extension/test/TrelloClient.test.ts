@@ -1,3 +1,5 @@
+// cspell:ignore prefs
+
 import { expect, test } from '@jest/globals'
 import { createTrelloClient } from '../src/parts/TrelloClient/TrelloClient.ts'
 
@@ -31,7 +33,7 @@ test('listBoards requests member boards with credentials', async () => {
   expect(url.searchParams.get('key')).toBe(validApiKey)
   expect(url.searchParams.get('token')).toBe(validToken)
   expect(url.searchParams.get('fields')).toBe(
-    'name,url,dateLastView,idOrganization',
+    'name,url,dateLastView,idOrganization,prefs',
   )
   expect(url.searchParams.get('organization')).toBe('true')
   expect(url.searchParams.get('organization_fields')).toBe('name,displayName')
@@ -296,7 +298,7 @@ test('search requests trello search with card and board params', async () => {
   expect(url.searchParams.get('query')).toBe('ship')
   expect(url.searchParams.get('modelTypes')).toBe('cards,boards')
   expect(url.searchParams.get('card_fields')).toBe('name,url,idBoard')
-  expect(url.searchParams.get('board_fields')).toBe('name,url')
+  expect(url.searchParams.get('board_fields')).toBe('name,url,prefs')
   expect(url.searchParams.get('cards_limit')).toBe('10')
   expect(url.searchParams.get('boards_limit')).toBe('10')
 })

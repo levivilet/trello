@@ -1,3 +1,5 @@
+// cspell:ignore prefs
+
 import type {
   TrelloBoard,
   TrelloCredentials,
@@ -14,7 +16,7 @@ export const listBoards = (
     '/members/me/boards',
     credentials,
     {
-      fields: 'name,url,dateLastView,idOrganization',
+      fields: 'name,url,dateLastView,idOrganization,prefs',
       organization: 'true',
       organization_fields: 'name,displayName',
     },
