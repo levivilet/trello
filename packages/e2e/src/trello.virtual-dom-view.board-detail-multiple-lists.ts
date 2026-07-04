@@ -30,9 +30,9 @@ export const test: Test = async ({ Command, expect, Locator }) => {
 
   const lists = Locator('.TrelloList')
   const cards = Locator('.TrelloCard')
-  const todo = Locator('text=Todo')
-  const doing = Locator('text=Doing')
-  const done = Locator('text=Done')
+  const todo = Locator('input[name="listTitle:list-1"]')
+  const doing = Locator('input[name="listTitle:list-2"]')
+  const done = Locator('input[name="listTitle:list-3"]')
   const planWork = Locator('text=Plan work')
   const buildWork = Locator('text=Build work')
   const shipWork = Locator('text=Ship work')

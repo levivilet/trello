@@ -6,27 +6,30 @@ export const handleInputEvent = (
   event: Readonly<ViewEvent>,
 ): void => {
   const mutableState = state as TrelloViewState
-  if (event.name === 'apiKey') {
-    mutableState.draftApiKey =
-      typeof event.value === 'string' ? event.value : ''
-    return
-  }
-  if (event.name === 'token') {
-    mutableState.draftToken = typeof event.value === 'string' ? event.value : ''
-    return
-  }
-  if (event.name === 'search') {
-    mutableState.draftSearchQuery =
-      typeof event.value === 'string' ? event.value : ''
-    return
-  }
-  if (event.name === 'cardTitle') {
-    mutableState.draftCardTitle =
-      typeof event.value === 'string' ? event.value : ''
-    return
-  }
-  if (event.name === 'cardDescription') {
-    mutableState.draftCardDescription =
-      typeof event.value === 'string' ? event.value : ''
+  const value = typeof event.value === 'string' ? event.value : ''
+  switch (event.name) {
+    case 'apiKey':
+      mutableState.draftApiKey = value
+      return
+    case 'cardDescription':
+      mutableState.draftCardDescription = value
+      return
+    case 'cardTitle':
+      mutableState.draftCardTitle = value
+      return
+    case 'search':
+      mutableState.draftSearchQuery = value
+      return
+    case 'token':
+      mutableState.draftToken = value
+      return
+    default:
+      if (event.name?.startsWith('listTitle:')) {
+        const listId = event.name.slice('listTitle:'.length)
+        mutableState.draftListTitles = {
+          ...mutableState.draftListTitles,
+          [listId]: value,
+        }
+      }
   }
 }

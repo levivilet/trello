@@ -5,6 +5,8 @@ import type {
   TrelloCardDetail,
   TrelloCardUpdate,
   TrelloCredentials,
+  TrelloList,
+  TrelloListUpdate,
   TrelloSearchResult,
 } from '../TrelloTypes/TrelloTypes.ts'
 
@@ -29,6 +31,11 @@ export interface TrelloClient {
     update: TrelloCardUpdate,
     credentials: TrelloCredentials,
   ) => Promise<TrelloCard>
+  readonly updateList: (
+    list: TrelloList,
+    update: TrelloListUpdate,
+    credentials: TrelloCredentials,
+  ) => Promise<TrelloList>
 }
 
 export interface TrelloResponse {

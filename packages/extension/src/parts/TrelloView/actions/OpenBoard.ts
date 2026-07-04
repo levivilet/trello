@@ -25,7 +25,8 @@ export const openBoard = async (
   context: TrelloViewActionContext,
   boardId: string,
 ): Promise<void> => {
-  const { client, recentStorage, requestRerender } = context
+  const { client, currentBoardStorage, recentStorage, requestRerender } =
+    context
   const state = context.state as TrelloViewState
   if (!state.credentials) {
     return
@@ -51,6 +52,7 @@ export const openBoard = async (
   await recentStorage.write(state.recentBoardViews)
   try {
     state.boardDetail = await client.getBoardDetail(board, state.credentials)
+    await currentBoardStorage.write(board.id)
   } catch (error) {
     state.error = getErrorMessage(error)
   } finally {
