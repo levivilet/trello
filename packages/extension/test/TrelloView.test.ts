@@ -256,6 +256,17 @@ test('clicking card renders card detail and close dismisses it', async () => {
             name: 'Ship Trello view',
             url: 'https://trello.com/c/card-1',
           },
+          comments: [
+            {
+              data: {
+                text: 'This should show under the description.',
+              },
+              id: 'comment-1',
+              memberCreator: {
+                fullName: 'Alex Morgan',
+              },
+            },
+          ],
         },
       },
     }),
@@ -281,10 +292,23 @@ test('clicking card renders card detail and close dismisses it', async () => {
   const detailDom = await instance.render()
   const text = getText(detailDom)
   expect(text).toContain('Detailed card description')
+  expect(text).toContain('Comments')
+  expect(text).toContain('Alex Morgan')
+  expect(text).toContain('This should show under the description.')
   expect(text).toContain('Extension Api')
   expect(text).toContain('Open in Trello')
+  expect(text.indexOf('Detailed card description')).toBeLessThan(
+    text.indexOf('Comments'),
+  )
+  expect(text.indexOf('This should show under the description.')).toBeLessThan(
+    text.indexOf('Images'),
+  )
   expect(getClassNames(detailDom)).toContain('TrelloCardDetailPanel')
   expect(getClassNames(detailDom)).toContain('TrelloCardDetailImage')
+  expect(getClassNames(detailDom)).toContain('TrelloCardComments')
+  expect(getClassNames(detailDom)).toContain('TrelloCardComment')
+  expect(getClassNames(detailDom)).toContain('TrelloCardCommentAuthor')
+  expect(getClassNames(detailDom)).toContain('TrelloCardCommentText')
   expect(hasDirectChildClass(detailDom, 'TrelloCards', 'TrelloCard')).toBe(true)
   expect(
     hasNode(detailDom, (node) => {
@@ -348,6 +372,7 @@ test('editing card title and description saves card detail', async () => {
             id: 'card-1',
             name: 'Ship Trello view',
           },
+          comments: [],
         },
       },
     }),

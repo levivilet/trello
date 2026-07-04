@@ -147,7 +147,7 @@ export const createTrelloClient = (
       card: TrelloCard,
       credentials: TrelloCredentials,
     ): Promise<TrelloCardDetail> {
-      const [detailCard, attachments] = await Promise.all([
+      const [detailCard, attachments, comments] = await Promise.all([
         requestJson<TrelloCard>(fetchLike, `/cards/${card.id}`, credentials, {
           fields: 'name,desc,url,idBoard,idList,labels',
         }),
@@ -159,10 +159,19 @@ export const createTrelloClient = (
             fields: 'name,url,mimeType,previews',
           },
         ),
+        requestJson<TrelloCardDetail['comments']>(
+          fetchLike,
+          `/cards/${card.id}/actions`,
+          credentials,
+          {
+            filter: 'commentCard',
+          },
+        ),
       ])
       return {
         attachments,
         card: detailCard,
+        comments,
       }
     },
     async listBoards(
