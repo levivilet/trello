@@ -39,7 +39,7 @@
       "displayName": "Trello",
       "id": "trello.views.boards",
       "title": "Trello",
-      "icon": "list-tree",
+      "icon": "trello.svg",
       "kind": "virtualDom"
     }
   ]
