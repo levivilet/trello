@@ -5,6 +5,7 @@ import type {
 } from '../state/TrelloViewState.ts'
 import { updateRecentBoardViews } from '../../RecentBoardStorage/RecentBoardStorage.ts'
 import { getErrorMessage } from '../GetErrorMessage.ts'
+import { isSameJson } from './CacheFirstHelpers.ts'
 
 const findBoard = (
   context: TrelloViewActionContext,
@@ -43,6 +44,7 @@ export const openBoard = async (
   state.cardDetailLoading = false
   state.draftCardDescription = ''
   state.draftCardTitle = ''
+  state.draftListTitles = {}
   state.savingCardDetail = false
   state.recentBoardViews = updateRecentBoardViews(
     state.recentBoardViews,
@@ -51,11 +53,25 @@ export const openBoard = async (
   )
   await recentStorage.write(state.recentBoardViews)
   try {
-    state.boardDetail = await client.getBoardDetail(board, state.credentials)
+    const result = await client.getBoardDetailCacheFirst(
+      board,
+      state.credentials,
+    )
+    if (result.cached) {
+      state.boardDetail = result.cached
+      state.loading = false
+      requestRerender()
+    }
+    const fresh = await result.fresh
+    if (state.loading || state.boardDetail?.board.id === board.id) {
+      if (!isSameJson(state.boardDetail, fresh)) {
+        state.boardDetail = fresh
+      }
+      state.loading = false
+    }
     await currentBoardStorage.write(board.id)
   } catch (error) {
     state.error = getErrorMessage(error)
-  } finally {
     state.loading = false
   }
   requestRerender()

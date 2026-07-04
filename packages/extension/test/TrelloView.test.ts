@@ -2,11 +2,16 @@
 
 import type { VirtualDomViewInstance } from '@lvce-editor/api'
 import { expect, test } from '@jest/globals'
+import type { TrelloClient } from '../src/parts/TrelloClient/TrelloClient.ts'
 import type {
   TrelloBoard,
   TrelloBoardDetail,
+  TrelloCard,
   TrelloCardDetail,
+  TrelloCardUpdate,
   TrelloSearchResult,
+  TrelloList,
+  TrelloListUpdate,
 } from '../src/parts/TrelloTypes/TrelloTypes.ts'
 import { createMemoryCredentialStorage } from '../src/parts/CredentialStorage/CredentialStorage.ts'
 import { createMockTrelloClient } from '../src/parts/MockTrelloClient/MockTrelloClient.ts'
@@ -179,6 +184,10 @@ const createSearchEnabledInstance = async (
   })
   await instance.handleEvent?.({ name: 'connect', type: 'click' })
   return instance
+}
+
+const createDeferred = <T>(): PromiseWithResolvers<T> => {
+  return Promise.withResolvers<T>()
 }
 
 test('renders auth inputs when unauthenticated', async () => {
@@ -575,6 +584,121 @@ test('clicking card renders card detail and close dismisses it', async () => {
   expect(getListTitleInput(closedDom, 'list-1')?.value).toBe('Todo')
   expect(getText(closedDom)).toContain('Ship Trello view')
   expect(getClassNames(closedDom)).not.toContain('TrelloCardDetailPanel')
+  resetTrelloViewDependencyFactory()
+})
+
+test('clicking card renders cached detail before fresh detail resolves', async () => {
+  const boardDetail: TrelloBoardDetail = {
+    board: { id: 'board-1', name: 'Roadmap' },
+    lists: [
+      {
+        cards: [{ id: 'card-1', name: 'Ship Trello view' }],
+        id: 'list-1',
+        name: 'Todo',
+      },
+    ],
+  }
+  const cachedCardDetail: TrelloCardDetail = {
+    attachments: [],
+    card: {
+      desc: 'Cached description',
+      id: 'card-1',
+      name: 'Ship Trello view',
+    },
+    comments: [],
+  }
+  const freshCardDetail = {
+    ...cachedCardDetail,
+    card: {
+      ...cachedCardDetail.card,
+      desc: 'Fresh description',
+    },
+  }
+  const freshCardDeferred = createDeferred<TrelloCardDetail>()
+  const boards = [{ id: 'board-1', name: 'Roadmap' }]
+  const client: TrelloClient = {
+    async getBoardDetail() {
+      return boardDetail
+    },
+    async getBoardDetailCacheFirst() {
+      return {
+        cached: undefined,
+        fresh: Promise.resolve(boardDetail),
+      }
+    },
+    async getCardDetail() {
+      return freshCardDeferred.promise
+    },
+    async getCardDetailCacheFirst() {
+      return {
+        cached: cachedCardDetail,
+        fresh: freshCardDeferred.promise,
+      }
+    },
+    async listBoards() {
+      return boards
+    },
+    async listBoardsCacheFirst() {
+      return {
+        cached: undefined,
+        fresh: Promise.resolve(boards),
+      }
+    },
+    async search() {
+      return []
+    },
+    async searchCacheFirst() {
+      return {
+        cached: undefined,
+        fresh: Promise.resolve([]),
+      }
+    },
+    async updateCard(card: TrelloCard, update: TrelloCardUpdate) {
+      return {
+        ...card,
+        ...update,
+      }
+    },
+    async updateList(list: TrelloList, update: TrelloListUpdate) {
+      return {
+        ...list,
+        ...update,
+      }
+    },
+  }
+  setTrelloViewDependencyFactory(() => ({
+    client,
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage(),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: validApiKey,
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: validToken,
+  })
+  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+
+  const openCardPromise = instance.handleEvent?.({
+    name: 'card:card-1',
+    type: 'click',
+  }) as Promise<void>
+  await Promise.resolve()
+
+  expect(getText(await instance.render())).toContain('Cached description')
+  freshCardDeferred.resolve(freshCardDetail)
+  await openCardPromise
+
+  const refreshedText = getText(await instance.render())
+  expect(refreshedText).toContain('Fresh description')
+  expect(refreshedText).not.toContain('Cached description')
   resetTrelloViewDependencyFactory()
 })
 

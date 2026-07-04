@@ -4,6 +4,7 @@ import type {
   TrelloViewState,
 } from '../state/TrelloViewState.ts'
 import { getErrorMessage } from '../GetErrorMessage.ts'
+import { isSameJson } from './CacheFirstHelpers.ts'
 
 const findBoard = (
   boards: readonly TrelloBoard[],
@@ -34,7 +35,18 @@ export const restoreCurrentBoard = async (
   state.loading = true
   state.error = ''
   try {
-    state.boardDetail = await client.getBoardDetail(board, state.credentials)
+    const result = await client.getBoardDetailCacheFirst(
+      board,
+      state.credentials,
+    )
+    if (result.cached) {
+      state.boardDetail = result.cached
+      state.loading = false
+    }
+    const fresh = await result.fresh
+    if (!isSameJson(state.boardDetail, fresh)) {
+      state.boardDetail = fresh
+    }
   } catch (error) {
     state.error = getErrorMessage(error)
     await currentBoardStorage.delete()

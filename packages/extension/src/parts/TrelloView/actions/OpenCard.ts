@@ -1,8 +1,10 @@
+import type { TrelloCardDetail } from '../../TrelloTypes/TrelloTypes.ts'
 import type {
   TrelloViewActionContext,
   TrelloViewState,
 } from '../state/TrelloViewState.ts'
 import { getErrorMessage } from '../GetErrorMessage.ts'
+import { applyCardDetail, isSameJson } from './CacheFirstHelpers.ts'
 import { findBoardCard } from './FindBoardCard.ts'
 
 export const openCard = async (
@@ -25,15 +27,24 @@ export const openCard = async (
   state.error = ''
   requestRerender()
   try {
-    const cardDetail = await client.getCardDetail(card, state.credentials)
-    state.selectedCardDetail = cardDetail
-    state.draftCardTitle = cardDetail.card.name
-    state.draftCardDescription = cardDetail.card.desc || ''
-    state.editingCardDescription = false
-    state.editingCardTitle = false
+    const result = await client.getCardDetailCacheFirst(card, state.credentials)
+    if (result.cached) {
+      applyCardDetail(state, result.cached)
+      state.cardDetailLoading = false
+      requestRerender()
+    }
+    const fresh = await result.fresh
+    const selectedCardDetail = state.selectedCardDetail as
+      | TrelloCardDetail
+      | undefined
+    if (state.cardDetailLoading || selectedCardDetail?.card.id === card.id) {
+      if (!isSameJson(state.selectedCardDetail, fresh)) {
+        applyCardDetail(state, fresh)
+      }
+      state.cardDetailLoading = false
+    }
   } catch (error) {
     state.error = getErrorMessage(error)
-  } finally {
     state.cardDetailLoading = false
   }
   requestRerender()

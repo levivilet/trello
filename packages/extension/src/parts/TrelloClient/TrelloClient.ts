@@ -1,41 +1,99 @@
-import type { FetchLike, TrelloClient } from './TrelloClientTypes.ts'
-import { getBoardDetail } from './operations/GetBoardDetail.ts'
-import { getCardDetail } from './operations/GetCardDetail.ts'
-import { listBoards } from './operations/ListBoards.ts'
-import { search } from './operations/Search.ts'
+import type {
+  TrelloBoard,
+  TrelloBoardDetail,
+  TrelloCard,
+  TrelloCardDetail,
+  TrelloCredentials,
+  TrelloSearchResult,
+} from '../TrelloTypes/TrelloTypes.ts'
+import type {
+  FetchLike,
+  TrelloCacheFirstResult,
+  TrelloClient,
+} from './TrelloClientTypes.ts'
+import {
+  getBoardDetail,
+  readCachedBoardDetail,
+} from './operations/GetBoardDetail.ts'
+import {
+  getCardDetail,
+  readCachedCardDetail,
+} from './operations/GetCardDetail.ts'
+import { listBoards, readCachedListBoards } from './operations/ListBoards.ts'
+import { readCachedSearch, search } from './operations/Search.ts'
 import { updateCard } from './operations/UpdateCard.ts'
 import { updateList } from './operations/UpdateList.ts'
+import {
+  createCacheStorageTrelloApiCache,
+  type TrelloApiCache,
+} from './TrelloApiCache.ts'
 
 export type { FetchLike, TrelloClient } from './TrelloClientTypes.ts'
 
 export const createTrelloClient = (
   fetchLike: FetchLike = fetch,
+  cache: TrelloApiCache | undefined = createCacheStorageTrelloApiCache(),
 ): TrelloClient => {
   return {
     getBoardDetail(
       board,
       credentials,
     ): ReturnType<TrelloClient['getBoardDetail']> {
-      return getBoardDetail(fetchLike, board, credentials)
+      return getBoardDetail(fetchLike, board, credentials, cache)
+    },
+    async getBoardDetailCacheFirst(
+      board: TrelloBoard,
+      credentials: TrelloCredentials,
+    ): Promise<TrelloCacheFirstResult<TrelloBoardDetail>> {
+      return {
+        cached: await readCachedBoardDetail(cache, board, credentials),
+        fresh: getBoardDetail(fetchLike, board, credentials, cache),
+      }
     },
     getCardDetail(
       card,
       credentials,
     ): ReturnType<TrelloClient['getCardDetail']> {
-      return getCardDetail(fetchLike, card, credentials)
+      return getCardDetail(fetchLike, card, credentials, cache)
+    },
+    async getCardDetailCacheFirst(
+      card: TrelloCard,
+      credentials: TrelloCredentials,
+    ): Promise<TrelloCacheFirstResult<TrelloCardDetail>> {
+      return {
+        cached: await readCachedCardDetail(cache, card, credentials),
+        fresh: getCardDetail(fetchLike, card, credentials, cache),
+      }
     },
     listBoards(credentials): ReturnType<TrelloClient['listBoards']> {
-      return listBoards(fetchLike, credentials)
+      return listBoards(fetchLike, credentials, cache)
+    },
+    async listBoardsCacheFirst(
+      credentials,
+    ): ReturnType<TrelloClient['listBoardsCacheFirst']> {
+      return {
+        cached: await readCachedListBoards(cache, credentials),
+        fresh: listBoards(fetchLike, credentials, cache),
+      }
     },
     search(query, credentials): ReturnType<TrelloClient['search']> {
-      return search(fetchLike, query, credentials)
+      return search(fetchLike, query, credentials, cache)
+    },
+    async searchCacheFirst(
+      query: string,
+      credentials: TrelloCredentials,
+    ): Promise<TrelloCacheFirstResult<readonly TrelloSearchResult[]>> {
+      return {
+        cached: await readCachedSearch(cache, query, credentials),
+        fresh: search(fetchLike, query, credentials, cache),
+      }
     },
     updateCard(
       card,
       update,
       credentials,
     ): ReturnType<TrelloClient['updateCard']> {
-      return updateCard(fetchLike, card, update, credentials)
+      return updateCard(fetchLike, card, update, credentials, cache)
     },
     updateList(
       list,
