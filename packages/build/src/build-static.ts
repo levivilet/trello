@@ -1,7 +1,7 @@
 import { cp } from 'node:fs/promises'
 import path, { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { root } from './root.js'
+import { root } from './root.ts'
 
 const sharedProcessPath = join(
   root,
@@ -19,7 +19,7 @@ const sharedProcess = await import(sharedProcessUrl)
 
 const { exportStatic } = sharedProcess
 
-await import('./build.js')
+await import('./build.ts')
 
 await cp(path.join(root, 'dist'), path.join(root, 'dist2'), {
   recursive: true,

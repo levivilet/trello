@@ -38,6 +38,22 @@ export const div = (
   return node(VirtualDomElements.Div, { className }, children)
 }
 
+export const form = (
+  name: string,
+  className: string,
+  children: readonly TreeNode[],
+): TreeNode => {
+  return node(
+    VirtualDomElements.Form,
+    {
+      className,
+      name,
+      onSubmit: 'handleSubmit',
+    },
+    children,
+  )
+}
+
 export const button = (
   name: string,
   label: string,
@@ -66,6 +82,48 @@ export const input = (
     placeholder,
     value,
   })
+}
+
+export const textArea = (
+  name: string,
+  value: string,
+  placeholder: string,
+): TreeNode => {
+  return node(VirtualDomElements.TextArea, {
+    className: 'TrelloTextArea',
+    name,
+    onInput: 'handleInput',
+    placeholder,
+    value,
+  })
+}
+
+export const image = (
+  className: string,
+  src: string,
+  alt: string,
+): TreeNode => {
+  return node(VirtualDomElements.Img, {
+    alt,
+    className,
+    src,
+  })
+}
+
+export const link = (
+  className: string,
+  href: string,
+  text: string,
+): TreeNode => {
+  return node(
+    VirtualDomElements.A,
+    {
+      className,
+      href,
+      target: '_blank',
+    },
+    [textNode(text)],
+  )
 }
 
 export const flatten = (tree: TreeNode): readonly VirtualDomNode[] => {
