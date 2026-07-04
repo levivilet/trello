@@ -35,6 +35,8 @@ export interface TrelloViewState {
   draftListTitles: Readonly<Record<string, string>>
   draftSearchQuery: string
   draftToken: string
+  editingCardDescription: boolean
+  editingCardTitle: boolean
   error: string
   loading: boolean
   recentBoardViews: readonly RecentBoardView[]

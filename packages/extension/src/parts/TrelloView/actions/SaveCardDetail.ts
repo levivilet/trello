@@ -17,30 +17,29 @@ export const saveCardDetail = async (
   ) {
     return
   }
-  const name = state.draftCardTitle.trim()
-  if (!name) {
-    state.error = 'Card title is required.'
-    requestRerender()
-    return
-  }
   state.error = ''
   state.savingCardDetail = true
   requestRerender()
   try {
-    const card = await client.updateCard(
+    const updatedCard = await client.updateCard(
       state.selectedCardDetail.card,
       {
         desc: state.draftCardDescription,
-        name,
+        name: state.selectedCardDetail.card.name,
       },
       state.credentials,
     )
+    const card = {
+      ...state.selectedCardDetail.card,
+      ...updatedCard,
+    }
     state.selectedCardDetail = {
       ...state.selectedCardDetail,
       card,
     }
     state.draftCardTitle = card.name
     state.draftCardDescription = card.desc || ''
+    state.editingCardDescription = false
     updateBoardDetailCard(state, card)
   } catch (error) {
     state.error = getErrorMessage(error)

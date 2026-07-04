@@ -29,6 +29,8 @@ export const openCard = async (
     state.selectedCardDetail = cardDetail
     state.draftCardTitle = cardDetail.card.name
     state.draftCardDescription = cardDetail.card.desc || ''
+    state.editingCardDescription = false
+    state.editingCardTitle = false
   } catch (error) {
     state.error = getErrorMessage(error)
   } finally {

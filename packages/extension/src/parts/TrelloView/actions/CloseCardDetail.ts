@@ -10,6 +10,8 @@ export const closeCardDetail = (context: TrelloViewActionContext): void => {
   state.cardDetailLoading = false
   state.draftCardDescription = ''
   state.draftCardTitle = ''
+  state.editingCardDescription = false
+  state.editingCardTitle = false
   state.error = ''
   requestRerender()
 }
