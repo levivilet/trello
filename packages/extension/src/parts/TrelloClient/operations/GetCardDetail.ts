@@ -31,8 +31,7 @@ export const getCardDetail = async (
         fields: 'data,date,id',
         filter: 'commentCard',
         memberCreator: 'true',
-        memberCreator_fields:
-          'avatarHash,avatarUrl,fullName,initials,username',
+        memberCreator_fields: 'avatarHash,avatarUrl,fullName,initials,username',
       },
     ),
   ])

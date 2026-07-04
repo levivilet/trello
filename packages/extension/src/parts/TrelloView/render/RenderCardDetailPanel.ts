@@ -50,6 +50,9 @@ const renderCardDetailComment = (
   const author = getCommentAuthor(comment)
   const avatarUrl = getCommentAvatarUrl(comment)
   const dateText = getCommentDateText(comment)
+  const commentText = getCommentText(comment)
+  const commentTextNode = Dom.textNode(commentText)
+  const commentTextElement = Dom.div('TrelloCardCommentText', [commentTextNode])
   const headerChildren = [
     Dom.div('TrelloCardCommentAuthor', [Dom.textNode(author)]),
     ...(dateText
@@ -65,7 +68,7 @@ const renderCardDetailComment = (
     avatar,
     Dom.div('TrelloCardCommentContent', [
       Dom.div('TrelloCardCommentHeader', headerChildren),
-      Dom.div('TrelloCardCommentText', [Dom.textNode(getCommentText(comment))]),
+      commentTextElement,
     ]),
   ])
 }

@@ -231,9 +231,9 @@ test('getCardDetail requests card detail, attachments, and comments', async () =
   expect(new URL(commentsRequest || '').searchParams.get('fields')).toBe(
     'data,date,id',
   )
-  expect(
-    new URL(commentsRequest || '').searchParams.get('memberCreator'),
-  ).toBe('true')
+  expect(new URL(commentsRequest || '').searchParams.get('memberCreator')).toBe(
+    'true',
+  )
   expect(
     new URL(commentsRequest || '').searchParams.get('memberCreator_fields'),
   ).toBe('avatarHash,avatarUrl,fullName,initials,username')

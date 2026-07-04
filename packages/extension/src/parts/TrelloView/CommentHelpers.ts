@@ -2,14 +2,16 @@ import type { TrelloComment } from '../TrelloTypes/TrelloTypes.ts'
 
 const commentDateFormatter = new Intl.DateTimeFormat('en-US', {
   dateStyle: 'medium',
-  timeZone: 'Europe/Berlin',
   timeStyle: 'short',
+  timeZone: 'Europe/Berlin',
 })
+
+const whitespaceRegex = /\s+/
 
 const getDerivedInitials = (name: string): string => {
   const parts = name
     .trim()
-    .split(/\s+/)
+    .split(whitespaceRegex)
     .filter((part) => part.length > 0)
   if (parts.length === 0) {
     return ''
@@ -17,7 +19,7 @@ const getDerivedInitials = (name: string): string => {
   if (parts.length === 1) {
     return parts[0].slice(0, 2).toUpperCase()
   }
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+  return `${parts[0][0]}${parts.at(-1)?.[0]}`.toUpperCase()
 }
 
 export const getCommentAuthor = (comment: Readonly<TrelloComment>): string => {
