@@ -359,6 +359,58 @@ test('updateCard sends title and description to trello', async () => {
   expect(requestInits[0]?.method).toBe('PUT')
 })
 
+test('moveCard sends target list and bottom position to trello', async () => {
+  const requests: string[] = []
+  const requestInits: ({ readonly method?: string } | undefined)[] = []
+  const client = createTrelloClient(async (url, init) => {
+    requests.push(url)
+    requestInits.push(init)
+    return jsonResponse({
+      badges: {
+        comments: 1,
+      },
+      id: 'card-1',
+      idBoard: 'board-1',
+      idList: 'list-2',
+      name: 'Ship Trello view',
+      url: 'https://trello.com/c/card-1',
+    })
+  })
+
+  await expect(
+    client.moveCard(
+      { id: 'card-1', idList: 'list-1', name: 'Ship Trello view' },
+      {
+        idList: 'list-2',
+        pos: 'bottom',
+      },
+      {
+        apiKey: validApiKey,
+        token: validToken,
+      },
+    ),
+  ).resolves.toEqual({
+    badges: {
+      comments: 1,
+    },
+    id: 'card-1',
+    idBoard: 'board-1',
+    idList: 'list-2',
+    name: 'Ship Trello view',
+    url: 'https://trello.com/c/card-1',
+  })
+
+  expect(requests).toHaveLength(1)
+  const url = new URL(requests[0])
+  expect(url.pathname).toBe('/1/cards/card-1')
+  expect(url.searchParams.get('key')).toBe(validApiKey)
+  expect(url.searchParams.get('token')).toBe(validToken)
+  expect(url.searchParams.get('idList')).toBe('list-2')
+  expect(url.searchParams.get('pos')).toBe('bottom')
+  expect(url.searchParams.get('fields')).toBe('name,url,idBoard,idList,badges')
+  expect(requestInits[0]?.method).toBe('PUT')
+})
+
 test('updateList sends title to trello', async () => {
   const requests: string[] = []
   const requestInits: ({ readonly method?: string } | undefined)[] = []
