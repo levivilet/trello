@@ -660,18 +660,51 @@ button.TrelloSearchResult:hover {
 
 .TrelloCardComments {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   contain: content;
 }
 
 .TrelloCardComment {
   display: grid;
-  gap: 4px;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
   contain: content;
-  padding: 8px;
-  background: var(--EditorBackground, #121818);
+}
+
+.TrelloCardCommentAvatar {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  contain: content;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ButtonForeground, #ffffff);
+  text-transform: uppercase;
+  background: var(--ButtonBackground, #006a7a);
   border: 1px solid var(--WidgetBorder, #314040);
-  border-radius: 6px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.TrelloCardCommentContent {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  contain: content;
+}
+
+.TrelloCardCommentHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  align-items: baseline;
+  contain: content;
+  min-width: 0;
 }
 
 .TrelloCardCommentAuthor {
@@ -685,11 +718,28 @@ button.TrelloSearchResult:hover {
   white-space: nowrap;
 }
 
-.TrelloCardCommentText {
+.TrelloCardCommentDate {
   contain: content;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ForegroundMuted, #aeb8b8);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.TrelloCardCommentText {
+  box-sizing: border-box;
+  contain: content;
+  padding: 8px;
   white-space: pre-wrap;
   line-height: 1.5;
-  color: var(--ForegroundMuted, #c4cccc);
+  color: var(--Foreground, #f4f4f4);
+  overflow-wrap: anywhere;
+  background: var(--EditorBackground, #121818);
+  border: 1px solid var(--WidgetBorder, #314040);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
 }
 
 .TrelloCardDetailImages {

@@ -28,7 +28,10 @@ export const getCardDetail = async (
       `/cards/${card.id}/actions`,
       credentials,
       {
+        fields: 'data,date,id',
         filter: 'commentCard',
+        memberCreator: 'true',
+        memberCreator_fields: 'avatarHash,avatarUrl,fullName,initials,username',
       },
     ),
   ])

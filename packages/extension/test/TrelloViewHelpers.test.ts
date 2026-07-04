@@ -8,6 +8,12 @@ import {
   getWorkspaceSections,
 } from '../src/parts/TrelloView/BoardSections.ts'
 import {
+  getCommentAuthor,
+  getCommentAvatarUrl,
+  getCommentDateText,
+  getCommentInitials,
+} from '../src/parts/TrelloView/CommentHelpers.ts'
+import {
   getLabelColorClassName,
   getLabelText,
 } from '../src/parts/TrelloView/LabelHelpers.ts'
@@ -149,6 +155,84 @@ test('attachment helpers detect image attachments and choose fallback urls', () 
       url: 'https://example.com/file',
     }),
   ).toBe('https://example.com/preview-large.png')
+})
+
+test('comment helpers use trello member metadata with fallbacks', () => {
+  expect(
+    getCommentAuthor({
+      data: { text: 'Hello' },
+      id: 'comment-1',
+      memberCreator: {
+        fullName: '  Test User  ',
+        username: 'testuser',
+      },
+    }),
+  ).toBe('Test User')
+  expect(
+    getCommentAuthor({
+      data: { text: 'Hello' },
+      id: 'comment-2',
+      memberCreator: {
+        username: 'testuser',
+      },
+    }),
+  ).toBe('testuser')
+  expect(
+    getCommentInitials({
+      data: { text: 'Hello' },
+      id: 'comment-3',
+      memberCreator: {
+        fullName: 'Test User',
+      },
+    }),
+  ).toBe('TU')
+  expect(
+    getCommentInitials({
+      data: { text: 'Hello' },
+      id: 'comment-4',
+      memberCreator: {
+        initials: 'TS',
+      },
+    }),
+  ).toBe('TS')
+  expect(
+    getCommentInitials({
+      data: { text: 'Hello' },
+      id: 'comment-5',
+    }),
+  ).toBe('?')
+  expect(
+    getCommentAvatarUrl({
+      data: { text: 'Hello' },
+      id: 'comment-6',
+      memberCreator: {
+        avatarUrl: ' https://example.com/avatar.png ',
+      },
+    }),
+  ).toBe('https://example.com/avatar.png')
+})
+
+test('comment date helper formats valid dates and omits missing dates', () => {
+  expect(
+    getCommentDateText({
+      data: { text: 'Hello' },
+      date: '2026-07-03T10:11:00.000Z',
+      id: 'comment-1',
+    }),
+  ).toBe('Jul 3, 2026, 12:11 PM')
+  expect(
+    getCommentDateText({
+      data: { text: 'Hello' },
+      date: 'invalid',
+      id: 'comment-2',
+    }),
+  ).toBe('')
+  expect(
+    getCommentDateText({
+      data: { text: 'Hello' },
+      id: 'comment-3',
+    }),
+  ).toBe('')
 })
 
 test('label helpers prefer label names and known color classes', () => {

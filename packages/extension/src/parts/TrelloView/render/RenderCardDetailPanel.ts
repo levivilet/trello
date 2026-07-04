@@ -10,7 +10,13 @@ import {
   getAttachmentImageUrl,
   isImageAttachment,
 } from '../AttachmentHelpers.ts'
-import { getCommentAuthor, getCommentText } from '../CommentHelpers.ts'
+import {
+  getCommentAuthor,
+  getCommentAvatarUrl,
+  getCommentDateText,
+  getCommentInitials,
+  getCommentText,
+} from '../CommentHelpers.ts'
 import { getLabelColorClassName, getLabelText } from '../LabelHelpers.ts'
 import { renderMarkdown } from './RenderMarkdown.ts'
 import { renderListTitle } from './RenderShared.ts'
@@ -41,11 +47,29 @@ const renderCardDetailImages = (
 const renderCardDetailComment = (
   comment: Readonly<TrelloComment>,
 ): Dom.TreeNode => {
-  const author = Dom.textNode(getCommentAuthor(comment))
-  const text = Dom.textNode(getCommentText(comment))
+  const author = getCommentAuthor(comment)
+  const avatarUrl = getCommentAvatarUrl(comment)
+  const dateText = getCommentDateText(comment)
+  const commentText = getCommentText(comment)
+  const commentTextNode = Dom.textNode(commentText)
+  const commentTextElement = Dom.div('TrelloCardCommentText', [commentTextNode])
+  const headerChildren = [
+    Dom.div('TrelloCardCommentAuthor', [Dom.textNode(author)]),
+    ...(dateText
+      ? [Dom.div('TrelloCardCommentDate', [Dom.textNode(dateText)])]
+      : []),
+  ]
+  const avatar = avatarUrl
+    ? Dom.image('TrelloCardCommentAvatar', avatarUrl, `${author} avatar`)
+    : Dom.div('TrelloCardCommentAvatar', [
+        Dom.textNode(getCommentInitials(comment)),
+      ])
   return Dom.div('TrelloCardComment', [
-    Dom.div('TrelloCardCommentAuthor', [author]),
-    Dom.div('TrelloCardCommentText', [text]),
+    avatar,
+    Dom.div('TrelloCardCommentContent', [
+      Dom.div('TrelloCardCommentHeader', headerChildren),
+      commentTextElement,
+    ]),
   ])
 }
 

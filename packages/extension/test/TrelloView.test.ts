@@ -470,9 +470,11 @@ test('clicking card renders card detail and close dismisses it', async () => {
               data: {
                 text: 'This should show under the description.',
               },
+              date: '2026-07-03T10:11:00.000Z',
               id: 'comment-1',
               memberCreator: {
                 fullName: 'Test User',
+                initials: 'TU',
               },
             },
           ],
@@ -502,12 +504,20 @@ test('clicking card renders card detail and close dismisses it', async () => {
   const text = getText(detailDom)
   expect(text).toContain('Detailed card description')
   expect(text).toContain('Comments')
+  expect(text).toContain('TU')
   expect(text).toContain('Test User')
+  expect(text).toContain('Jul 3, 2026, 12:11 PM')
   expect(text).toContain('This should show under the description.')
   expect(text).toContain('Extension Api')
   expect(text).toContain('Open in Trello')
   expect(text.indexOf('Detailed card description')).toBeLessThan(
     text.indexOf('Comments'),
+  )
+  expect(text.indexOf('Test User')).toBeLessThan(
+    text.indexOf('Jul 3, 2026, 12:11 PM'),
+  )
+  expect(text.indexOf('Jul 3, 2026, 12:11 PM')).toBeLessThan(
+    text.indexOf('This should show under the description.'),
   )
   expect(text.indexOf('This should show under the description.')).toBeLessThan(
     text.indexOf('Images'),
@@ -516,7 +526,11 @@ test('clicking card renders card detail and close dismisses it', async () => {
   expect(getClassNames(detailDom)).toContain('TrelloCardDetailImage')
   expect(getClassNames(detailDom)).toContain('TrelloCardComments')
   expect(getClassNames(detailDom)).toContain('TrelloCardComment')
+  expect(getClassNames(detailDom)).toContain('TrelloCardCommentAvatar')
+  expect(getClassNames(detailDom)).toContain('TrelloCardCommentContent')
+  expect(getClassNames(detailDom)).toContain('TrelloCardCommentHeader')
   expect(getClassNames(detailDom)).toContain('TrelloCardCommentAuthor')
+  expect(getClassNames(detailDom)).toContain('TrelloCardCommentDate')
   expect(getClassNames(detailDom)).toContain('TrelloCardCommentText')
   expect(hasDirectChildClass(detailDom, 'TrelloCards', 'TrelloCard')).toBe(true)
   expect(

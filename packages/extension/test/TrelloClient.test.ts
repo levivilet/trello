@@ -121,7 +121,11 @@ test('getCardDetail requests card detail, attachments, and comments', async () =
           date: '2026-07-03T10:11:00.000Z',
           id: 'comment-1',
           memberCreator: {
+            avatarHash: 'avatar-hash-1',
+            avatarUrl: 'https://trello-members.example/avatar.png',
             fullName: 'Test User',
+            initials: 'TU',
+            username: 'testuser',
           },
           type: 'commentCard',
         },
@@ -187,7 +191,11 @@ test('getCardDetail requests card detail, attachments, and comments', async () =
         date: '2026-07-03T10:11:00.000Z',
         id: 'comment-1',
         memberCreator: {
+          avatarHash: 'avatar-hash-1',
+          avatarUrl: 'https://trello-members.example/avatar.png',
           fullName: 'Test User',
+          initials: 'TU',
+          username: 'testuser',
         },
         type: 'commentCard',
       },
@@ -220,6 +228,15 @@ test('getCardDetail requests card detail, attachments, and comments', async () =
   expect(new URL(commentsRequest || '').searchParams.get('filter')).toBe(
     'commentCard',
   )
+  expect(new URL(commentsRequest || '').searchParams.get('fields')).toBe(
+    'data,date,id',
+  )
+  expect(new URL(commentsRequest || '').searchParams.get('memberCreator')).toBe(
+    'true',
+  )
+  expect(
+    new URL(commentsRequest || '').searchParams.get('memberCreator_fields'),
+  ).toBe('avatarHash,avatarUrl,fullName,initials,username')
 })
 
 test('updateCard sends title and description to trello', async () => {
