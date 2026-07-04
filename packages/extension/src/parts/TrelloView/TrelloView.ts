@@ -16,6 +16,7 @@ import type {
   TrelloCard,
   TrelloCardDetail,
   TrelloCredentials,
+  TrelloLabel,
   TrelloSearchResult,
 } from '../TrelloTypes/TrelloTypes.ts'
 import {
@@ -479,6 +480,43 @@ const renderCardDetailImages = (
   )
 }
 
+const getLabelText = (label: Readonly<TrelloLabel>): string => {
+  return label.name?.trim() || label.color?.trim() || 'Label'
+}
+
+const getLabelColorClassName = (color: string | undefined): string => {
+  switch (color) {
+    case 'black':
+    case 'blue':
+    case 'green':
+    case 'lime':
+    case 'orange':
+    case 'pink':
+    case 'purple':
+    case 'red':
+    case 'sky':
+    case 'yellow':
+      return `TrelloCardLabelColor${color[0].toUpperCase()}${color.slice(1)}`
+    default:
+      return 'TrelloCardLabelColorNeutral'
+  }
+}
+
+const renderCardDetailLabel = (label: Readonly<TrelloLabel>): Dom.TreeNode => {
+  return Dom.div(`TrelloCardLabel ${getLabelColorClassName(label.color)}`, [
+    Dom.textNode(getLabelText(label)),
+  ])
+}
+
+const renderCardDetailLabels = (
+  labels: readonly TrelloLabel[] | undefined,
+): readonly Dom.TreeNode[] => {
+  if (!labels || labels.length === 0) {
+    return []
+  }
+  return [Dom.div('TrelloCardLabels', labels.map(renderCardDetailLabel))]
+}
+
 const renderCardDetailPanel = (
   state: Readonly<TrelloViewState>,
 ): readonly Dom.TreeNode[] => {
@@ -499,6 +537,7 @@ const renderCardDetailPanel = (
   const children = [
     Dom.button('closeCardDetail', 'Close'),
     renderField('Title', 'cardTitle', state.draftCardTitle),
+    ...renderCardDetailLabels(card.labels),
     renderTextAreaField(
       'Description',
       'cardDescription',
