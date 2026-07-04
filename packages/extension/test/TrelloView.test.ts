@@ -159,6 +159,15 @@ test('renders auth inputs when unauthenticated', async () => {
   expect(text).toContain('Welcome to Trello')
   expect(text).toContain('https://trello.com/power-ups/admin')
   expect(text).toContain('The token grants access to your Trello account')
+  expect(
+    hasNode(dom, (node) => {
+      return (
+        node.className === 'TrelloWelcomeLink' &&
+        node.href === 'https://trello.com/power-ups/admin' &&
+        node.target === '_blank'
+      )
+    }),
+  ).toBe(true)
   resetTrelloViewDependencyFactory()
 })
 

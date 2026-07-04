@@ -42,6 +42,7 @@ export const searchEnabledPreference = 'trello.searchEnabled'
 const apiKeyPattern = /^[A-Za-z0-9]{32}$/
 const tokenPattern = /^[A-Za-z0-9]{64}$/
 const imageUrlPattern = /\.(?:avif|gif|jpe?g|png|svg|webp)(?:[?#]|$)/i
+const trelloPowerUpsUrl = 'https://trello.com/power-ups/admin'
 
 interface TrelloViewDependencies {
   readonly client: TrelloClient
@@ -177,6 +178,12 @@ const renderWelcomeText = (text: string): Dom.TreeNode => {
   return Dom.div('TrelloWelcomeText', [Dom.textNode(text)])
 }
 
+const renderWelcomeContent = (
+  children: readonly Dom.TreeNode[],
+): Dom.TreeNode => {
+  return Dom.div('TrelloWelcomeText', children)
+}
+
 const renderWelcome = (): Dom.TreeNode => {
   return Dom.div('TrelloWelcome', [
     Dom.node(VirtualDomElements.H3, { className: 'TrelloWelcomeTitle' }, [
@@ -185,9 +192,11 @@ const renderWelcome = (): Dom.TreeNode => {
     renderWelcomeText(
       'Connect your Trello account to browse your boards from Lvce Editor.',
     ),
-    renderWelcomeText(
-      'Create or open a Trello Power-Up at https://trello.com/power-ups/admin, then open the API Key tab and generate an API key.',
-    ),
+    renderWelcomeContent([
+      Dom.textNode('Create or open a Trello Power-Up at '),
+      Dom.link('TrelloWelcomeLink', trelloPowerUpsUrl, trelloPowerUpsUrl),
+      Dom.textNode(', then open the API Key tab and generate an API key.'),
+    ]),
     renderWelcomeText(
       "Use that key to generate a token from Trello's authorization page, then paste both values here.",
     ),
