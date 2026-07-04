@@ -321,12 +321,6 @@ test('clicking card renders card detail and close dismisses it', async () => {
   expect(text).toContain('Alex Morgan')
   expect(text).toContain('This should show under the description.')
   expect(text).toContain('Extension Api')
-<<<<<<< Updated upstream
-=======
-  expect(text).toContain('Comments')
-  expect(text).toContain('Simon Siefke')
-  expect(text).toContain('This should show under the description.')
->>>>>>> Stashed changes
   expect(text).toContain('Open in Trello')
   expect(text.indexOf('Detailed card description')).toBeLessThan(
     text.indexOf('Comments'),

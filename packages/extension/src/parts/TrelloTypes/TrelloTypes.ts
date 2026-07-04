@@ -25,13 +25,10 @@ export interface TrelloLabel {
   readonly name?: string
 }
 
-<<<<<<< Updated upstream
-=======
 export interface TrelloCardBadges {
   readonly comments?: number
 }
 
->>>>>>> Stashed changes
 export interface TrelloCard {
   readonly badges?: TrelloCardBadges
   readonly desc?: string
