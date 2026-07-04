@@ -44,26 +44,101 @@
 
 .TrelloWelcome {
   display: grid;
-  gap: 8px;
+  gap: 10px;
+  box-sizing: border-box;
   contain: content;
-  margin-top: 4px;
-  padding-top: 12px;
+  max-width: 760px;
+  margin-top: 8px;
+  padding: 12px;
   color: var(--ForegroundMuted, #c4cccc);
-  border-top: 1px solid var(--SideBarBorder, #334040);
+  background: var(--SideBarBackground, #202929);
+  border: 1px solid var(--SideBarBorder, #334040);
+  border-radius: 6px;
 }
 
 .TrelloWelcomeTitle {
   margin: 0;
   contain: content;
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 600;
   line-height: 1.3;
   color: var(--Foreground, #f4f4f4);
 }
 
 .TrelloWelcomeText {
   contain: content;
+  max-width: 68ch;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.TrelloWelcomeNote {
+  contain: content;
+  max-width: 68ch;
+  padding-top: 8px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ForegroundMuted, #c4cccc);
+  border-top: 1px solid var(--WidgetBorder, #314040);
+}
+
+.TrelloWelcomeSteps {
+  display: grid;
+  gap: 8px;
+  contain: content;
+  margin: 2px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.TrelloWelcomeStep {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  contain: content;
+  min-width: 0;
   font-size: 12px;
   line-height: 1.5;
+}
+
+.TrelloWelcomeStepNumber {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  contain: content;
+  color: var(--ButtonForeground, #ffffff);
+  background: var(--ButtonBackground, #006a7a);
+  border-radius: 999px;
+}
+
+.TrelloWelcomeStepText {
+  min-width: 0;
+  contain: content;
+  overflow-wrap: anywhere;
+}
+
+.TrelloWelcomeLink {
+  color: var(--TextLinkForeground, #4dc8ff);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.TrelloWelcomeLink:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 520px) {
+  .TrelloWelcome {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .TrelloWelcomeStep {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
 }
 
 .TrelloInput,
@@ -77,6 +152,16 @@
   background: var(--InputBackground, #111616);
   border: 1px solid var(--InputBorder, #394545);
   border-radius: 6px;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.TrelloInput:focus,
+.TrelloTextArea:focus {
+  outline: none;
+  border-color: var(--ButtonHoverBackground, #087d90);
+  box-shadow: inset 0 0 0 1px var(--ButtonHoverBackground, #087d90);
 }
 
 .TrelloTextArea {
