@@ -21,6 +21,8 @@ import {
 const validApiKey = 'abcdefghijklmnopqrstuvwxyz123456'
 const validToken =
   'abcdefghijklmnopqrstuvwxyz123456abcdefghijklmnopqrstuvwxyz123456'
+const validLongToken =
+  'abcdefghijklmnopqrstuvwxyz123456abcdefghijklmnopqrstuvwxyz123456abcdefghijkl'
 
 const getText = (dom: readonly any[]): string => {
   return dom
@@ -505,7 +507,7 @@ test('connect shows validation error for invalid api key shape', async () => {
   resetTrelloViewDependencyFactory()
 })
 
-test('connect shows validation error for invalid token shape', async () => {
+test('connect accepts 76 character token and loads boards', async () => {
   setTrelloViewDependencyFactory(() => ({
     client: createMockTrelloClient({
       boards: [{ id: 'board-1', name: 'Roadmap' }],
@@ -523,14 +525,13 @@ test('connect shows validation error for invalid token shape', async () => {
   await instance.handleEvent?.({
     name: 'token',
     type: 'input',
-    value: 'bad-token',
+    value: validLongToken,
   })
   await instance.handleEvent?.({ name: 'connect', type: 'click' })
 
   const text = getText(await instance.render())
-  expect(text).toContain('Token must be 64 alphanumeric characters.')
-  expect(text).toContain('Token')
-  expect(text).not.toContain('Roadmap')
+  expect(text).toContain('Roadmap')
+  expect(text).not.toContain('Welcome to Trello')
   resetTrelloViewDependencyFactory()
 })
 
