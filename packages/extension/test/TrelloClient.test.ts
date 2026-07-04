@@ -95,7 +95,7 @@ test('getBoardDetail requests lists and cards', async () => {
   )
 })
 
-test('getCardDetail requests card detail and attachments', async () => {
+test('getCardDetail requests card detail, attachments, and comments', async () => {
   const requests: string[] = []
   const client = createTrelloClient(async (url) => {
     requests.push(url)
@@ -107,6 +107,21 @@ test('getCardDetail requests card detail and attachments', async () => {
           name: 'Screenshot',
           previews: [{ url: 'https://example.com/preview.png' }],
           url: 'https://example.com/screenshot.png',
+        },
+      ])
+    }
+    if (url.includes('/cards/card-1/actions')) {
+      return jsonResponse([
+        {
+          data: {
+            text: 'This should show under the description.',
+          },
+          date: '2026-07-03T10:11:00.000Z',
+          id: 'comment-1',
+          memberCreator: {
+            fullName: 'Alex Morgan',
+          },
+          type: 'commentCard',
         },
       ])
     }
@@ -162,11 +177,25 @@ test('getCardDetail requests card detail and attachments', async () => {
       name: 'Ship Trello view',
       url: 'https://trello.com/c/card-1',
     },
+    comments: [
+      {
+        data: {
+          text: 'This should show under the description.',
+        },
+        date: '2026-07-03T10:11:00.000Z',
+        id: 'comment-1',
+        memberCreator: {
+          fullName: 'Alex Morgan',
+        },
+        type: 'commentCard',
+      },
+    ],
   })
 
   expect(requests.map((request) => new URL(request).pathname)).toEqual([
     '/1/cards/card-1',
     '/1/cards/card-1/attachments',
+    '/1/cards/card-1/actions',
   ])
   const cardRequest = requests.find((request) => {
     return new URL(request).pathname === '/1/cards/card-1'
@@ -174,13 +203,20 @@ test('getCardDetail requests card detail and attachments', async () => {
   const attachmentsRequest = requests.find((request) => {
     return new URL(request).pathname === '/1/cards/card-1/attachments'
   })
+  const commentsRequest = requests.find((request) => {
+    return new URL(request).pathname === '/1/cards/card-1/actions'
+  })
   expect(cardRequest).toBeDefined()
   expect(attachmentsRequest).toBeDefined()
+  expect(commentsRequest).toBeDefined()
   expect(new URL(cardRequest || '').searchParams.get('fields')).toBe(
     'name,desc,url,idBoard,idList,labels',
   )
   expect(new URL(attachmentsRequest || '').searchParams.get('fields')).toBe(
     'name,url,mimeType,previews',
+  )
+  expect(new URL(commentsRequest || '').searchParams.get('filter')).toBe(
+    'commentCard',
   )
 })
 

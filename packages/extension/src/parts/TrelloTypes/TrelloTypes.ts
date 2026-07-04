@@ -55,9 +55,25 @@ export interface TrelloAttachment {
   readonly url?: string
 }
 
+export interface TrelloCommentData {
+  readonly text?: string
+}
+
+export interface TrelloCommentMember {
+  readonly fullName?: string
+}
+
+export interface TrelloComment {
+  readonly data: TrelloCommentData
+  readonly date?: string
+  readonly id: string
+  readonly memberCreator?: TrelloCommentMember
+}
+
 export interface TrelloCardDetail {
   readonly attachments: readonly TrelloAttachment[]
   readonly card: TrelloCard
+  readonly comments: readonly TrelloComment[]
 }
 
 export interface TrelloCardUpdate {

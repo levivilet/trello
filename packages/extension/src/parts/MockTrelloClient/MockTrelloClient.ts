@@ -70,11 +70,15 @@ export const createMockTrelloClient = (
       }
       const detail = cardDetails[card.id]
       if (detail) {
-        return detail
+        return {
+          ...detail,
+          comments: detail.comments || [],
+        }
       }
       return {
         attachments: [],
         card: findCard(card.id) || card,
+        comments: [],
       }
     },
     async listBoards(): Promise<readonly TrelloBoard[]> {
@@ -121,6 +125,7 @@ export const createMockTrelloClient = (
       cardDetails[card.id] = {
         attachments: previousDetail?.attachments || [],
         card: updatedCard,
+        comments: previousDetail?.comments || [],
       }
       return updatedCard
     },
