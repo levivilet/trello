@@ -341,6 +341,10 @@ button.TrelloSearchResult:hover {
   background: var(--ButtonHoverBackground, #087d90);
 }
 
+.TrelloCard * {
+  pointer-events: none;
+}
+
 .TrelloCardTitle {
   contain: content;
   line-height: 1.4;
