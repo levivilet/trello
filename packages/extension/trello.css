@@ -420,10 +420,26 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloCardMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   contain: content;
   font-size: 12px;
   line-height: 1.3;
   color: var(--ForegroundMuted, #aeb8b8);
+}
+
+.TrelloCardCommentIcon {
+  display: block;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: inherit;
+}
+
+.TrelloCardCommentCount {
+  font-size: 12px;
+  line-height: 1;
 }
 
 .TrelloAddCardButton {
