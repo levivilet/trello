@@ -402,15 +402,22 @@ test('connect loads boards and clicking board loads detail', async () => {
   expect(getListTitleInput(detailDom, 'list-1')?.value).toBe('Todo')
   expect(detailText).toContain('Ship Trello view')
   expect(detailText).toContain('+ Add a card')
-  expect(detailText).toContain('3 comments')
+  expect(detailText).not.toContain('3 comments')
+  expect(getSubtreeTextByNodeName(detailDom, 'card:card-1')).toContain('3')
   expect(detailText).toContain('Quiet card')
   expect(detailText).toContain('Plain card')
   expect(detailText).not.toContain('0 comments')
+  expect(getNodeByClass(detailDom, 'TrelloCardMeta')).toMatchObject({
+    'aria-label': '3 comments',
+    title: '3 comments',
+  })
   expect(detailClassNames).toContain('TrelloLists')
   expect(detailClassNames).toContain('TrelloList')
   expect(detailClassNames).toContain('TrelloCards')
   expect(detailClassNames).toContain('TrelloCardTitle')
   expect(detailClassNames).toContain('TrelloCardMeta')
+  expect(detailClassNames).toContain('TrelloCardCommentIcon')
+  expect(detailClassNames).toContain('TrelloCardCommentCount')
   expect(detailClassNames).toContain('TrelloCardCoverImage')
   expect(
     hasNode(detailDom, (node) => {
