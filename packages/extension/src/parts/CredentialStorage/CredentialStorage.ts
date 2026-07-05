@@ -1,4 +1,9 @@
 import type { TrelloCredentials } from '../TrelloTypes/TrelloTypes.ts'
+import {
+  createLocalCacheRequestUrl,
+  deleteLocalCacheRequest,
+  matchLocalCacheRequest,
+} from '../LocalCacheRequest/LocalCacheRequest.ts'
 
 export interface CredentialStorage {
   readonly delete: () => Promise<void>
@@ -8,7 +13,10 @@ export interface CredentialStorage {
 
 export const cacheName = 'builtin.trello.credentials'
 export const testCacheName = 'test.builtin.trello.credentials'
-export const credentialsRequestUrl = '/credentials.json'
+const legacyCredentialsRequestUrl = '/credentials.json'
+export const credentialsRequestUrl = createLocalCacheRequestUrl(
+  legacyCredentialsRequestUrl,
+)
 
 const isCredentials = (value: unknown): value is TrelloCredentials => {
   if (!value || typeof value !== 'object') {
@@ -24,11 +32,19 @@ export const createCacheCredentialStorage = (
   return {
     async delete(): Promise<void> {
       const cache = await caches.open(selectedCacheName)
-      await cache.delete(credentialsRequestUrl)
+      await deleteLocalCacheRequest(
+        cache,
+        credentialsRequestUrl,
+        legacyCredentialsRequestUrl,
+      )
     },
     async read(): Promise<TrelloCredentials | undefined> {
       const cache = await caches.open(selectedCacheName)
-      const response = await cache.match(credentialsRequestUrl)
+      const response = await matchLocalCacheRequest(
+        cache,
+        credentialsRequestUrl,
+        legacyCredentialsRequestUrl,
+      )
       if (!response) {
         return undefined
       }

@@ -1,3 +1,9 @@
+import {
+  createLocalCacheRequestUrl,
+  deleteLocalCacheRequest,
+  matchLocalCacheRequest,
+} from '../LocalCacheRequest/LocalCacheRequest.ts'
+
 export interface CurrentBoardStorage {
   readonly delete: () => Promise<void>
   readonly read: () => Promise<string | undefined>
@@ -6,7 +12,10 @@ export interface CurrentBoardStorage {
 
 export const cacheName = 'builtin.trello.current-board'
 export const testCacheName = 'test.builtin.trello.current-board'
-export const currentBoardRequestUrl = '/current-board.json'
+const legacyCurrentBoardRequestUrl = '/current-board.json'
+export const currentBoardRequestUrl = createLocalCacheRequestUrl(
+  legacyCurrentBoardRequestUrl,
+)
 
 const isCurrentBoard = (value: unknown): value is string => {
   return typeof value === 'string'
@@ -18,11 +27,19 @@ export const createCacheCurrentBoardStorage = (
   return {
     async delete(): Promise<void> {
       const cache = await caches.open(selectedCacheName)
-      await cache.delete(currentBoardRequestUrl)
+      await deleteLocalCacheRequest(
+        cache,
+        currentBoardRequestUrl,
+        legacyCurrentBoardRequestUrl,
+      )
     },
     async read(): Promise<string | undefined> {
       const cache = await caches.open(selectedCacheName)
-      const response = await cache.match(currentBoardRequestUrl)
+      const response = await matchLocalCacheRequest(
+        cache,
+        currentBoardRequestUrl,
+        legacyCurrentBoardRequestUrl,
+      )
       if (!response) {
         return undefined
       }
