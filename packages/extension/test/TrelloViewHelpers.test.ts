@@ -242,7 +242,7 @@ test('comment helpers use trello member metadata with fallbacks', () => {
       data: { text: 'Hello' },
       id: 'comment-10',
       memberCreator: {
-        avatarUrl: '   ',
+        avatarUrl: ' '.repeat(3),
       },
     }),
   ).toBe('')

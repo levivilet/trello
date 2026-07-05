@@ -88,5 +88,5 @@ export const getCommentAvatarUrl = (
   url.pathname = url.pathname.endsWith('/')
     ? `${url.pathname}50.png`
     : `${url.pathname}/50.png`
-  return url.toString()
+  return url.href
 }
