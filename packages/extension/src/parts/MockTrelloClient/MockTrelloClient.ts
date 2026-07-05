@@ -4,6 +4,7 @@ import type {
   TrelloBoard,
   TrelloBoardDetail,
   TrelloCard,
+  TrelloCardCreate,
   TrelloCardDetail,
   TrelloCardMove,
   TrelloCardUpdate,
@@ -16,6 +17,7 @@ export interface MockTrelloData {
   readonly boardDetailErrors?: Readonly<Record<string, string>>
   readonly boardDetails?: Readonly<Record<string, TrelloBoardDetail>>
   readonly boards?: readonly TrelloBoard[]
+  readonly cardCreateErrors?: Readonly<Record<string, string>>
   readonly cardDetailErrors?: Readonly<Record<string, string>>
   readonly cardDetails?: Readonly<Record<string, TrelloCardDetail>>
   readonly cardMoveErrors?: Readonly<Record<string, string>>
@@ -32,6 +34,7 @@ export const createMockTrelloClient = (
   data: Readonly<MockTrelloData>,
 ): TrelloClient => {
   let listBoardsCallCount = 0
+  let createCardCallCount = 0
   const cardDetails: Record<string, TrelloCardDetail> = {
     ...data.cardDetails,
   }
@@ -52,6 +55,53 @@ export const createMockTrelloClient = (
   }
 
   const client: TrelloClient = {
+    async createCard(
+      list: TrelloList,
+      create: TrelloCardCreate,
+    ): Promise<TrelloCard> {
+      if (data.error) {
+        throw new Error(data.error)
+      }
+      const createError = data.cardCreateErrors?.[list.id]
+      if (createError) {
+        throw new Error(createError)
+      }
+      createCardCallCount++
+      const createdCard: TrelloCard = {
+        badges: {
+          comments: 0,
+        },
+        id: `created-card-${createCardCallCount}`,
+        idList: list.id,
+        name: create.name,
+      }
+      for (const [boardId, detail] of Object.entries(boardDetails)) {
+        const hasList = detail.lists.some((item) => {
+          return item.id === list.id
+        })
+        if (!hasList) {
+          continue
+        }
+        boardDetails[boardId] = {
+          ...detail,
+          lists: detail.lists.map((item) => {
+            if (item.id !== list.id) {
+              return item
+            }
+            return {
+              ...item,
+              cards: [...item.cards, createdCard],
+            }
+          }),
+        }
+      }
+      cardDetails[createdCard.id] = {
+        attachments: [],
+        card: createdCard,
+        comments: [],
+      }
+      return createdCard
+    },
     async getBoardDetail(board: TrelloBoard): Promise<TrelloBoardDetail> {
       if (data.error) {
         throw new Error(data.error)

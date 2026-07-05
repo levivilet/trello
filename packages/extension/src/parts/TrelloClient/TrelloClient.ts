@@ -11,6 +11,7 @@ import type {
   TrelloCacheFirstResult,
   TrelloClient,
 } from './TrelloClientTypes.ts'
+import { createCard } from './operations/CreateCard.ts'
 import {
   getBoardDetail,
   readCachedBoardDetail,
@@ -36,6 +37,13 @@ export const createTrelloClient = (
   cache: TrelloApiCache | undefined = createCacheStorageTrelloApiCache(),
 ): TrelloClient => {
   return {
+    createCard(
+      list,
+      create,
+      credentials,
+    ): ReturnType<TrelloClient['createCard']> {
+      return createCard(fetchLike, list, create, credentials, cache)
+    },
     getBoardDetail(
       board,
       credentials,

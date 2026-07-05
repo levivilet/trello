@@ -160,15 +160,18 @@ const createAuthenticatedInstance = async (
   options: {
     readonly boardBackgroundEnabled?: boolean
     readonly boardDetails?: Readonly<Record<string, TrelloBoardDetail>>
+    readonly cardCreateErrors?: Readonly<Record<string, string>>
     readonly cardMoveErrors?: Readonly<Record<string, string>>
     readonly listUpdateErrors?: Readonly<Record<string, string>>
   } = {},
 ): Promise<VirtualDomViewInstance> => {
-  const { boardDetails, cardMoveErrors, listUpdateErrors } = options
+  const { boardDetails, cardCreateErrors, cardMoveErrors, listUpdateErrors } =
+    options
   setTrelloViewDependencyFactory(() => ({
     client: createMockTrelloClient({
       boards,
       ...(boardDetails && { boardDetails }),
+      ...(cardCreateErrors && { cardCreateErrors }),
       ...(cardMoveErrors && { cardMoveErrors }),
       ...(listUpdateErrors && { listUpdateErrors }),
     }),
@@ -532,6 +535,187 @@ test('cards and lists render drag and drop attributes', async () => {
       onDragOver: 'handleDragOver',
       onDrop: 'handleDrop',
     }),
+  )
+  resetTrelloViewDependencyFactory()
+})
+
+test('clicking add card renders input for that list only', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [],
+              id: 'list-1',
+              name: 'Todo',
+            },
+            {
+              cards: [],
+              id: 'list-2',
+              name: 'Doing',
+            },
+          ],
+        },
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'addCard:list-1', type: 'click' })
+
+  const dom = await instance.render()
+  expect(getNodeByName(dom, 'newCardTitle:list-1')).toEqual(
+    expect.objectContaining({
+      className: 'TrelloAddCardInput',
+      name: 'newCardTitle:list-1',
+      onInput: 'handleInput',
+      value: '',
+    }),
+  )
+  expect(getNodeByName(dom, 'newCardTitle:list-2')).toBeUndefined()
+  expect(
+    hasNode(dom, (node) => {
+      return (
+        node.name === 'addCard:list-2' &&
+        node.className === 'TrelloAddCardButton'
+      )
+    }),
+  ).toBe(true)
+  resetTrelloViewDependencyFactory()
+})
+
+test('submitting add card appends card and hides input', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', idList: 'list-1', name: 'Plan work' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+            {
+              cards: [],
+              id: 'list-2',
+              name: 'Doing',
+            },
+          ],
+        },
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'addCard:list-1', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'newCardTitle:list-1',
+    type: 'input',
+    value: 'Build add card',
+  })
+  await instance.handleEvent?.({ name: 'addCard:list-1', type: 'submit' })
+
+  const dom = await instance.render()
+  const todoText = getSubtreeTextByNodeName(dom, 'list:list-1')
+  const doingText = getSubtreeTextByNodeName(dom, 'list:list-2')
+  expect(todoText).toContain('Plan work')
+  expect(todoText).toContain('Build add card')
+  expect(todoText.indexOf('Plan work')).toBeLessThan(
+    todoText.indexOf('Build add card'),
+  )
+  expect(doingText).not.toContain('Build add card')
+  expect(getNodeByName(dom, 'newCardTitle:list-1')).toBeUndefined()
+  expect(
+    hasNode(dom, (node) => {
+      return (
+        node.name === 'addCard:list-1' &&
+        node.className === 'TrelloAddCardButton'
+      )
+    }),
+  ).toBe(true)
+  resetTrelloViewDependencyFactory()
+})
+
+test('submitting blank add card keeps input open with error', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'addCard:list-1', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'newCardTitle:list-1',
+    type: 'input',
+    value: ' '.repeat(3),
+  })
+  await instance.handleEvent?.({ name: 'addCard:list-1', type: 'submit' })
+
+  const dom = await instance.render()
+  expect(getNodeByName(dom, 'newCardTitle:list-1')?.value).toBe(' '.repeat(3))
+  expect(getText(dom)).toContain('Card title is required.')
+  expect(getSubtreeTextByNodeName(dom, 'list:list-1')).not.toContain(
+    'created-card',
+  )
+  resetTrelloViewDependencyFactory()
+})
+
+test('add card failure keeps input open and preserves draft', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      cardCreateErrors: {
+        'list-1': 'Cannot create card',
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'addCard:list-1', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'newCardTitle:list-1',
+    type: 'input',
+    value: 'Build add card',
+  })
+  await instance.handleEvent?.({ name: 'addCard:list-1', type: 'submit' })
+
+  const dom = await instance.render()
+  expect(getNodeByName(dom, 'newCardTitle:list-1')?.value).toBe(
+    'Build add card',
+  )
+  expect(getText(dom)).toContain('Cannot create card')
+  expect(getSubtreeTextByNodeName(dom, 'list:list-1')).not.toContain(
+    'Build add card',
   )
   resetTrelloViewDependencyFactory()
 })
@@ -981,6 +1165,13 @@ test('clicking card renders cached detail before fresh detail resolves', async (
   const freshCardDeferred = createDeferred<TrelloCardDetail>()
   const boards = [{ id: 'board-1', name: 'Roadmap' }]
   const client: TrelloClient = {
+    async createCard(list: TrelloList) {
+      return {
+        id: 'created-card-1',
+        idList: list.id,
+        name: 'Created card',
+      }
+    },
     async getBoardDetail() {
       return boardDetail
     },

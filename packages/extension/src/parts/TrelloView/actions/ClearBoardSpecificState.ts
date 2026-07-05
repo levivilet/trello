@@ -7,10 +7,13 @@ export const clearBoardSpecificState = (
   mutableState.boardDetail = undefined
   mutableState.selectedCardDetail = undefined
   mutableState.cardDetailLoading = false
+  mutableState.addingCardListId = ''
   mutableState.draftCardDescription = ''
   mutableState.draftCardTitle = ''
   mutableState.draftListTitles = {}
+  mutableState.draftNewCardTitle = ''
   mutableState.editingCardDescription = false
   mutableState.editingCardTitle = false
   mutableState.savingCardDetail = false
+  mutableState.savingNewCard = false
 }
