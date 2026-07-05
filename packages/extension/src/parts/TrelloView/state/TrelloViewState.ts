@@ -25,6 +25,7 @@ export interface TrelloViewDependencies {
 
 export interface TrelloViewState {
   activeSearchQuery: string
+  addingCardListId: string
   boardBackgroundEnabled: boolean
   boardDetail: TrelloBoardDetail | undefined
   boards: readonly TrelloBoard[]
@@ -34,6 +35,7 @@ export interface TrelloViewState {
   draftCardDescription: string
   draftCardTitle: string
   draftListTitles: Readonly<Record<string, string>>
+  draftNewCardTitle: string
   draftSearchQuery: string
   draftToken: string
   draggedCardId: string
@@ -44,6 +46,7 @@ export interface TrelloViewState {
   loading: boolean
   recentBoardViews: readonly RecentBoardView[]
   savingCardDetail: boolean
+  savingNewCard: boolean
   searchEnabled: boolean
   searchResults: readonly TrelloSearchResult[]
   selectedCardDetail: TrelloCardDetail | undefined

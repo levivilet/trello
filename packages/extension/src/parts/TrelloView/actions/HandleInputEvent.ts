@@ -7,6 +7,10 @@ export const handleInputEvent = (
 ): void => {
   const mutableState = state as TrelloViewState
   const value = typeof event.value === 'string' ? event.value : ''
+  if (event.name?.startsWith('newCardTitle:')) {
+    mutableState.draftNewCardTitle = value
+    return
+  }
   switch (event.name) {
     case 'apiKey':
       mutableState.draftApiKey = value

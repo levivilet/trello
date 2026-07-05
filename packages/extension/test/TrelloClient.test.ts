@@ -421,6 +421,109 @@ test('moveCard sends target list and bottom position to trello', async () => {
   expect(requestInits[0]?.method).toBe('PUT')
 })
 
+test('createCard sends target list, title, and bottom position to trello', async () => {
+  const requests: string[] = []
+  const requestInits: ({ readonly method?: string } | undefined)[] = []
+  const client = createTrelloClient(async (url, init) => {
+    requests.push(url)
+    requestInits.push(init)
+    return jsonResponse({
+      badges: {
+        comments: 0,
+      },
+      id: 'card-1',
+      idBoard: 'board-1',
+      idList: 'list-1',
+      name: 'Build add card',
+      url: 'https://trello.com/c/card-1',
+    })
+  })
+
+  await expect(
+    client.createCard(
+      { cards: [], id: 'list-1', name: 'Todo' },
+      {
+        name: 'Build add card',
+        pos: 'bottom',
+      },
+      {
+        apiKey: validApiKey,
+        token: validToken,
+      },
+    ),
+  ).resolves.toEqual({
+    badges: {
+      comments: 0,
+    },
+    id: 'card-1',
+    idBoard: 'board-1',
+    idList: 'list-1',
+    name: 'Build add card',
+    url: 'https://trello.com/c/card-1',
+  })
+
+  expect(requests).toHaveLength(1)
+  const url = new URL(requests[0])
+  expect(url.pathname).toBe('/1/cards')
+  expect(url.searchParams.get('key')).toBe(validApiKey)
+  expect(url.searchParams.get('token')).toBe(validToken)
+  expect(url.searchParams.get('idList')).toBe('list-1')
+  expect(url.searchParams.get('name')).toBe('Build add card')
+  expect(url.searchParams.get('pos')).toBe('bottom')
+  expect(url.searchParams.get('fields')).toBe('name,url,idBoard,idList,badges')
+  expect(requestInits[0]?.method).toBe('POST')
+})
+
+test('createCard invalidates cached cards for target list', async () => {
+  const cache = createMemoryTrelloApiCache()
+  const client = createTrelloClient(async (url) => {
+    const path = new URL(url).pathname
+    if (path === '/1/boards/board-1/lists') {
+      return jsonResponse([{ id: 'list-1', name: 'Todo' }])
+    }
+    if (path === '/1/lists/list-1/cards') {
+      return jsonResponse([
+        {
+          id: 'card-1',
+          idList: 'list-1',
+          name: 'Plan work',
+        },
+      ])
+    }
+    return jsonResponse({
+      id: 'card-2',
+      idList: 'list-1',
+      name: 'Build add card',
+    })
+  }, cache)
+  const credentials = {
+    apiKey: validApiKey,
+    token: validToken,
+  }
+
+  await client.getBoardDetail({ id: 'board-1', name: 'Roadmap' }, credentials)
+  expect(
+    cache.keys().some((key) => {
+      return new URL(key).pathname === '/1/lists/list-1/cards'
+    }),
+  ).toBe(true)
+
+  await client.createCard(
+    { cards: [], id: 'list-1', name: 'Todo' },
+    {
+      name: 'Build add card',
+      pos: 'bottom',
+    },
+    credentials,
+  )
+
+  expect(
+    cache.keys().some((key) => {
+      return new URL(key).pathname === '/1/lists/list-1/cards'
+    }),
+  ).toBe(false)
+})
+
 test('updateList sends title to trello', async () => {
   const requests: string[] = []
   const requestInits: ({ readonly method?: string } | undefined)[] = []

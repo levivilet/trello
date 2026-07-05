@@ -1,5 +1,6 @@
 import type { ViewEvent } from '@lvce-editor/api'
 import type { TrelloViewActionContext } from '../state/TrelloViewState.ts'
+import { startAddCard } from './AddCard.ts'
 import { closeCardDetail } from './CloseCardDetail.ts'
 import { connect } from './Connect.ts'
 import {
@@ -20,6 +21,10 @@ export const handleClickEvent = async (
 ): Promise<void> => {
   if (event.name === 'cardTitle' || event.name === 'editCardTitle') {
     editCardTitle(context)
+    return
+  }
+  if (event.name?.startsWith('addCard:')) {
+    startAddCard(context, event.name.slice('addCard:'.length))
     return
   }
   switch (event.name) {
