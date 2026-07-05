@@ -253,6 +253,10 @@ test('renders auth inputs when unauthenticated', async () => {
   expect(text).toContain('Welcome to Trello')
   expect(text).toContain('https://trello.com/power-ups/admin')
   expect(text).toContain('The token grants access to your Trello account')
+  const apiKeyInput = dom.find((node) => node.name === 'apiKey')
+  const tokenInput = dom.find((node) => node.name === 'token')
+  expect(apiKeyInput.inputType).toBeUndefined()
+  expect(tokenInput.inputType).toBe('password')
   expect(
     hasNode(dom, (node) => {
       return (

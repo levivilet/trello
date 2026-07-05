@@ -9,7 +9,7 @@ export const renderAuth = (
 ): readonly VirtualDomNode[] => {
   const title = renderTitle('Trello')
   const apiKey = renderField('API key', 'apiKey', state.draftApiKey)
-  const token = renderField('Token', 'token', state.draftToken)
+  const token = renderField('Token', 'token', state.draftToken, 'password')
   const connect = Dom.button(
     'connect',
     state.loading ? 'Connecting...' : 'Connect',
