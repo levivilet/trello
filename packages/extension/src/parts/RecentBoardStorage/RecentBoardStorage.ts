@@ -12,6 +12,7 @@ export interface RecentBoardStorage {
 }
 
 export const cacheName = 'builtin.trello.recent-boards'
+export const testCacheName = 'test.builtin.trello.recent-boards'
 export const recentBoardsRequestUrl = '/recent-boards.json'
 export const maxRecentBoards = 20
 
@@ -45,14 +46,16 @@ export const updateRecentBoardViews = (
   ].slice(0, maxRecentBoards)
 }
 
-export const createCacheRecentBoardStorage = (): RecentBoardStorage => {
+export const createCacheRecentBoardStorage = (
+  selectedCacheName = cacheName,
+): RecentBoardStorage => {
   return {
     async delete(): Promise<void> {
-      const cache = await caches.open(cacheName)
+      const cache = await caches.open(selectedCacheName)
       await cache.delete(recentBoardsRequestUrl)
     },
     async read(): Promise<readonly RecentBoardView[]> {
-      const cache = await caches.open(cacheName)
+      const cache = await caches.open(selectedCacheName)
       const response = await cache.match(recentBoardsRequestUrl)
       if (!response) {
         return []
@@ -64,7 +67,7 @@ export const createCacheRecentBoardStorage = (): RecentBoardStorage => {
       return value.slice(0, maxRecentBoards)
     },
     async write(recentBoardViews: readonly RecentBoardView[]): Promise<void> {
-      const cache = await caches.open(cacheName)
+      const cache = await caches.open(selectedCacheName)
       await cache.put(
         recentBoardsRequestUrl,
         Response.json(recentBoardViews.slice(0, maxRecentBoards)),

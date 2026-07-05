@@ -7,6 +7,7 @@ export interface CredentialStorage {
 }
 
 export const cacheName = 'builtin.trello.credentials'
+export const testCacheName = 'test.builtin.trello.credentials'
 export const credentialsRequestUrl = '/credentials.json'
 
 const isCredentials = (value: unknown): value is TrelloCredentials => {
@@ -17,14 +18,16 @@ const isCredentials = (value: unknown): value is TrelloCredentials => {
   return typeof record.apiKey === 'string' && typeof record.token === 'string'
 }
 
-export const createCacheCredentialStorage = (): CredentialStorage => {
+export const createCacheCredentialStorage = (
+  selectedCacheName = cacheName,
+): CredentialStorage => {
   return {
     async delete(): Promise<void> {
-      const cache = await caches.open(cacheName)
+      const cache = await caches.open(selectedCacheName)
       await cache.delete(credentialsRequestUrl)
     },
     async read(): Promise<TrelloCredentials | undefined> {
-      const cache = await caches.open(cacheName)
+      const cache = await caches.open(selectedCacheName)
       const response = await cache.match(credentialsRequestUrl)
       if (!response) {
         return undefined
@@ -36,7 +39,7 @@ export const createCacheCredentialStorage = (): CredentialStorage => {
       return value
     },
     async write(credentials: TrelloCredentials): Promise<void> {
-      const cache = await caches.open(cacheName)
+      const cache = await caches.open(selectedCacheName)
       await cache.put(credentialsRequestUrl, Response.json(credentials))
     },
   }

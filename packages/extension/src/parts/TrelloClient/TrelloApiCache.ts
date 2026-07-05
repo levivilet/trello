@@ -21,6 +21,7 @@ export interface MemoryTrelloApiCache extends TrelloApiCache {
 }
 
 export const trelloApiCacheName = 'builtin.trello.api-responses'
+export const testTrelloApiCacheName = 'test.builtin.trello.api-responses'
 export const credentialFingerprintSearchParam = 'credential'
 
 const textEncoder = new TextEncoder()
@@ -57,6 +58,7 @@ export const createTrelloApiCacheRequestUrl = async (
 
 export const createCacheStorageTrelloApiCache = (
   cacheStorage: Readonly<CacheStorage> | undefined = globalThis.caches,
+  selectedCacheName = trelloApiCacheName,
 ): TrelloApiCache | undefined => {
   if (!cacheStorage) {
     return undefined
@@ -73,7 +75,7 @@ export const createCacheStorageTrelloApiCache = (
       if (!cacheRequestUrl) {
         return
       }
-      const cache = await cacheStorage.open(trelloApiCacheName)
+      const cache = await cacheStorage.open(selectedCacheName)
       await cache.delete(cacheRequestUrl)
     },
     async read<T>(
@@ -87,7 +89,7 @@ export const createCacheStorageTrelloApiCache = (
       if (!cacheRequestUrl) {
         return undefined
       }
-      const cache = await cacheStorage.open(trelloApiCacheName)
+      const cache = await cacheStorage.open(selectedCacheName)
       const response = await cache.match(cacheRequestUrl)
       if (!response) {
         return undefined
@@ -106,7 +108,7 @@ export const createCacheStorageTrelloApiCache = (
       if (!cacheRequestUrl) {
         return
       }
-      const cache = await cacheStorage.open(trelloApiCacheName)
+      const cache = await cacheStorage.open(selectedCacheName)
       await cache.put(cacheRequestUrl, Response.json(value))
     },
   }
