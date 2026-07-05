@@ -7,6 +7,7 @@ import {
   getRecentlyViewedBoards,
   getWorkspaceSections,
 } from '../src/parts/TrelloView/BoardSections.ts'
+import { getCardCoverImageUrl } from '../src/parts/TrelloView/CardCoverHelpers.ts'
 import {
   getCommentAuthor,
   getCommentAvatarUrl,
@@ -155,6 +156,39 @@ test('attachment helpers detect image attachments and choose fallback urls', () 
       url: 'https://example.com/file',
     }),
   ).toBe('https://example.com/preview-large.png')
+})
+
+test('card cover helper chooses image urls with fallbacks', () => {
+  expect(
+    getCardCoverImageUrl({
+      cover: {
+        scaled: [
+          { url: 'https://example.com/cover-small.png' },
+          { url: 'https://example.com/cover-large.png' },
+        ],
+      },
+      id: 'card-1',
+      name: 'Covered card',
+    }),
+  ).toBe('https://example.com/cover-large.png')
+  expect(
+    getCardCoverImageUrl({
+      cover: {
+        sharedSourceUrl: 'https://example.com/shared-cover.png',
+      },
+      id: 'card-2',
+      name: 'Shared cover card',
+    }),
+  ).toBe('https://example.com/shared-cover.png')
+  expect(
+    getCardCoverImageUrl({
+      cover: {
+        color: 'green',
+      },
+      id: 'card-3',
+      name: 'Color cover card',
+    }),
+  ).toBe('')
 })
 
 test('comment helpers use trello member metadata with fallbacks', () => {

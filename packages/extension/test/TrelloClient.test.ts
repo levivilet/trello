@@ -123,6 +123,9 @@ test('getBoardDetail requests lists and cards', async () => {
         badges: {
           comments: 3,
         },
+        cover: {
+          scaled: [{ url: 'https://example.com/cover.png' }],
+        },
         id: 'card-1',
         idBoard: 'board-1',
         idList: 'list-1',
@@ -148,6 +151,9 @@ test('getBoardDetail requests lists and cards', async () => {
             badges: {
               comments: 3,
             },
+            cover: {
+              scaled: [{ url: 'https://example.com/cover.png' }],
+            },
             id: 'card-1',
             idBoard: 'board-1',
             idList: 'list-1',
@@ -165,7 +171,7 @@ test('getBoardDetail requests lists and cards', async () => {
     '/1/lists/list-1/cards',
   ])
   expect(new URL(requests[1]).searchParams.get('fields')).toBe(
-    'name,url,idBoard,idList,badges',
+    'name,url,idBoard,idList,badges,cover',
   )
 })
 
@@ -355,7 +361,9 @@ test('updateCard sends title and description to trello', async () => {
   expect(url.searchParams.get('token')).toBe(validToken)
   expect(url.searchParams.get('name')).toBe('Updated title')
   expect(url.searchParams.get('desc')).toBe('Updated description')
-  expect(url.searchParams.get('fields')).toBe('name,desc,url,idBoard,idList')
+  expect(url.searchParams.get('fields')).toBe(
+    'name,desc,url,idBoard,idList,badges,cover',
+  )
   expect(requestInits[0]?.method).toBe('PUT')
 })
 
@@ -407,7 +415,9 @@ test('moveCard sends target list and bottom position to trello', async () => {
   expect(url.searchParams.get('token')).toBe(validToken)
   expect(url.searchParams.get('idList')).toBe('list-2')
   expect(url.searchParams.get('pos')).toBe('bottom')
-  expect(url.searchParams.get('fields')).toBe('name,url,idBoard,idList,badges')
+  expect(url.searchParams.get('fields')).toBe(
+    'name,url,idBoard,idList,badges,cover',
+  )
   expect(requestInits[0]?.method).toBe('PUT')
 })
 
