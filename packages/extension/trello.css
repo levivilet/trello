@@ -396,6 +396,23 @@ button.TrelloSearchResult:hover {
   color: var(--ForegroundMuted, #aeb8b8);
 }
 
+.TrelloAddCardButton {
+  width: 100%;
+  min-height: 32px;
+  contain: content;
+  padding: 6px 8px;
+  text-align: left;
+  color: var(--ForegroundMuted, #aeb8b8);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+}
+
+.TrelloAddCardButton:hover {
+  color: var(--ButtonForeground, #ffffff);
+  background: var(--ButtonHoverBackground, #087d90);
+}
+
 .TrelloCardDetailPanel {
   box-sizing: border-box;
   display: flex;
