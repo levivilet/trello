@@ -437,10 +437,16 @@ test('cards and lists render drag and drop attributes', async () => {
       onDragStart: 'handleDragStart',
     }),
   )
+  expect(getNodeByName(dom, 'card:card-1')).not.toEqual(
+    expect.objectContaining({
+      onClick: 'handleClick',
+    }),
+  )
   expect(getNodeByName(dom, 'list:list-1')).toEqual(
     expect.objectContaining({
       className: 'TrelloList',
       name: 'list:list-1',
+      onClick: 'handleClick',
       onDragLeave: 'handleDragLeave',
       onDragOver: 'handleDragOver',
       onDrop: 'handleDrop',

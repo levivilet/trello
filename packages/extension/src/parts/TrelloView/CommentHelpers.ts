@@ -7,6 +7,11 @@ const commentDateFormatter = new Intl.DateTimeFormat('en-US', {
 })
 
 const whitespaceRegex = /\s+/
+const trelloAvatarHosts = new Set([
+  'trello-avatars.s3.amazonaws.com',
+  'trello-members.s3.amazonaws.com',
+])
+const avatarImageExtensionRegex = /\.(?:avif|gif|jpe?g|png|svg|webp)$/i
 
 const getDerivedInitials = (name: string): string => {
   const parts = name
@@ -64,5 +69,24 @@ export const getCommentDateText = (
 export const getCommentAvatarUrl = (
   comment: Readonly<TrelloComment>,
 ): string => {
-  return comment.memberCreator?.avatarUrl?.trim() || ''
+  const avatarUrl = comment.memberCreator?.avatarUrl?.trim() || ''
+  if (!avatarUrl) {
+    return ''
+  }
+  let url: URL
+  try {
+    url = new URL(avatarUrl)
+  } catch {
+    return avatarUrl
+  }
+  if (
+    !trelloAvatarHosts.has(url.hostname) ||
+    avatarImageExtensionRegex.test(url.pathname)
+  ) {
+    return avatarUrl
+  }
+  url.pathname = url.pathname.endsWith('/')
+    ? `${url.pathname}50.png`
+    : `${url.pathname}/50.png`
+  return url.href
 }
