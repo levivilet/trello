@@ -48,8 +48,23 @@ export interface TrelloCardBadges {
   readonly comments?: number
 }
 
+export interface TrelloCardCoverScaled {
+  readonly height?: number
+  readonly url?: string
+  readonly width?: number
+}
+
+export interface TrelloCardCover {
+  readonly color?: string | null
+  readonly scaled?: readonly TrelloCardCoverScaled[]
+  readonly sharedSourceUrl?: string | null
+  readonly size?: string
+  readonly url?: string | null
+}
+
 export interface TrelloCard {
   readonly badges?: TrelloCardBadges
+  readonly cover?: TrelloCardCover | null
   readonly desc?: string
   readonly id: string
   readonly idBoard?: string

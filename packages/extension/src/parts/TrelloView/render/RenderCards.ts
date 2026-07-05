@@ -1,6 +1,7 @@
 import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import type { TrelloCard } from '../../TrelloTypes/TrelloTypes.ts'
 import * as Dom from '../../VirtualDom/VirtualDom.ts'
+import { getCardCoverImageUrl } from '../CardCoverHelpers.ts'
 
 const getCardCommentCount = (card: Readonly<TrelloCard>): number => {
   return card.badges?.comments || 0
@@ -28,19 +29,29 @@ const renderCardCommentCount = (
 }
 
 const renderCard = (card: Readonly<TrelloCard>): Dom.TreeNode => {
+  const coverImageUrl = getCardCoverImageUrl(card)
+  const cardBody = Dom.div('TrelloCardBody', [
+    Dom.div('TrelloCardTitle', [Dom.textNode(card.name)]),
+    ...renderCardCommentCount(card),
+  ])
+  const children = coverImageUrl
+    ? [
+        Dom.image('TrelloCardCoverImage', coverImageUrl, `${card.name} cover`),
+        cardBody,
+      ]
+    : [cardBody]
   return Dom.node(
     VirtualDomElements.Button,
     {
-      className: 'TrelloCard',
+      className: coverImageUrl
+        ? 'TrelloCard TrelloCardWithCover'
+        : 'TrelloCard',
       draggable: true,
       name: `card:${card.id}`,
       onDragEnd: 'handleDragEnd',
       onDragStart: 'handleDragStart',
     },
-    [
-      Dom.div('TrelloCardTitle', [Dom.textNode(card.name)]),
-      ...renderCardCommentCount(card),
-    ],
+    children,
   )
 }
 
