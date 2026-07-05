@@ -573,6 +573,7 @@ test('clicking add card renders input for that list only', async () => {
   const dom = await instance.render()
   expect(getNodeByName(dom, 'newCardTitle:list-1')).toEqual(
     expect.objectContaining({
+      autocomplete: 'off',
       className: 'TrelloAddCardInput',
       name: 'newCardTitle:list-1',
       onInput: 'handleInput',

@@ -39,6 +39,7 @@ const renderAddCardInput = (
 ): Dom.TreeNode => {
   return Dom.form(`addCard:${list.id}`, 'TrelloAddCardForm', [
     Dom.node(VirtualDomElements.Input, {
+      autocomplete: 'off',
       className: 'TrelloAddCardInput',
       disabled: state.savingNewCard,
       name: `newCardTitle:${list.id}`,
