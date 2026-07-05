@@ -29,6 +29,10 @@ const renderListTitleInput = (
   })
 }
 
+const renderAddCardButton = (list: Readonly<TrelloList>): Dom.TreeNode => {
+  return Dom.button(`addCard:${list.id}`, '+ Add a card', 'TrelloAddCardButton')
+}
+
 const renderBoardDetailContent = (
   state: Readonly<TrelloViewState>,
   lists: readonly Readonly<Dom.TreeNode>[],
@@ -70,7 +74,11 @@ export const renderBoardDetail = (
         onDragOver: 'handleDragOver',
         onDrop: 'handleDrop',
       },
-      [renderListTitleInput(state, list), Dom.div('TrelloCards', cards)],
+      [
+        renderListTitleInput(state, list),
+        Dom.div('TrelloCards', cards),
+        renderAddCardButton(list),
+      ],
     )
   })
   const toolbar = renderToolbar([

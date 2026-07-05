@@ -76,6 +76,29 @@ const hasDirectChildClass = (
   return false
 }
 
+const getDirectChildClassNamesByName = (
+  dom: readonly any[],
+  name: string,
+): readonly string[] => {
+  const index = dom.findIndex((node) => {
+    return node.name === name
+  })
+  if (index === -1) {
+    return []
+  }
+  const classNames: string[] = []
+  let childIndex = index + 1
+  const childCount = dom[index]?.childCount || 0
+  for (let i = 0; i < childCount; i++) {
+    const className = dom[childIndex]?.className
+    if (typeof className === 'string') {
+      classNames.push(className)
+    }
+    childIndex = getNodeEndIndex(dom, childIndex)
+  }
+  return classNames
+}
+
 const hasNode = (
   dom: readonly any[],
   predicate: (node: any) => boolean,
@@ -368,6 +391,7 @@ test('connect loads boards and clicking board loads detail', async () => {
   const detailClassNames = getClassNames(detailDom)
   expect(getListTitleInput(detailDom, 'list-1')?.value).toBe('Todo')
   expect(detailText).toContain('Ship Trello view')
+  expect(detailText).toContain('+ Add a card')
   expect(detailText).toContain('3 comments')
   expect(detailText).toContain('Quiet card')
   expect(detailText).toContain('Plain card')
@@ -393,7 +417,22 @@ test('connect loads boards and clicking board loads detail', async () => {
     }),
   ).toBe(true)
   expect(hasDirectChildClass(detailDom, 'TrelloList', 'TrelloCards')).toBe(true)
+  expect(
+    hasDirectChildClass(detailDom, 'TrelloList', 'TrelloAddCardButton'),
+  ).toBe(true)
   expect(hasDirectChildClass(detailDom, 'TrelloCards', 'TrelloCard')).toBe(true)
+  expect(getDirectChildClassNamesByName(detailDom, 'list:list-1')).toEqual([
+    'TrelloListTitleInput',
+    'TrelloCards',
+    'TrelloAddCardButton',
+  ])
+  expect(getNodeByName(detailDom, 'addCard:list-1')).toEqual(
+    expect.objectContaining({
+      className: 'TrelloAddCardButton',
+      name: 'addCard:list-1',
+      onClick: 'handleClick',
+    }),
+  )
   resetTrelloViewDependencyFactory()
 })
 
@@ -418,7 +457,8 @@ test('list title renders as editable input', async () => {
   )
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
 
-  const title = getListTitleInput(await instance.render(), 'list-1')
+  const dom = await instance.render()
+  const title = getListTitleInput(dom, 'list-1')
   expect(title).toEqual(
     expect.objectContaining({
       className: 'TrelloListTitleInput',
@@ -426,6 +466,15 @@ test('list title renders as editable input', async () => {
       onBlur: 'handleBlur',
       onInput: 'handleInput',
       value: 'Todo',
+    }),
+  )
+  expect(getText(dom)).toContain('No cards')
+  expect(getText(dom)).toContain('+ Add a card')
+  expect(getNodeByName(dom, 'addCard:list-1')).toEqual(
+    expect.objectContaining({
+      className: 'TrelloAddCardButton',
+      name: 'addCard:list-1',
+      onClick: 'handleClick',
     }),
   )
   resetTrelloViewDependencyFactory()
