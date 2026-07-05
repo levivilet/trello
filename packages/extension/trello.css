@@ -66,7 +66,8 @@
 }
 
 .TrelloField {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 5px;
   contain: content;
   font-size: 12px;
@@ -74,7 +75,8 @@
 }
 
 .TrelloWelcome {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   box-sizing: border-box;
   contain: content;
@@ -114,7 +116,8 @@
 }
 
 .TrelloWelcomeSteps {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   contain: content;
   margin: 2px 0;
@@ -123,10 +126,9 @@
 }
 
 .TrelloWelcomeStep {
-  display: grid;
-  grid-template-columns: 22px minmax(0, 1fr);
+  display: flex;
   gap: 8px;
-  align-items: start;
+  align-items: flex-start;
   contain: content;
   min-width: 0;
   font-size: 12px;
@@ -134,8 +136,10 @@
 }
 
 .TrelloWelcomeStepNumber {
-  display: inline-grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
   width: 20px;
   height: 20px;
   contain: content;
@@ -167,7 +171,7 @@
   }
 
   .TrelloWelcomeStep {
-    grid-template-columns: minmax(0, 1fr);
+    flex-direction: column;
     gap: 4px;
   }
 }
@@ -230,7 +234,8 @@
 .TrelloSection,
 .TrelloWorkspaces,
 .TrelloWorkspace {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   contain: content;
 }
@@ -240,14 +245,16 @@
 }
 
 .TrelloBoardGrid {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   contain: content;
 }
 
 .TrelloSearchSection,
 .TrelloSearchResults {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   contain: content;
 }
@@ -344,7 +351,8 @@ button.TrelloSearchResult:hover {
 
 .TrelloCard {
   box-sizing: border-box;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 6px;
   flex: 0 0 auto;
   width: 100%;
@@ -469,8 +477,9 @@ button.TrelloSearchResult:hover {
 
 .TrelloCardDetailCloseButton {
   flex: 0 0 auto;
-  display: inline-grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 24px;
   min-width: 24px;
   height: 24px;
@@ -492,7 +501,8 @@ button.TrelloSearchResult:hover {
 
 .TrelloCardDescriptionSection,
 .TrelloCardDescriptionEditor {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   contain: content;
 }
@@ -508,7 +518,8 @@ button.TrelloSearchResult:hover {
 
 .TrelloCardDescriptionPreview {
   box-sizing: border-box;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   min-height: 48px;
   contain: content;
@@ -527,6 +538,7 @@ button.TrelloSearchResult:hover {
 
 .TrelloCardDescriptionPlaceholder {
   align-items: center;
+  justify-content: center;
   color: var(--ForegroundMuted, #aeb8b8);
 }
 
@@ -584,7 +596,8 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloMarkdownList {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 4px;
   contain: content;
   margin: 0;
@@ -685,23 +698,25 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloCardComments {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   contain: content;
 }
 
 .TrelloCardComment {
-  display: grid;
-  grid-template-columns: 32px minmax(0, 1fr);
+  display: flex;
   gap: 8px;
-  align-items: start;
+  align-items: flex-start;
   contain: content;
 }
 
 .TrelloCardCommentAvatar {
   box-sizing: border-box;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
   width: 32px;
   height: 32px;
   contain: content;
@@ -718,7 +733,8 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloCardCommentContent {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 4px;
   min-width: 0;
   contain: content;
@@ -769,7 +785,8 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloCardDetailImages {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   contain: content;
 }
