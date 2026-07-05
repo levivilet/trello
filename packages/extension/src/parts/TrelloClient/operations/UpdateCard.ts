@@ -21,7 +21,7 @@ export const updateCard = async (
     credentials,
     {
       desc: update.desc,
-      fields: 'name,desc,url,idBoard,idList',
+      fields: 'name,desc,url,idBoard,idList,badges,cover',
       name: update.name,
     },
     {

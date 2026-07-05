@@ -21,7 +21,7 @@ export const moveCard = async (
     `/cards/${card.id}`,
     credentials,
     {
-      fields: 'name,url,idBoard,idList,badges',
+      fields: 'name,url,idBoard,idList,badges,cover',
       idList: move.idList,
       pos: move.pos,
     },

@@ -313,6 +313,16 @@ test('connect loads boards and clicking board loads detail', async () => {
                   badges: {
                     comments: 0,
                   },
+                  cover: {
+                    scaled: [
+                      {
+                        url: 'https://example.com/quiet-card-small.png',
+                      },
+                      {
+                        url: 'https://example.com/quiet-card-large.png',
+                      },
+                    ],
+                  },
                   id: 'card-2',
                   name: 'Quiet card',
                 },
@@ -367,6 +377,21 @@ test('connect loads boards and clicking board loads detail', async () => {
   expect(detailClassNames).toContain('TrelloCards')
   expect(detailClassNames).toContain('TrelloCardTitle')
   expect(detailClassNames).toContain('TrelloCardMeta')
+  expect(detailClassNames).toContain('TrelloCardCoverImage')
+  expect(
+    hasNode(detailDom, (node) => {
+      return hasClass(node, 'TrelloCardWithCover')
+    }),
+  ).toBe(true)
+  expect(
+    hasNode(detailDom, (node) => {
+      return (
+        node.className === 'TrelloCardCoverImage' &&
+        node.src === 'https://example.com/quiet-card-large.png' &&
+        node.alt === 'Quiet card cover'
+      )
+    }),
+  ).toBe(true)
   expect(hasDirectChildClass(detailDom, 'TrelloList', 'TrelloCards')).toBe(true)
   expect(hasDirectChildClass(detailDom, 'TrelloCards', 'TrelloCard')).toBe(true)
   resetTrelloViewDependencyFactory()
