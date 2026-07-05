@@ -21,6 +21,7 @@ import {
   type RecentBoardView,
 } from '../src/parts/RecentBoardStorage/RecentBoardStorage.ts'
 import {
+  reloadActiveTrelloViewInstances,
   resetTrelloViewDependencyFactory,
   setTrelloViewDependencyFactory,
   view,
@@ -238,6 +239,57 @@ test('renders auth inputs when unauthenticated', async () => {
       )
     }),
   ).toBe(true)
+  resetTrelloViewDependencyFactory()
+})
+
+test('dependency reload resets authenticated user state without clearing user credentials in test mode', async () => {
+  const userStorage = createMemoryCredentialStorage({
+    apiKey: validApiKey,
+    token: validToken,
+  })
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({
+      boards: [{ id: 'user-board', name: 'User Board' }],
+    }),
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: userStorage,
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  expect(getText(await instance.render())).toContain('User Board')
+
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({
+      boards: [{ id: 'board-1', name: 'Roadmap' }],
+    }),
+    isTest: true,
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage(),
+  }))
+  await reloadActiveTrelloViewInstances()
+
+  const authText = getText(await instance.render())
+  expect(authText).toContain('API key')
+  expect(authText).not.toContain('User Board')
+
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: validApiKey,
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: validToken,
+  })
+  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+
+  expect(getText(await instance.render())).toContain('Roadmap')
+  await expect(userStorage.read()).resolves.toEqual({
+    apiKey: validApiKey,
+    token: validToken,
+  })
+  await instance.dispose?.()
   resetTrelloViewDependencyFactory()
 })
 

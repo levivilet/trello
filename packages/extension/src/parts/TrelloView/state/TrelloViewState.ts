@@ -16,6 +16,7 @@ import type {
 export interface TrelloViewDependencies {
   readonly client: TrelloClient
   readonly currentBoardStorage?: CurrentBoardStorage
+  readonly isTest?: boolean
   readonly readBoardBackgroundEnabled?: () => Promise<boolean>
   readonly readSearchEnabled?: () => Promise<boolean>
   readonly recentStorage: RecentBoardStorage

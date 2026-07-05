@@ -16,6 +16,7 @@ export {
   resetTrelloViewDependencyFactory,
   setTrelloViewDependencyFactory,
 } from './state/DependencyFactory.ts'
+export { reloadActiveTrelloViewInstances } from './CreateInstance.ts'
 export {
   boardBackgroundEnabledPreference,
   searchEnabledPreference,

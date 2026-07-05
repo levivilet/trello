@@ -4,7 +4,14 @@ import type {
   VirtualDomViewInstance,
 } from '@lvce-editor/api'
 import type { VirtualDomNode } from '@lvce-editor/virtual-dom-worker'
-import type { TrelloViewActionContext } from './state/TrelloViewState.ts'
+import type { CredentialStorage } from '../CredentialStorage/CredentialStorage.ts'
+import type { CurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
+import type { RecentBoardStorage } from '../RecentBoardStorage/RecentBoardStorage.ts'
+import type { TrelloClient } from '../TrelloClient/TrelloClient.ts'
+import type {
+  TrelloViewActionContext,
+  TrelloViewState,
+} from './state/TrelloViewState.ts'
 import { createMemoryCurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
 import { handleBlurEvent } from './actions/HandleBlurEvent.ts'
 import { handleClickEvent } from './actions/HandleClickEvent.ts'
@@ -25,20 +32,41 @@ import { renderBoards } from './render/RenderBoards.ts'
 import { createInitialState } from './state/CreateInitialState.ts'
 import { dependencyState } from './state/DependencyFactory.ts'
 
+interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
+  readonly reload: () => Promise<void>
+}
+
+interface MutableTrelloViewActionContext extends TrelloViewActionContext {
+  client: TrelloClient
+  currentBoardStorage: CurrentBoardStorage
+  recentStorage: RecentBoardStorage
+  requestRerender: () => void
+  state: TrelloViewState
+  storage: CredentialStorage
+}
+
+const activeInstances = new Set<ActiveTrelloViewInstance>()
+
+export const reloadActiveTrelloViewInstances = async (): Promise<void> => {
+  await Promise.all(
+    activeInstances.values().map((instance) => {
+      return instance.reload()
+    }),
+  )
+}
+
 export const createInstance = async (
   context?: ViewContext,
 ): Promise<VirtualDomViewInstance> => {
-  const dependencies = dependencyState.factory()
-  const {
-    client,
-    readBoardBackgroundEnabled,
-    readSearchEnabled,
-    recentStorage,
-    storage,
-  } = dependencies
-  const currentBoardStorage =
-    dependencies.currentBoardStorage || createMemoryCurrentBoardStorage()
   const state = createInitialState()
+  const viewContext: MutableTrelloViewActionContext = {
+    client: undefined as never,
+    currentBoardStorage: createMemoryCurrentBoardStorage(),
+    recentStorage: undefined as never,
+    requestRerender: undefined as never,
+    state,
+    storage: undefined as never,
+  }
 
   const requestRerender = (): void => {
     // @ts-ignore
@@ -51,32 +79,51 @@ export const createInstance = async (
     }, 0)
   }
 
-  const viewContext: TrelloViewActionContext = {
-    client,
-    currentBoardStorage,
-    recentStorage,
-    requestRerender,
-    state,
-    storage,
+  const initialize = async (rerender: boolean): Promise<void> => {
+    const dependencies = dependencyState.factory()
+    const {
+      client,
+      readBoardBackgroundEnabled,
+      readSearchEnabled,
+      recentStorage,
+      storage,
+    } = dependencies
+    const currentBoardStorage =
+      dependencies.currentBoardStorage || createMemoryCurrentBoardStorage()
+
+    Object.assign(state, createInitialState())
+    viewContext.client = client
+    viewContext.currentBoardStorage = currentBoardStorage
+    viewContext.recentStorage = recentStorage
+    viewContext.requestRerender = requestRerender
+    viewContext.storage = storage
+
+    if (readSearchEnabled) {
+      state.searchEnabled = await readSearchEnabled()
+    }
+    if (readBoardBackgroundEnabled) {
+      state.boardBackgroundEnabled = await readBoardBackgroundEnabled()
+    }
+    state.recentBoardViews = await recentStorage.read()
+    const storedCredentials = await storage.read()
+    if (storedCredentials) {
+      state.credentials = storedCredentials
+      state.draftApiKey = storedCredentials.apiKey
+      state.draftToken = storedCredentials.token
+      await loadBoards(viewContext, false)
+      await restoreCurrentBoard(viewContext)
+    }
+    if (rerender) {
+      requestRerender()
+    }
   }
 
-  if (readSearchEnabled) {
-    state.searchEnabled = await readSearchEnabled()
-  }
-  if (readBoardBackgroundEnabled) {
-    state.boardBackgroundEnabled = await readBoardBackgroundEnabled()
-  }
-  state.recentBoardViews = await recentStorage.read()
-  const storedCredentials = await storage.read()
-  if (storedCredentials) {
-    state.credentials = storedCredentials
-    state.draftApiKey = storedCredentials.apiKey
-    state.draftToken = storedCredentials.token
-    await loadBoards(viewContext, false)
-    await restoreCurrentBoard(viewContext)
-  }
+  await initialize(false)
 
-  return {
+  const instance: ActiveTrelloViewInstance = {
+    async dispose(): Promise<void> {
+      activeInstances.delete(instance)
+    },
     async handleEvent(event: Readonly<ViewEvent>): Promise<void> {
       if (event.type === 'input') {
         handleInputEvent(state, event)
@@ -114,6 +161,9 @@ export const createInstance = async (
         await handleDropEvent(viewContext, event)
       }
     },
+    async reload(): Promise<void> {
+      await initialize(true)
+    },
     render(): readonly VirtualDomNode[] {
       if (!state.credentials) {
         return renderAuth(state)
@@ -131,4 +181,6 @@ export const createInstance = async (
       }
     },
   }
+  activeInstances.add(instance)
+  return instance
 }

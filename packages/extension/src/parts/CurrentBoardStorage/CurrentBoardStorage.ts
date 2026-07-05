@@ -5,20 +5,23 @@ export interface CurrentBoardStorage {
 }
 
 export const cacheName = 'builtin.trello.current-board'
+export const testCacheName = 'test.builtin.trello.current-board'
 export const currentBoardRequestUrl = '/current-board.json'
 
 const isCurrentBoard = (value: unknown): value is string => {
   return typeof value === 'string'
 }
 
-export const createCacheCurrentBoardStorage = (): CurrentBoardStorage => {
+export const createCacheCurrentBoardStorage = (
+  selectedCacheName = cacheName,
+): CurrentBoardStorage => {
   return {
     async delete(): Promise<void> {
-      const cache = await caches.open(cacheName)
+      const cache = await caches.open(selectedCacheName)
       await cache.delete(currentBoardRequestUrl)
     },
     async read(): Promise<string | undefined> {
-      const cache = await caches.open(cacheName)
+      const cache = await caches.open(selectedCacheName)
       const response = await cache.match(currentBoardRequestUrl)
       if (!response) {
         return undefined
@@ -30,7 +33,7 @@ export const createCacheCurrentBoardStorage = (): CurrentBoardStorage => {
       return value
     },
     async write(boardId: string): Promise<void> {
-      const cache = await caches.open(cacheName)
+      const cache = await caches.open(selectedCacheName)
       await cache.put(currentBoardRequestUrl, Response.json(boardId))
     },
   }
