@@ -120,6 +120,7 @@ const renderCardDescriptionEditor = (
     Dom.node(VirtualDomElements.TextArea, {
       className: 'TrelloTextArea TrelloCardDescriptionTextArea',
       name: 'cardDescription',
+      onBlur: 'handleBlur',
       onInput: 'handleInput',
       placeholder: 'Add a more detailed description...',
       value: state.draftCardDescription,
@@ -129,11 +130,6 @@ const renderCardDescriptionEditor = (
         'saveCardDetail',
         state.savingCardDetail ? 'Saving...' : 'Save',
         'TrelloButton TrelloCardDetailSaveButton',
-      ),
-      Dom.button(
-        'cancelCardDescriptionEdit',
-        'Cancel',
-        'TrelloButton TrelloCardDetailCancelButton',
       ),
     ]),
   ])
