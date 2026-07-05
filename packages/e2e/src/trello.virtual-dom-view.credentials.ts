@@ -5,7 +5,7 @@ import {
 } from './_trello.virtual-dom-view.shared.ts'
 
 export const name = 'trello.virtual-dom-view.credentials'
-export const skip = true
+// export const skip = true
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   let step = 'start'
