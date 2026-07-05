@@ -74,9 +74,11 @@ export const input = (
   name: string,
   value: string,
   placeholder: string,
+  inputType?: string,
 ): TreeNode => {
   return node(VirtualDomElements.Input, {
     className: 'TrelloInput',
+    ...(inputType && { inputType }),
     name,
     onInput: 'handleInput',
     placeholder,
