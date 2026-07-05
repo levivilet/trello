@@ -1,3 +1,9 @@
+import {
+  createLocalCacheRequestUrl,
+  deleteLocalCacheRequest,
+  matchLocalCacheRequest,
+} from '../LocalCacheRequest/LocalCacheRequest.ts'
+
 export interface RecentBoardView {
   readonly boardId: string
   readonly viewedAt: string
@@ -13,7 +19,10 @@ export interface RecentBoardStorage {
 
 export const cacheName = 'builtin.trello.recent-boards'
 export const testCacheName = 'test.builtin.trello.recent-boards'
-export const recentBoardsRequestUrl = '/recent-boards.json'
+const legacyRecentBoardsRequestUrl = '/recent-boards.json'
+export const recentBoardsRequestUrl = createLocalCacheRequestUrl(
+  legacyRecentBoardsRequestUrl,
+)
 export const maxRecentBoards = 20
 
 const isRecentBoardView = (value: unknown): value is RecentBoardView => {
@@ -52,11 +61,19 @@ export const createCacheRecentBoardStorage = (
   return {
     async delete(): Promise<void> {
       const cache = await caches.open(selectedCacheName)
-      await cache.delete(recentBoardsRequestUrl)
+      await deleteLocalCacheRequest(
+        cache,
+        recentBoardsRequestUrl,
+        legacyRecentBoardsRequestUrl,
+      )
     },
     async read(): Promise<readonly RecentBoardView[]> {
       const cache = await caches.open(selectedCacheName)
-      const response = await cache.match(recentBoardsRequestUrl)
+      const response = await matchLocalCacheRequest(
+        cache,
+        recentBoardsRequestUrl,
+        legacyRecentBoardsRequestUrl,
+      )
       if (!response) {
         return []
       }
