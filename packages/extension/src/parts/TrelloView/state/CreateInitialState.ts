@@ -3,6 +3,7 @@ import type { TrelloViewState } from './TrelloViewState.ts'
 export const createInitialState = (): TrelloViewState => {
   return {
     activeSearchQuery: '',
+    addingCardListId: '',
     boardBackgroundEnabled: false,
     boardDetail: undefined,
     boards: [],
@@ -12,6 +13,7 @@ export const createInitialState = (): TrelloViewState => {
     draftCardDescription: '',
     draftCardTitle: '',
     draftListTitles: {},
+    draftNewCardTitle: '',
     draftSearchQuery: '',
     draftToken: '',
     draggedCardId: '',
@@ -22,6 +24,7 @@ export const createInitialState = (): TrelloViewState => {
     loading: false,
     recentBoardViews: [],
     savingCardDetail: false,
+    savingNewCard: false,
     searchEnabled: false,
     searchResults: [],
     selectedCardDetail: undefined,

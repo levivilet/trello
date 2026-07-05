@@ -42,10 +42,13 @@ export const openBoard = async (
   state.error = ''
   state.selectedCardDetail = undefined
   state.cardDetailLoading = false
+  state.addingCardListId = ''
   state.draftCardDescription = ''
   state.draftCardTitle = ''
   state.draftListTitles = {}
+  state.draftNewCardTitle = ''
   state.savingCardDetail = false
+  state.savingNewCard = false
   state.recentBoardViews = updateRecentBoardViews(
     state.recentBoardViews,
     board.id,

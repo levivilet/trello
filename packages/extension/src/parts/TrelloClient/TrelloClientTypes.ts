@@ -2,6 +2,7 @@ import type {
   TrelloBoard,
   TrelloBoardDetail,
   TrelloCard,
+  TrelloCardCreate,
   TrelloCardDetail,
   TrelloCardMove,
   TrelloCardUpdate,
@@ -17,6 +18,11 @@ export interface TrelloCacheFirstResult<T> {
 }
 
 export interface TrelloClient {
+  readonly createCard: (
+    list: TrelloList,
+    create: TrelloCardCreate,
+    credentials: TrelloCredentials,
+  ) => Promise<TrelloCard>
   readonly getBoardDetail: (
     board: TrelloBoard,
     credentials: TrelloCredentials,

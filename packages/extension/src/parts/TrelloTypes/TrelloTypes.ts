@@ -117,6 +117,11 @@ export interface TrelloCardUpdate {
   readonly name: string
 }
 
+export interface TrelloCardCreate {
+  readonly name: string
+  readonly pos: 'bottom'
+}
+
 export interface TrelloCardMove {
   readonly idList: string
   readonly pos: 'bottom'
