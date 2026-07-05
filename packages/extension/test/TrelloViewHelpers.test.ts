@@ -3,11 +3,11 @@ import {
   getAttachmentImageUrl,
   isImageAttachment,
 } from '../src/parts/TrelloView/AttachmentHelpers.ts'
-import { getCardCoverImageUrl } from '../src/parts/TrelloView/CardCoverHelpers.ts'
 import {
   getRecentlyViewedBoards,
   getWorkspaceSections,
 } from '../src/parts/TrelloView/BoardSections.ts'
+import { getCardCoverImageUrl } from '../src/parts/TrelloView/CardCoverHelpers.ts'
 import {
   getCommentAuthor,
   getCommentAvatarUrl,

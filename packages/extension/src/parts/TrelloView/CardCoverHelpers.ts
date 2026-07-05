@@ -1,9 +1,7 @@
 import type { TrelloCard } from '../TrelloTypes/TrelloTypes.ts'
 
-export const getCardCoverImageUrl = (
-  card: Readonly<TrelloCard>,
-): string => {
-  const cover = card.cover
+export const getCardCoverImageUrl = (card: Readonly<TrelloCard>): string => {
+  const { cover } = card
   if (!cover) {
     return ''
   }

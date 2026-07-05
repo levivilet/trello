@@ -351,16 +351,9 @@ button.TrelloSearchResult:hover {
 
 .TrelloCard {
   box-sizing: border-box;
-<<<<<<< HEAD
-<<<<<<< HEAD
-  display: grid;
-=======
-=======
->>>>>>> origin/main
   display: flex;
   flex-direction: column;
   gap: 6px;
->>>>>>> 461eb21c356d (style: refactor layout to use flexbox for improved responsiveness (#69))
   flex: 0 0 auto;
   width: 100%;
   contain: content;
