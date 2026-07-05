@@ -3,6 +3,7 @@ import type {
   TrelloBoardDetail,
   TrelloCard,
   TrelloCardDetail,
+  TrelloCardMove,
   TrelloCardUpdate,
   TrelloCredentials,
   TrelloList,
@@ -38,6 +39,11 @@ export interface TrelloClient {
   readonly listBoardsCacheFirst: (
     credentials: TrelloCredentials,
   ) => Promise<TrelloCacheFirstResult<readonly TrelloBoard[]>>
+  readonly moveCard: (
+    card: TrelloCard,
+    move: TrelloCardMove,
+    credentials: TrelloCredentials,
+  ) => Promise<TrelloCard>
   readonly search: (
     query: string,
     credentials: TrelloCredentials,

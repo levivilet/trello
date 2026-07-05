@@ -7,7 +7,11 @@ import type {
 } from '../../TrelloTypes/TrelloTypes.ts'
 import type { TrelloApiCache } from '../TrelloApiCache.ts'
 import type { FetchLike } from '../TrelloClientTypes.ts'
-import { readCachedJson, requestJson } from '../RequestJson.ts'
+import {
+  deleteCachedJson,
+  readCachedJson,
+  requestJson,
+} from '../RequestJson.ts'
 
 const listParams = {
   fields: 'name',
@@ -16,6 +20,19 @@ const listParams = {
 const cardsParams = {
   fields: 'name,url,idBoard,idList,badges',
 } as const
+
+export const deleteCachedListCards = async (
+  cache: TrelloApiCache | undefined,
+  listId: string,
+  credentials: TrelloCredentials,
+): Promise<void> => {
+  await deleteCachedJson(
+    cache,
+    `/lists/${listId}/cards`,
+    credentials,
+    cardsParams,
+  )
+}
 
 export const readCachedBoardDetail = async (
   cache: TrelloApiCache | undefined,

@@ -322,6 +322,15 @@ button.TrelloSearchResult:hover {
     0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
+.TrelloListDragTarget {
+  background: color-mix(
+    in srgb,
+    var(--ButtonHoverBackground, #087d90) 18%,
+    var(--SideBarBackground, #202929)
+  );
+  border-color: var(--ButtonHoverBackground, #087d90);
+}
+
 .TrelloCards {
   display: flex;
   flex: 1 1 auto;
