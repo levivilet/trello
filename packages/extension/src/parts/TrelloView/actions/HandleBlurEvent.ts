@@ -4,6 +4,7 @@ import type {
   TrelloViewState,
 } from '../state/TrelloViewState.ts'
 import { getErrorMessage } from '../GetErrorMessage.ts'
+import { saveCardDetail } from './SaveCardDetail.ts'
 import { updateBoardDetailCard } from './UpdateBoardDetailCard.ts'
 import { updateBoardDetailList } from './UpdateBoardDetailList.ts'
 
@@ -126,6 +127,10 @@ export const handleBlurEvent = async (
 ): Promise<void> => {
   if (event.name === 'cardTitle') {
     await handleCardTitleBlur(context)
+    return
+  }
+  if (event.name === 'cardDescription') {
+    await saveCardDetail(context)
     return
   }
   await handleListTitleBlur(context, event)

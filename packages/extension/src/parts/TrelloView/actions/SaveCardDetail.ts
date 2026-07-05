@@ -17,20 +17,28 @@ export const saveCardDetail = async (
   ) {
     return
   }
+  const { card: savedCard } = state.selectedCardDetail
+  if (state.draftCardDescription === (savedCard.desc || '')) {
+    state.draftCardDescription = savedCard.desc || ''
+    state.editingCardDescription = false
+    state.error = ''
+    requestRerender()
+    return
+  }
   state.error = ''
   state.savingCardDetail = true
   requestRerender()
   try {
     const updatedCard = await client.updateCard(
-      state.selectedCardDetail.card,
+      savedCard,
       {
         desc: state.draftCardDescription,
-        name: state.selectedCardDetail.card.name,
+        name: savedCard.name,
       },
       state.credentials,
     )
     const card = {
-      ...state.selectedCardDetail.card,
+      ...savedCard,
       ...updatedCard,
     }
     state.selectedCardDetail = {

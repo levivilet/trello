@@ -10,6 +10,7 @@ import type {
   TrelloCardDetail,
   TrelloCardMove,
   TrelloCardUpdate,
+  TrelloCredentials,
   TrelloSearchResult,
   TrelloList,
   TrelloListUpdate,
@@ -1350,16 +1351,21 @@ test('editing card title and description saves card detail', async () => {
   ).toBe(true)
   expect(
     hasNode(editingDom, (node) => {
-      return node.name === 'cancelCardDescriptionEdit'
+      return node.name === 'saveCardDetail'
     }),
   ).toBe(true)
+  expect(
+    hasNode(editingDom, (node) => {
+      return node.name === 'cancelCardDescriptionEdit'
+    }),
+  ).toBe(false)
 
   await instance.handleEvent?.({
     name: 'cardDescription',
     type: 'input',
     value: 'Updated description',
   })
-  await instance.handleEvent?.({ name: 'saveCardDetail', type: 'click' })
+  await instance.handleEvent?.({ name: 'cardDescription', type: 'blur' })
 
   const detailDom = await instance.render()
   const text = getText(detailDom)
@@ -1379,34 +1385,46 @@ test('editing card title and description saves card detail', async () => {
   resetTrelloViewDependencyFactory()
 })
 
-test('canceling card description edit restores saved preview', async () => {
-  setTrelloViewDependencyFactory(() => ({
-    client: createMockTrelloClient({
-      boardDetails: {
-        'board-1': {
-          board: { id: 'board-1', name: 'Roadmap' },
-          lists: [
-            {
-              cards: [{ id: 'card-1', name: 'Ship Trello view' }],
-              id: 'list-1',
-              name: 'Todo',
-            },
-          ],
-        },
-      },
-      boards: [{ id: 'board-1', name: 'Roadmap' }],
-      cardDetails: {
-        'card-1': {
-          attachments: [],
-          card: {
-            desc: 'Original description',
-            id: 'card-1',
-            name: 'Ship Trello view',
+test('unchanged card description blur closes editor without saving', async () => {
+  let updateCardCallCount = 0
+  const client = createMockTrelloClient({
+    boardDetails: {
+      'board-1': {
+        board: { id: 'board-1', name: 'Roadmap' },
+        lists: [
+          {
+            cards: [{ id: 'card-1', name: 'Ship Trello view' }],
+            id: 'list-1',
+            name: 'Todo',
           },
-          comments: [],
-        },
+        ],
       },
-    }),
+    },
+    boards: [{ id: 'board-1', name: 'Roadmap' }],
+    cardDetails: {
+      'card-1': {
+        attachments: [],
+        card: {
+          desc: 'Original description',
+          id: 'card-1',
+          name: 'Ship Trello view',
+        },
+        comments: [],
+      },
+    },
+  })
+  setTrelloViewDependencyFactory(() => ({
+    client: {
+      ...client,
+      async updateCard(
+        card: TrelloCard,
+        update: TrelloCardUpdate,
+        credentials: TrelloCredentials,
+      ): Promise<TrelloCard> {
+        updateCardCallCount++
+        return client.updateCard(card, update, credentials)
+      },
+    },
     recentStorage: createMemoryRecentBoardStorage(),
     storage: createMemoryCredentialStorage(),
   }))
@@ -1426,20 +1444,12 @@ test('canceling card description edit restores saved preview', async () => {
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
   await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
   await instance.handleEvent?.({ name: 'editCardDescription', type: 'click' })
-  await instance.handleEvent?.({
-    name: 'cardDescription',
-    type: 'input',
-    value: 'Unsaved description',
-  })
-  await instance.handleEvent?.({
-    name: 'cancelCardDescriptionEdit',
-    type: 'click',
-  })
+  await instance.handleEvent?.({ name: 'cardDescription', type: 'blur' })
 
   const detailDom = await instance.render()
   const text = getText(detailDom)
   expect(text).toContain('Original description')
-  expect(text).not.toContain('Unsaved description')
+  expect(updateCardCallCount).toBe(0)
   expect(
     hasNode(detailDom, (node) => {
       return node.name === 'cardDescription'
