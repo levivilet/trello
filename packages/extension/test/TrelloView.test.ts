@@ -531,11 +531,15 @@ test('cards and lists render drag and drop attributes', async () => {
       className: 'TrelloList',
       name: 'list:list-1',
       onClick: 'handleClick',
+      onContextMenu: 'handleContextMenu',
       onDragLeave: 'handleDragLeave',
       onDragOver: 'handleDragOver',
       onDrop: 'handleDrop',
     }),
   )
+
+  await instance.handleEvent?.({ name: 'list:list-1', type: 'contextmenu' })
+  expect(await instance.render()).toEqual(dom)
   resetTrelloViewDependencyFactory()
 })
 

@@ -133,6 +133,9 @@ export const createInstance = async (
         await handleClickEvent(viewContext, event)
         return
       }
+      if (event.type === 'contextmenu') {
+        return
+      }
       if (event.type === 'submit') {
         await handleSubmitEvent(viewContext, event)
         return

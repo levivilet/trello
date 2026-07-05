@@ -96,6 +96,7 @@ export const renderBoardDetail = (
         className: getListClassName(state, list),
         name: `list:${list.id}`,
         onClick: 'handleClick',
+        onContextMenu: 'handleContextMenu',
         onDragLeave: 'handleDragLeave',
         onDragOver: 'handleDragOver',
         onDrop: 'handleDrop',
