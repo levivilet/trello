@@ -108,6 +108,7 @@ const renderCardDetailTitle = (
     name: 'cardTitle',
     onBlur: 'handleBlur',
     onClick: 'handleClick',
+    onFocus: 'handleFocus',
     onInput: 'handleInput',
     value: state.draftCardTitle,
   })
@@ -121,6 +122,7 @@ const renderCardDescriptionEditor = (
       className: 'TrelloTextArea TrelloCardDescriptionTextArea',
       name: 'cardDescription',
       onBlur: 'handleBlur',
+      onFocus: 'handleFocus',
       onInput: 'handleInput',
       placeholder: 'Add a more detailed description...',
       value: state.draftCardDescription,
