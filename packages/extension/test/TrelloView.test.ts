@@ -499,6 +499,30 @@ test('list title renders as editable input', async () => {
 })
 
 test('cards and lists render drag and drop attributes', async () => {
+  expect(view.eventListeners).toEqual([
+    {
+      name: 'handleDragStart',
+      params: ['handleViewEvent', 'dragstart', 'event.target.name'],
+    },
+    {
+      name: 'handleDragEnd',
+      params: ['handleViewEvent', 'dragend', 'event.target.name'],
+    },
+    {
+      name: 'handleDragOver',
+      params: ['handleViewEvent', 'dragover', 'event.target.name'],
+      preventDefault: true,
+    },
+    {
+      name: 'handleDragLeave',
+      params: ['handleViewEvent', 'dragleave', 'event.target.name'],
+    },
+    {
+      name: 'handleDrop',
+      params: ['handleViewEvent', 'drop', 'event.target.name'],
+      preventDefault: true,
+    },
+  ])
   const instance = await createAuthenticatedInstance(
     [{ id: 'board-1', name: 'Roadmap' }],
     [],
