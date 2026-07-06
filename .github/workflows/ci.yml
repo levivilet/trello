@@ -56,7 +56,7 @@ jobs:
         env:
           PLAYWRIGHT_BROWSERS_PATH: 0
       - name: Build static site
-        run: node scripts/build-static.js
+        run: node scripts/build-static.ts
         env:
           PATH_PREFIX: auto
       - name: Upload artifact
