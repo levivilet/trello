@@ -60,6 +60,18 @@ export const activate = async (): Promise<void> => {
   })
   registerCommand({
     execute() {
+      return TrelloView.logoutActiveTrelloViewInstance()
+    },
+    id: 'trello.logout',
+  })
+  registerCommand({
+    execute(cardId: string) {
+      return TrelloView.openCardActiveTrelloViewInstance(cardId)
+    },
+    id: 'trello.openCard',
+  })
+  registerCommand({
+    execute() {
       return TrelloView.refreshBoardsActiveTrelloViewInstance()
     },
     id: 'trello.refreshBoards',
@@ -69,6 +81,12 @@ export const activate = async (): Promise<void> => {
       return TrelloView.saveCardDetailActiveTrelloViewInstance()
     },
     id: 'trello.saveCardDetail',
+  })
+  registerCommand({
+    execute(listId: string) {
+      return TrelloView.startAddCardActiveTrelloViewInstance(listId)
+    },
+    id: 'trello.startAddCard',
   })
   registerCommand({
     execute() {

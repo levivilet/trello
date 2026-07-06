@@ -13,11 +13,12 @@ import type {
   TrelloViewState,
 } from './state/TrelloViewState.ts'
 import { createMemoryCurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
-import { cancelAddCard, submitAddCard } from './actions/AddCard.ts'
+import { cancelAddCard, startAddCard, submitAddCard } from './actions/AddCard.ts'
 import { closeCardDetail as closeCardDetailAction } from './actions/CloseCardDetail.ts'
 import { goBackToBoards } from './actions/GoBackToBoards.ts'
 import { handleBlurEvent } from './actions/HandleBlurEvent.ts'
 import { handleClickEvent } from './actions/HandleClickEvent.ts'
+import { handleContextMenuEvent } from './actions/HandleContextMenuEvent.ts'
 import {
   handleDragEndEvent,
   handleDragLeaveEvent,
@@ -28,11 +29,14 @@ import {
 import { handleInputEvent } from './actions/HandleInputEvent.ts'
 import { handleSubmitEvent } from './actions/HandleSubmitEvent.ts'
 import { loadBoards } from './actions/LoadBoards.ts'
+import { logout } from './actions/Logout.ts'
+import { openCard } from './actions/OpenCard.ts'
 import { restoreCurrentBoard } from './actions/RestoreCurrentBoard.ts'
 import { saveCardDetail as saveCardDetailAction } from './actions/SaveCardDetail.ts'
 import { renderAuth } from './render/RenderAuth.ts'
 import { renderBoardDetail } from './render/RenderBoardDetail.ts'
 import { renderBoards } from './render/RenderBoards.ts'
+import { getMenuEntries } from './MenuEntries.ts'
 import { createInitialState } from './state/CreateInitialState.ts'
 import { dependencyState } from './state/DependencyFactory.ts'
 import { updateContext } from './state/UpdateContext.ts'
@@ -42,10 +46,14 @@ interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly cancelNewCard: () => void
   readonly closeCardDetail: () => void
   readonly getContext: () => Readonly<Record<string, boolean>>
+  readonly getMenuEntries: (menuId: string) => readonly unknown[]
+  readonly logout: () => Promise<void>
   readonly refreshBoards: () => Promise<void>
   readonly reload: () => Promise<void>
   readonly saveCardDetail: () => Promise<void>
+  readonly startAddCard: (listId: string) => void
   readonly submitNewCard: () => Promise<void>
+  readonly openCard: (cardId: string) => Promise<void>
 }
 
 interface MutableTrelloViewActionContext extends TrelloViewActionContext {
@@ -53,6 +61,7 @@ interface MutableTrelloViewActionContext extends TrelloViewActionContext {
   currentBoardStorage: CurrentBoardStorage
   recentStorage: RecentBoardStorage
   requestRerender: () => void
+  showContextMenu: (menuId: string, x: number, y: number) => Promise<void>
   state: TrelloViewState
   storage: CredentialStorage
 }
@@ -79,6 +88,10 @@ export const closeCardDetailActiveTrelloViewInstance = (): void => {
   getActiveInstance()?.closeCardDetail()
 }
 
+export const logoutActiveTrelloViewInstance = async (): Promise<void> => {
+  await getActiveInstance()?.logout()
+}
+
 export const refreshBoardsActiveTrelloViewInstance =
   async (): Promise<void> => {
     await getActiveInstance()?.refreshBoards()
@@ -88,6 +101,16 @@ export const saveCardDetailActiveTrelloViewInstance =
   async (): Promise<void> => {
     await getActiveInstance()?.saveCardDetail()
   }
+
+export const startAddCardActiveTrelloViewInstance = (listId: string): void => {
+  getActiveInstance()?.startAddCard(listId)
+}
+
+export const openCardActiveTrelloViewInstance = async (
+  cardId: string,
+): Promise<void> => {
+  await getActiveInstance()?.openCard(cardId)
+}
 
 export const submitNewCardActiveTrelloViewInstance =
   async (): Promise<void> => {
@@ -111,6 +134,7 @@ export const createInstance = async (
     currentBoardStorage: createMemoryCurrentBoardStorage(),
     recentStorage: undefined as never,
     requestRerender: undefined as never,
+    showContextMenu: undefined as never,
     state,
     storage: undefined as never,
   }
@@ -125,6 +149,18 @@ export const createInstance = async (
     globalThis.setTimeout(() => {
       void request()
     }, 0)
+  }
+
+  const showContextMenu = async (
+    menuId: string,
+    x: number,
+    y: number,
+  ): Promise<void> => {
+    const request = (context as any)?.showContextMenu
+    if (!request) {
+      return
+    }
+    await request(menuId, x, y)
   }
 
   const initialize = async (rerender: boolean): Promise<void> => {
@@ -144,6 +180,7 @@ export const createInstance = async (
     viewContext.currentBoardStorage = currentBoardStorage
     viewContext.recentStorage = recentStorage
     viewContext.requestRerender = requestRerender
+    viewContext.showContextMenu = showContextMenu
     viewContext.storage = storage
 
     if (readSearchEnabled) {
@@ -205,6 +242,7 @@ export const createInstance = async (
           return
         }
         if (event.type === 'contextmenu') {
+          await handleContextMenuEvent(viewContext, event)
           return
         }
         if (event.type === 'submit') {
@@ -241,8 +279,15 @@ export const createInstance = async (
         updateContext(state)
       }
     },
+    getMenuEntries(menuId: string): readonly unknown[] {
+      return getMenuEntries(state, menuId)
+    },
     async refreshBoards(): Promise<void> {
       await loadBoards(viewContext)
+      updateContext(state)
+    },
+    async logout(): Promise<void> {
+      await logout(viewContext)
       updateContext(state)
     },
     async reload(): Promise<void> {
@@ -273,6 +318,14 @@ export const createInstance = async (
         return
       }
       await submitAddCard(viewContext, `addCard:${state.addingCardListId}`)
+      updateContext(state)
+    },
+    async openCard(cardId: string): Promise<void> {
+      await openCard(viewContext, cardId)
+      updateContext(state)
+    },
+    startAddCard(listId: string): void {
+      startAddCard(viewContext, listId)
       updateContext(state)
     },
   }

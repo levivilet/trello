@@ -170,6 +170,7 @@ const createAuthenticatedInstance = async (
     readonly cardCreateErrors?: Readonly<Record<string, string>>
     readonly cardMoveErrors?: Readonly<Record<string, string>>
     readonly listUpdateErrors?: Readonly<Record<string, string>>
+    readonly showContextMenu?: (menuId: string, x: number, y: number) => Promise<void>
   } = {},
 ): Promise<VirtualDomViewInstance> => {
   const { boardDetails, cardCreateErrors, cardMoveErrors, listUpdateErrors } =
@@ -189,7 +190,13 @@ const createAuthenticatedInstance = async (
     storage: createMemoryCredentialStorage(),
   }))
 
-  const instance = (await view.create()) as VirtualDomViewInstance
+  const instance = (await view.create(
+    options.showContextMenu
+      ? ({
+          showContextMenu: options.showContextMenu,
+        } as any)
+      : undefined,
+  )) as VirtualDomViewInstance
   await instance.handleEvent?.({
     name: 'apiKey',
     type: 'input',
@@ -529,6 +536,7 @@ test('cards and lists render drag and drop attributes', async () => {
       preventDefault: true,
     },
   ])
+  const contextMenuInvocations: unknown[] = []
   const instance = await createAuthenticatedInstance(
     [{ id: 'board-1', name: 'Roadmap' }],
     [],
@@ -545,6 +553,9 @@ test('cards and lists render drag and drop attributes', async () => {
           ],
         },
       },
+      showContextMenu: async (menuId: string, x: number, y: number) => {
+        contextMenuInvocations.push([menuId, x, y])
+      },
     },
   )
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
@@ -555,6 +566,7 @@ test('cards and lists render drag and drop attributes', async () => {
       className: 'TrelloCard',
       draggable: true,
       name: 'card:card-1',
+      onContextMenu: 'handleContextMenu',
       onDragEnd: 'handleDragEnd',
       onDragStart: 'handleDragStart',
     }),
@@ -576,7 +588,31 @@ test('cards and lists render drag and drop attributes', async () => {
     }),
   )
 
-  await instance.handleEvent?.({ name: 'list:list-1', type: 'contextmenu' })
+  await instance.handleEvent?.({
+    name: 'list:list-1',
+    type: 'contextmenu',
+    x: 100,
+    y: 200,
+  } as any)
+  expect(contextMenuInvocations).toEqual([['trello.list', 100, 200]])
+  expect((instance as any).getMenuEntries('trello.list')).toEqual([
+    {
+      args: ['list-1'],
+      command: 'trello.startAddCard',
+      id: 'addCard',
+      label: 'Add Card',
+    },
+    {
+      command: 'trello.refreshBoards',
+      id: 'refreshBoards',
+      label: 'Refresh Boards',
+    },
+    {
+      command: 'trello.backToBoards',
+      id: 'backToBoards',
+      label: 'Back to Boards',
+    },
+  ])
   expect(await instance.render()).toEqual(dom)
   resetTrelloViewDependencyFactory()
 })
@@ -627,6 +663,176 @@ test('clicking add card renders input for that list only', async () => {
       )
     }),
   ).toBe(true)
+  resetTrelloViewDependencyFactory()
+})
+
+test('board overview context menu opens board menu', async () => {
+  const contextMenuInvocations: unknown[] = []
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      showContextMenu: async (menuId: string, x: number, y: number) => {
+        contextMenuInvocations.push([menuId, x, y])
+      },
+    },
+  )
+
+  const dom = await instance.render()
+  expect(getNodeByName(dom, 'boards')).toEqual(
+    expect.objectContaining({
+      name: 'boards',
+      onContextMenu: 'handleContextMenu',
+    }),
+  )
+
+  await instance.handleEvent?.({
+    name: 'boards',
+    type: 'contextmenu',
+    x: 11,
+    y: 22,
+  } as any)
+
+  expect(contextMenuInvocations).toEqual([['trello.board', 11, 22]])
+  expect((instance as any).getMenuEntries('trello.board')).toEqual([
+    {
+      command: 'trello.refreshBoards',
+      id: 'refreshBoards',
+      label: 'Refresh Boards',
+    },
+    {
+      command: 'trello.logout',
+      id: 'signOut',
+      label: 'Sign Out',
+    },
+  ])
+  resetTrelloViewDependencyFactory()
+})
+
+test('card context menu opens card menu with target args', async () => {
+  const contextMenuInvocations: unknown[] = []
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', idList: 'list-1', name: 'Plan work' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      showContextMenu: async (menuId: string, x: number, y: number) => {
+        contextMenuInvocations.push([menuId, x, y])
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+
+  await instance.handleEvent?.({
+    name: 'card:card-1',
+    type: 'contextmenu',
+    x: 33,
+    y: 44,
+  } as any)
+
+  expect(contextMenuInvocations).toEqual([['trello.card', 33, 44]])
+  expect((instance as any).getMenuEntries('trello.card')).toEqual([
+    {
+      args: ['card-1'],
+      command: 'trello.openCard',
+      id: 'openCard',
+      label: 'Open Card',
+    },
+    {
+      args: ['list-1'],
+      command: 'trello.startAddCard',
+      id: 'addCard',
+      label: 'Add Card',
+    },
+    {
+      command: 'trello.refreshBoards',
+      id: 'refreshBoards',
+      label: 'Refresh Boards',
+    },
+    {
+      command: 'trello.backToBoards',
+      id: 'backToBoards',
+      label: 'Back to Boards',
+    },
+  ])
+  resetTrelloViewDependencyFactory()
+})
+
+test('card detail context menu opens card detail menu', async () => {
+  const contextMenuInvocations: unknown[] = []
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', idList: 'list-1', name: 'Plan work' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      showContextMenu: async (menuId: string, x: number, y: number) => {
+        contextMenuInvocations.push([menuId, x, y])
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+
+  const dom = await instance.render()
+  expect(getNodeByName(dom, 'cardDetail')).toEqual(
+    expect.objectContaining({
+      name: 'cardDetail',
+      onContextMenu: 'handleContextMenu',
+    }),
+  )
+
+  await instance.handleEvent?.({
+    name: 'cardDetail',
+    type: 'contextmenu',
+    x: 55,
+    y: 66,
+  } as any)
+
+  expect(contextMenuInvocations).toEqual([['trello.cardDetail', 55, 66]])
+  expect((instance as any).getMenuEntries('trello.cardDetail')).toEqual([
+    {
+      command: 'trello.saveCardDetail',
+      id: 'saveCard',
+      label: 'Save Card',
+    },
+    {
+      command: 'trello.closeCardDetail',
+      id: 'closeCard',
+      label: 'Close Card',
+    },
+    {
+      command: 'trello.refreshBoards',
+      id: 'refreshBoards',
+      label: 'Refresh Boards',
+    },
+    {
+      command: 'trello.backToBoards',
+      id: 'backToBoards',
+      label: 'Back to Boards',
+    },
+  ])
   resetTrelloViewDependencyFactory()
 })
 

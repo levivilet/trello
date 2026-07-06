@@ -9,6 +9,8 @@ export const createInitialState = (): TrelloViewState => {
     boards: [],
     cardDetailLoading: false,
     context: {},
+    contextMenuCardId: '',
+    contextMenuListId: '',
     credentials: undefined,
     draftApiKey: '',
     draftCardDescription: '',
