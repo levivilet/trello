@@ -13,10 +13,9 @@ import type {
   TrelloViewState,
 } from './state/TrelloViewState.ts'
 import { createMemoryCurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
-import {
-  cancelAddCard,
-  submitAddCard,
-} from './actions/AddCard.ts'
+import { cancelAddCard, submitAddCard } from './actions/AddCard.ts'
+import { closeCardDetail as closeCardDetailAction } from './actions/CloseCardDetail.ts'
+import { goBackToBoards } from './actions/GoBackToBoards.ts'
 import { handleBlurEvent } from './actions/HandleBlurEvent.ts'
 import { handleClickEvent } from './actions/HandleClickEvent.ts'
 import {
@@ -28,8 +27,6 @@ import {
 } from './actions/HandleDragEvent.ts'
 import { handleInputEvent } from './actions/HandleInputEvent.ts'
 import { handleSubmitEvent } from './actions/HandleSubmitEvent.ts'
-import { closeCardDetail as closeCardDetailAction } from './actions/CloseCardDetail.ts'
-import { goBackToBoards } from './actions/GoBackToBoards.ts'
 import { loadBoards } from './actions/LoadBoards.ts'
 import { restoreCurrentBoard } from './actions/RestoreCurrentBoard.ts'
 import { saveCardDetail as saveCardDetailAction } from './actions/SaveCardDetail.ts'
@@ -45,8 +42,8 @@ interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly cancelNewCard: () => void
   readonly closeCardDetail: () => void
   readonly getContext: () => Readonly<Record<string, boolean>>
-  readonly reload: () => Promise<void>
   readonly refreshBoards: () => Promise<void>
+  readonly reload: () => Promise<void>
   readonly saveCardDetail: () => Promise<void>
   readonly submitNewCard: () => Promise<void>
 }
@@ -82,17 +79,20 @@ export const closeCardDetailActiveTrelloViewInstance = (): void => {
   getActiveInstance()?.closeCardDetail()
 }
 
-export const refreshBoardsActiveTrelloViewInstance = async (): Promise<void> => {
-  await getActiveInstance()?.refreshBoards()
-}
+export const refreshBoardsActiveTrelloViewInstance =
+  async (): Promise<void> => {
+    await getActiveInstance()?.refreshBoards()
+  }
 
-export const saveCardDetailActiveTrelloViewInstance = async (): Promise<void> => {
-  await getActiveInstance()?.saveCardDetail()
-}
+export const saveCardDetailActiveTrelloViewInstance =
+  async (): Promise<void> => {
+    await getActiveInstance()?.saveCardDetail()
+  }
 
-export const submitNewCardActiveTrelloViewInstance = async (): Promise<void> => {
-  await getActiveInstance()?.submitNewCard()
-}
+export const submitNewCardActiveTrelloViewInstance =
+  async (): Promise<void> => {
+    await getActiveInstance()?.submitNewCard()
+  }
 
 export const reloadActiveTrelloViewInstances = async (): Promise<void> => {
   await Promise.all(
@@ -170,8 +170,23 @@ export const createInstance = async (
   await initialize(false)
 
   const instance: ActiveTrelloViewInstance = {
+    async backToBoards(): Promise<void> {
+      await goBackToBoards(viewContext)
+      updateContext(state)
+    },
+    cancelNewCard(): void {
+      cancelAddCard(viewContext)
+      updateContext(state)
+    },
+    closeCardDetail(): void {
+      closeCardDetailAction(viewContext)
+      updateContext(state)
+    },
     async dispose(): Promise<void> {
       activeInstances.delete(instance)
+    },
+    getContext(): Readonly<Record<string, boolean>> {
+      return state.context
     },
     async handleEvent(event: Readonly<ViewEvent>): Promise<void> {
       activeInstances.delete(instance)
@@ -226,27 +241,12 @@ export const createInstance = async (
         updateContext(state)
       }
     },
-    async backToBoards(): Promise<void> {
-      await goBackToBoards(viewContext)
-      updateContext(state)
-    },
-    cancelNewCard(): void {
-      cancelAddCard(viewContext)
-      updateContext(state)
-    },
-    closeCardDetail(): void {
-      closeCardDetailAction(viewContext)
-      updateContext(state)
-    },
-    getContext(): Readonly<Record<string, boolean>> {
-      return state.context
-    },
-    async reload(): Promise<void> {
-      await initialize(true)
-    },
     async refreshBoards(): Promise<void> {
       await loadBoards(viewContext)
       updateContext(state)
+    },
+    async reload(): Promise<void> {
+      await initialize(true)
     },
     render(): readonly VirtualDomNode[] {
       if (!state.credentials) {
@@ -257,16 +257,16 @@ export const createInstance = async (
       }
       return renderBoards(state)
     },
+    async saveCardDetail(): Promise<void> {
+      await saveCardDetailAction(viewContext)
+      updateContext(state)
+    },
     saveState(): unknown {
       return {
         boardId: state.boardDetail?.board.id,
         cardId: state.selectedCardDetail?.card.id,
         isAuthenticated: Boolean(state.credentials),
       }
-    },
-    async saveCardDetail(): Promise<void> {
-      await saveCardDetailAction(viewContext)
-      updateContext(state)
     },
     async submitNewCard(): Promise<void> {
       if (!state.addingCardListId) {

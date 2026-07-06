@@ -6,7 +6,7 @@ const contextKeyCardDescriptionFocus = 'trello.cardDescriptionFocus'
 const contextKeyCardDetailFocus = 'trello.cardDetailFocus'
 const contextKeyNewCardInputFocus = 'trello.newCardInputFocus'
 
-export const updateContext = (state: TrelloViewState): void => {
+export const updateContext = (state: Readonly<TrelloViewState>): void => {
   const context: Record<string, boolean> = {}
   if (state.credentials && state.boardDetail) {
     context[contextKeyBoardDetailFocus] = true
@@ -30,5 +30,6 @@ export const updateContext = (state: TrelloViewState): void => {
   ) {
     context[contextKeyNewCardInputFocus] = true
   }
-  state.context = context
+  const mutableState = state as TrelloViewState
+  mutableState.context = context
 }

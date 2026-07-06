@@ -714,7 +714,9 @@ test('active keybinding commands submit and cancel new card input', async () => 
 
   await instance.handleEvent?.({ name: 'addCard:list-1', type: 'click' })
   cancelNewCardActiveTrelloViewInstance()
-  expect(getNodeByName(await instance.render(), 'newCardTitle:list-1')).toBeUndefined()
+  expect(
+    getNodeByName(await instance.render(), 'newCardTitle:list-1'),
+  ).toBeUndefined()
 
   resetTrelloViewDependencyFactory()
 })
@@ -744,7 +746,9 @@ test('active keybinding commands navigate board and close card detail', async ()
   expect(getText(await instance.render())).toContain('Plan work')
 
   closeCardDetailActiveTrelloViewInstance()
-  expect(getNodeByName(await instance.render(), 'closeCardDetail')).toBeUndefined()
+  expect(
+    getNodeByName(await instance.render(), 'closeCardDetail'),
+  ).toBeUndefined()
 
   await backToBoardsActiveTrelloViewInstance()
   expect(getBoardButtonLabels(await instance.render())).toContain('Roadmap')
