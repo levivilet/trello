@@ -16,16 +16,16 @@ export const renderEventListeners = (): readonly DomEventListener[] => {
     },
     {
       name: 'handleDragOver',
-      params: ['handleViewEvent', 'dragover', 'event.target.name'],
+      params: ['handleViewEvent', 'dragover', 'event.currentTarget.dataset.id'],
       preventDefault: true,
     },
     {
       name: 'handleDragLeave',
-      params: ['handleViewEvent', 'dragleave', 'event.target.name'],
+      params: ['handleViewEvent', 'dragleave', 'event.currentTarget.dataset.id'],
     },
     {
       name: 'handleDrop',
-      params: ['handleViewEvent', 'drop', 'event.target.name'],
+      params: ['handleViewEvent', 'drop', 'event.currentTarget.dataset.id'],
       preventDefault: true,
     },
   ]

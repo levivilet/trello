@@ -95,6 +95,7 @@ export const renderBoardDetail = (
       VirtualDomElements.Div,
       {
         className: getListClassName(state, list),
+        'data-id': `list:${list.id}`,
         name: `list:${list.id}`,
         onClick: 'handleClick',
         onContextMenu: 'handleContextMenu',

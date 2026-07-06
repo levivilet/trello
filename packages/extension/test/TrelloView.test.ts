@@ -510,16 +510,16 @@ test('cards and lists render drag and drop attributes', async () => {
     },
     {
       name: 'handleDragOver',
-      params: ['handleViewEvent', 'dragover', 'event.target.name'],
+      params: ['handleViewEvent', 'dragover', 'event.currentTarget.dataset.id'],
       preventDefault: true,
     },
     {
       name: 'handleDragLeave',
-      params: ['handleViewEvent', 'dragleave', 'event.target.name'],
+      params: ['handleViewEvent', 'dragleave', 'event.currentTarget.dataset.id'],
     },
     {
       name: 'handleDrop',
-      params: ['handleViewEvent', 'drop', 'event.target.name'],
+      params: ['handleViewEvent', 'drop', 'event.currentTarget.dataset.id'],
       preventDefault: true,
     },
   ])
@@ -561,6 +561,7 @@ test('cards and lists render drag and drop attributes', async () => {
   expect(getNodeByName(dom, 'list:list-1')).toEqual(
     expect.objectContaining({
       className: 'TrelloList',
+      'data-id': 'list:list-1',
       name: 'list:list-1',
       onClick: 'handleClick',
       onContextMenu: 'handleContextMenu',
