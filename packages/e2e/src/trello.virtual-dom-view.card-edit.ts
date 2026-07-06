@@ -86,7 +86,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await openBoard(Locator, expect)
   await openCard(Locator, expect)
 
-  const title = Locator('input[name="cardTitle"]')
+  const title = Locator('textarea[name="cardTitle"]')
   await expect(title).toBeVisible()
   await title.type(' edited')
 
