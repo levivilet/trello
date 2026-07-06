@@ -24,6 +24,9 @@ export const openCard = async (
   }
   state.cardDetailLoading = true
   state.selectedCardDetail = undefined
+  state.addingCardLabelId = ''
+  state.cardLabelPickerOpen = false
+  state.draftLabelSearchQuery = ''
   state.error = ''
   requestRerender()
   try {

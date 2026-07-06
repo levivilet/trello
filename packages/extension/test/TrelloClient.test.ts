@@ -524,6 +524,146 @@ test('createCard invalidates cached cards for target list', async () => {
   ).toBe(false)
 })
 
+test('listBoardLabels requests board labels with credentials', async () => {
+  const requests: string[] = []
+  const client = createTrelloClient(async (url) => {
+    requests.push(url)
+    return jsonResponse([
+      {
+        color: 'blue',
+        id: 'label-1',
+        idBoard: 'board-1',
+        name: 'Extension Api',
+      },
+    ])
+  })
+
+  await expect(
+    client.listBoardLabels(
+      { id: 'board-1', name: 'Roadmap' },
+      {
+        apiKey: validApiKey,
+        token: validToken,
+      },
+    ),
+  ).resolves.toEqual([
+    {
+      color: 'blue',
+      id: 'label-1',
+      idBoard: 'board-1',
+      name: 'Extension Api',
+    },
+  ])
+
+  expect(requests).toHaveLength(1)
+  const url = new URL(requests[0])
+  expect(url.pathname).toBe('/1/boards/board-1/labels')
+  expect(url.searchParams.get('key')).toBe(validApiKey)
+  expect(url.searchParams.get('token')).toBe(validToken)
+  expect(url.searchParams.get('fields')).toBe('name,color,idBoard')
+  expect(url.searchParams.get('limit')).toBe('1000')
+})
+
+test('addCardLabel sends label id to trello', async () => {
+  const requests: string[] = []
+  const requestInits: ({ readonly method?: string } | undefined)[] = []
+  const client = createTrelloClient(async (url, init) => {
+    requests.push(url)
+    requestInits.push(init)
+    return jsonResponse({
+      id: 'card-1',
+      labels: [
+        {
+          color: 'blue',
+          id: 'label-1',
+          idBoard: 'board-1',
+          name: 'Extension Api',
+        },
+      ],
+      name: 'Ship Trello view',
+    })
+  })
+
+  await expect(
+    client.addCardLabel(
+      { id: 'card-1', name: 'Ship Trello view' },
+      {
+        color: 'blue',
+        id: 'label-1',
+        idBoard: 'board-1',
+        name: 'Extension Api',
+      },
+      {
+        apiKey: validApiKey,
+        token: validToken,
+      },
+    ),
+  ).resolves.toEqual({
+    id: 'card-1',
+    labels: [
+      {
+        color: 'blue',
+        id: 'label-1',
+        idBoard: 'board-1',
+        name: 'Extension Api',
+      },
+    ],
+    name: 'Ship Trello view',
+  })
+
+  expect(requests).toHaveLength(1)
+  const url = new URL(requests[0])
+  expect(url.pathname).toBe('/1/cards/card-1/idLabels')
+  expect(url.searchParams.get('key')).toBe(validApiKey)
+  expect(url.searchParams.get('token')).toBe(validToken)
+  expect(url.searchParams.get('value')).toBe('label-1')
+  expect(requestInits[0]?.method).toBe('POST')
+})
+
+test('addCardLabel invalidates cached card detail', async () => {
+  const cache = createMemoryTrelloApiCache()
+  const client = createTrelloClient(async (url) => {
+    const path = new URL(url).pathname
+    if (path === '/1/cards/card-1/attachments') {
+      return jsonResponse([])
+    }
+    if (path === '/1/cards/card-1/actions') {
+      return jsonResponse([])
+    }
+    return jsonResponse({
+      id: 'card-1',
+      labels: [],
+      name: 'Ship Trello view',
+    })
+  }, cache)
+  const credentials = {
+    apiKey: validApiKey,
+    token: validToken,
+  }
+
+  await client.getCardDetail(
+    { id: 'card-1', name: 'Ship Trello view' },
+    credentials,
+  )
+  expect(
+    cache.keys().some((key) => {
+      return new URL(key).pathname === '/1/cards/card-1'
+    }),
+  ).toBe(true)
+
+  await client.addCardLabel(
+    { id: 'card-1', name: 'Ship Trello view' },
+    { color: 'blue', id: 'label-1', name: 'Extension Api' },
+    credentials,
+  )
+
+  expect(
+    cache.keys().some((key) => {
+      return new URL(key).pathname === '/1/cards/card-1'
+    }),
+  ).toBe(false)
+})
+
 test('updateList sends title to trello', async () => {
   const requests: string[] = []
   const requestInits: ({ readonly method?: string } | undefined)[] = []

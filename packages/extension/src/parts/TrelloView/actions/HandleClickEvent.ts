@@ -1,6 +1,7 @@
 import type { ViewEvent } from '@lvce-editor/api'
 import type { TrelloViewActionContext } from '../state/TrelloViewState.ts'
 import { startAddCard } from './AddCard.ts'
+import { addCardLabel, openCardLabelPicker } from './AddCardLabel.ts'
 import { closeCardDetail } from './CloseCardDetail.ts'
 import { connect } from './Connect.ts'
 import { editCardDescription, editCardTitle } from './EditCardDetail.ts'
@@ -23,6 +24,10 @@ export const handleClickEvent = async (
     startAddCard(context, event.name.slice('addCard:'.length))
     return
   }
+  if (event.name?.startsWith('addCardLabel:')) {
+    await addCardLabel(context, event.name.slice('addCardLabel:'.length))
+    return
+  }
   switch (event.name) {
     case 'backToBoards':
       await goBackToBoards(context)
@@ -38,6 +43,9 @@ export const handleClickEvent = async (
       return
     case 'logout':
       await logout(context)
+      return
+    case 'openCardLabelPicker':
+      await openCardLabelPicker(context)
       return
     case 'refreshBoards':
       await loadBoards(context)

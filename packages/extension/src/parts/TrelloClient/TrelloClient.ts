@@ -4,6 +4,7 @@ import type {
   TrelloCard,
   TrelloCardDetail,
   TrelloCredentials,
+  TrelloLabel,
   TrelloSearchResult,
 } from '../TrelloTypes/TrelloTypes.ts'
 import type {
@@ -11,6 +12,7 @@ import type {
   TrelloCacheFirstResult,
   TrelloClient,
 } from './TrelloClientTypes.ts'
+import { addCardLabel } from './operations/AddCardLabel.ts'
 import { createCard } from './operations/CreateCard.ts'
 import {
   getBoardDetail,
@@ -20,6 +22,7 @@ import {
   getCardDetail,
   readCachedCardDetail,
 } from './operations/GetCardDetail.ts'
+import { listBoardLabels } from './operations/ListBoardLabels.ts'
 import { listBoards, readCachedListBoards } from './operations/ListBoards.ts'
 import { moveCard } from './operations/MoveCard.ts'
 import { readCachedSearch, search } from './operations/Search.ts'
@@ -37,6 +40,13 @@ export const createTrelloClient = (
   cache: TrelloApiCache | undefined = createCacheStorageTrelloApiCache(),
 ): TrelloClient => {
   return {
+    addCardLabel(
+      card: TrelloCard,
+      label: TrelloLabel,
+      credentials: TrelloCredentials,
+    ): ReturnType<TrelloClient['addCardLabel']> {
+      return addCardLabel(fetchLike, card, label, credentials, cache)
+    },
     createCard(
       list,
       create,
@@ -73,6 +83,12 @@ export const createTrelloClient = (
         cached: await readCachedCardDetail(cache, card, credentials),
         fresh: getCardDetail(fetchLike, card, credentials, cache),
       }
+    },
+    listBoardLabels(
+      board,
+      credentials,
+    ): ReturnType<TrelloClient['listBoardLabels']> {
+      return listBoardLabels(fetchLike, board, credentials, cache)
     },
     listBoards(credentials): ReturnType<TrelloClient['listBoards']> {
       return listBoards(fetchLike, credentials, cache)
