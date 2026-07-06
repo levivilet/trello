@@ -1,3 +1,99 @@
+.TrelloView,
+.TrelloBoardDetail {
+  --TrelloBackground: var(--MainBackground, var(--SideBarBackground, #1e2324));
+  --TrelloForeground: var(
+    --WorkbenchForeground,
+    var(--ListForeground, var(--SideBarForeground, #cccccc))
+  );
+  --TrelloForegroundStrong: var(--MarkdownForeground, var(--TrelloForeground));
+  --TrelloForegroundMuted: color-mix(
+    in srgb,
+    var(--TrelloForeground) 68%,
+    var(--TrelloBackground)
+  );
+  --TrelloSurface: var(
+    --SideBarBackground,
+    var(--PanelBackground, var(--WidgetBackground, var(--TrelloBackground)))
+  );
+  --TrelloSurfaceAlt: var(
+    --WidgetBackground,
+    var(
+      --InputBoxBackground,
+      color-mix(in srgb, var(--TrelloSurface) 88%, var(--TrelloForeground) 12%)
+    )
+  );
+  --TrelloInputBackground: var(
+    --InputBackground,
+    var(--InputBoxBackground, var(--TrelloSurfaceAlt))
+  );
+  --TrelloInputForeground: var(
+    --InputForeground,
+    var(--InputBoxForeground, var(--TrelloForegroundStrong))
+  );
+  --TrelloBorder: var(
+    --ContrastBorder,
+    var(
+      --SideBarBorder,
+      var(
+        --InputBoxBorder,
+        color-mix(in srgb, var(--TrelloForeground) 22%, transparent)
+      )
+    )
+  );
+  --TrelloBorderSubtle: color-mix(
+    in srgb,
+    var(--TrelloForeground) 16%,
+    transparent
+  );
+  --TrelloBorderStrong: color-mix(
+    in srgb,
+    var(--TrelloForeground) 32%,
+    transparent
+  );
+  --TrelloHoverBackground: color-mix(
+    in srgb,
+    var(--TrelloSurface) 84%,
+    var(--TrelloForeground) 16%
+  );
+  --TrelloActiveBackground: color-mix(
+    in srgb,
+    var(--TrelloSurface) 76%,
+    var(--TrelloForeground) 24%
+  );
+  --TrelloFocus: var(
+    --FocusBorder,
+    var(--SplitButtonBackground, var(--LinkForeground, #3794ff))
+  );
+  --TrelloFocusSoft: color-mix(in srgb, var(--TrelloFocus) 30%, transparent);
+  --TrelloBadgeBackground: var(--BadgeBackground, var(--TrelloFocus));
+  --TrelloButtonBackground: var(
+    --SplitButtonBackground,
+    var(--ButtonBackground, var(--TrelloFocus))
+  );
+  --TrelloButtonForeground: var(--SplitButtonForeground, #ffffff);
+  --TrelloButtonHoverBackground: var(
+    --SplitButtonHoverBackground,
+    color-mix(
+      in srgb,
+      var(--TrelloButtonBackground) 82%,
+      var(--TrelloForeground) 18%
+    )
+  );
+  --TrelloLinkForeground: var(
+    --LinkForeground,
+    var(--TextLinkForeground, var(--TrelloFocus))
+  );
+  --TrelloShadow: color-mix(in srgb, var(--TrelloBackground) 72%, transparent);
+  --TrelloErrorBackground: var(
+    --ErrorBackground,
+    color-mix(in srgb, #c9372c 22%, var(--TrelloBackground))
+  );
+  --TrelloErrorForeground: var(
+    --ErrorForeground,
+    var(--TrelloForegroundStrong)
+  );
+}
+
 .TrelloView {
   box-sizing: border-box;
   display: flex;
@@ -6,8 +102,8 @@
   height: 100%;
   contain: strict;
   padding: 16px;
-  color: var(--Foreground, #f4f4f4);
-  background: var(--MainBackground, #181f1f);
+  color: var(--TrelloForeground);
+  background: var(--TrelloBackground);
 }
 
 .TrelloTitle {
@@ -22,7 +118,7 @@
   contain: content;
   font-size: 13px;
   line-height: 1.3;
-  color: var(--ForegroundMuted, #aeb8b8);
+  color: var(--TrelloForegroundMuted);
   text-transform: uppercase;
 }
 
@@ -38,7 +134,7 @@
   font-size: 13px;
   font-weight: 600;
   line-height: 1.3;
-  color: var(--Foreground, #f4f4f4);
+  color: var(--TrelloForegroundStrong);
   text-overflow: ellipsis;
   background: transparent;
   border: 1px solid transparent;
@@ -50,11 +146,11 @@
 }
 
 .TrelloListTitleInput:focus {
-  color: var(--InputForeground, #f7f7f7);
-  background: var(--InputBackground, #111616);
-  border-color: var(--ButtonHoverBackground, #087d90);
+  color: var(--TrelloInputForeground);
+  background: var(--TrelloInputBackground);
+  border-color: var(--TrelloFocus);
   outline: none;
-  box-shadow: inset 0 0 0 1px var(--ButtonHoverBackground, #087d90);
+  box-shadow: inset 0 0 0 1px var(--TrelloFocus);
 }
 
 .TrelloToolbar {
@@ -71,7 +167,7 @@
   gap: 5px;
   contain: content;
   font-size: 12px;
-  color: var(--ForegroundMuted, #c4cccc);
+  color: var(--TrelloForegroundMuted);
 }
 
 .TrelloWelcome {
@@ -83,9 +179,9 @@
   max-width: 760px;
   margin-top: 8px;
   padding: 12px;
-  color: var(--ForegroundMuted, #c4cccc);
-  background: var(--SideBarBackground, #202929);
-  border: 1px solid var(--SideBarBorder, #334040);
+  color: var(--TrelloForegroundMuted);
+  background: var(--TrelloSurface);
+  border: 1px solid var(--TrelloBorder);
   border-radius: 6px;
 }
 
@@ -95,7 +191,7 @@
   font-size: 14px;
   font-weight: 600;
   line-height: 1.3;
-  color: var(--Foreground, #f4f4f4);
+  color: var(--TrelloForegroundStrong);
 }
 
 .TrelloWelcomeText {
@@ -111,8 +207,8 @@
   padding-top: 8px;
   font-size: 12px;
   line-height: 1.55;
-  color: var(--ForegroundMuted, #c4cccc);
-  border-top: 1px solid var(--WidgetBorder, #314040);
+  color: var(--TrelloForegroundMuted);
+  border-top: 1px solid var(--TrelloBorder);
 }
 
 .TrelloWelcomeSteps {
@@ -143,8 +239,8 @@
   width: 20px;
   height: 20px;
   contain: content;
-  color: var(--ButtonForeground, #ffffff);
-  background: var(--ButtonBackground, #006a7a);
+  color: var(--TrelloButtonForeground);
+  background: var(--TrelloButtonBackground);
   border-radius: 999px;
 }
 
@@ -155,7 +251,7 @@
 }
 
 .TrelloWelcomeLink {
-  color: var(--TextLinkForeground, #4dc8ff);
+  color: var(--TrelloLinkForeground);
   text-decoration: none;
   overflow-wrap: anywhere;
 }
@@ -183,9 +279,9 @@
   min-height: 28px;
   contain: content;
   padding: 4px 8px;
-  color: var(--InputForeground, #f7f7f7);
-  background: var(--InputBackground, #111616);
-  border: 1px solid var(--InputBorder, #394545);
+  color: var(--TrelloInputForeground);
+  background: var(--TrelloInputBackground);
+  border: 1px solid var(--TrelloBorder);
   border-radius: 6px;
   transition:
     border-color 120ms ease,
@@ -195,8 +291,8 @@
 .TrelloInput:focus,
 .TrelloTextArea:focus {
   outline: none;
-  border-color: var(--ButtonHoverBackground, #087d90);
-  box-shadow: inset 0 0 0 1px var(--ButtonHoverBackground, #087d90);
+  border-color: var(--TrelloFocus);
+  box-shadow: inset 0 0 0 1px var(--TrelloFocus);
 }
 
 .TrelloTextArea {
@@ -210,15 +306,15 @@
   min-height: 28px;
   contain: content;
   padding: 4px 10px;
-  color: var(--ButtonForeground, #ffffff);
-  background: var(--ButtonBackground, #006a7a);
+  color: var(--TrelloButtonForeground);
+  background: var(--TrelloButtonBackground);
   border: 1px solid transparent;
   border-radius: 6px;
 }
 
 .TrelloButton:hover,
 .TrelloBoardButton:hover {
-  background: var(--ButtonHoverBackground, #087d90);
+  background: var(--TrelloButtonHoverBackground);
 }
 
 .TrelloBoardButton {
@@ -264,14 +360,14 @@
   contain: content;
   padding: 8px;
   text-align: left;
-  color: var(--Foreground, #f4f4f4);
-  background: var(--EditorBackground, #121818);
-  border: 1px solid var(--WidgetBorder, #314040);
+  color: var(--TrelloForegroundStrong);
+  background: var(--TrelloSurfaceAlt);
+  border: 1px solid var(--TrelloBorder);
   border-radius: 6px;
 }
 
 button.TrelloSearchResult:hover {
-  background: var(--ButtonHoverBackground, #087d90);
+  background: var(--TrelloHoverBackground);
 }
 
 .TrelloBoardDetail {
@@ -280,10 +376,7 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloBoardDetailWithBackground {
-  background-color: var(
-    --TrelloBoardBackgroundColor,
-    var(--MainBackground, #181f1f)
-  );
+  background-color: var(--TrelloBoardBackgroundColor, var(--TrelloBackground));
   background-image: var(--TrelloBoardBackgroundImage, none);
   background-position: center;
   background-repeat: var(--TrelloBoardBackgroundRepeat, no-repeat);
@@ -321,21 +414,17 @@ button.TrelloSearchResult:hover {
   contain: strict;
   overflow: hidden;
   padding: 8px;
-  background: var(--SideBarBackground, #202929);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--TrelloSurface);
+  border: 1px solid var(--TrelloBorderSubtle);
   border-radius: 8px;
   box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.22),
-    0 8px 24px rgba(0, 0, 0, 0.12);
+    0 1px 2px var(--TrelloShadow),
+    0 8px 24px var(--TrelloShadow);
 }
 
 .TrelloListDragTarget {
-  background: color-mix(
-    in srgb,
-    var(--ButtonHoverBackground, #087d90) 18%,
-    var(--SideBarBackground, #202929)
-  );
-  border-color: var(--ButtonHoverBackground, #087d90);
+  background: color-mix(in srgb, var(--TrelloFocus) 18%, var(--TrelloSurface));
+  border-color: var(--TrelloFocus);
 }
 
 .TrelloCards {
@@ -360,11 +449,11 @@ button.TrelloSearchResult:hover {
   overflow: hidden;
   padding: 0;
   text-align: left;
-  color: var(--Foreground, #f4f4f4);
-  background: var(--EditorBackground, #121818);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--TrelloForegroundStrong);
+  background: var(--TrelloSurfaceAlt);
+  border: 1px solid var(--TrelloBorderSubtle);
   border-radius: 6px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
+  box-shadow: 0 1px 2px var(--TrelloShadow);
   transition:
     background 120ms ease,
     border-color 120ms ease,
@@ -373,20 +462,20 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloCard:hover {
-  background: var(--SideBarBackground, #202929);
-  border-color: var(--ButtonHoverBackground, #087d90);
+  background: var(--TrelloHoverBackground);
+  border-color: var(--TrelloFocus);
   box-shadow:
-    0 2px 5px rgba(0, 0, 0, 0.24),
-    0 0 0 1px rgba(8, 125, 144, 0.18);
+    0 2px 5px var(--TrelloShadow),
+    0 0 0 1px var(--TrelloFocusSoft);
   transform: translateY(-1px);
 }
 
 .TrelloCard:focus {
   outline: none;
-  border-color: var(--ButtonHoverBackground, #087d90);
+  border-color: var(--TrelloFocus);
   box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.24),
-    0 0 0 1px var(--ButtonHoverBackground, #087d90);
+    0 1px 2px var(--TrelloShadow),
+    0 0 0 1px var(--TrelloFocus);
 }
 
 .TrelloCard * {
@@ -410,8 +499,8 @@ button.TrelloSearchResult:hover {
   aspect-ratio: 16 / 9;
   contain: content;
   object-fit: cover;
-  background: var(--EditorBackground, #121818);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--TrelloSurfaceAlt);
+  border-bottom: 1px solid var(--TrelloBorderSubtle);
 }
 
 .TrelloCardTitle {
@@ -426,7 +515,7 @@ button.TrelloSearchResult:hover {
   contain: content;
   font-size: 12px;
   line-height: 1.3;
-  color: var(--ForegroundMuted, #aeb8b8);
+  color: var(--TrelloForegroundMuted);
 }
 
 .TrelloCardCommentIcon {
@@ -448,15 +537,15 @@ button.TrelloSearchResult:hover {
   contain: content;
   padding: 6px 8px;
   text-align: left;
-  color: var(--ForegroundMuted, #aeb8b8);
+  color: var(--TrelloForegroundMuted);
   background: transparent;
   border: 1px solid transparent;
   border-radius: 6px;
 }
 
 .TrelloAddCardButton:hover {
-  color: var(--ButtonForeground, #ffffff);
-  background: var(--ButtonHoverBackground, #087d90);
+  color: var(--TrelloButtonForeground);
+  background: var(--TrelloButtonHoverBackground);
 }
 
 .TrelloAddCardForm {
@@ -469,15 +558,15 @@ button.TrelloSearchResult:hover {
   min-height: 34px;
   contain: content;
   padding: 7px 8px;
-  color: var(--Foreground, #f4f4f4);
-  background: var(--EditorBackground, #121818);
-  border: 1px solid var(--ButtonHoverBackground, #087d90);
+  color: var(--TrelloInputForeground);
+  background: var(--TrelloInputBackground);
+  border: 1px solid var(--TrelloFocus);
   border-radius: 6px;
 }
 
 .TrelloAddCardInput:focus {
   outline: none;
-  box-shadow: 0 0 0 1px var(--ButtonHoverBackground, #087d90);
+  box-shadow: 0 0 0 1px var(--TrelloFocus);
 }
 
 .TrelloCardDetailPanel {
@@ -490,8 +579,8 @@ button.TrelloSearchResult:hover {
   contain: strict;
   overflow-y: auto;
   padding: 14px;
-  background: var(--SideBarBackground, #202929);
-  border: 1px solid var(--SideBarBorder, #334040);
+  background: var(--TrelloSurface);
+  border: 1px solid var(--TrelloBorder);
   border-radius: 8px;
 }
 
@@ -515,7 +604,7 @@ button.TrelloSearchResult:hover {
   font-size: 18px;
   font-weight: 600;
   line-height: 1.35;
-  color: var(--Foreground, #f4f4f4);
+  color: var(--TrelloForegroundStrong);
   text-overflow: ellipsis;
   background: transparent;
   border: 1px solid transparent;
@@ -523,15 +612,15 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloCardDetailTitleInput:hover {
-  background: var(--EditorBackground, #121818);
+  background: var(--TrelloSurfaceAlt);
 }
 
 .TrelloCardDetailTitleInput:focus,
 .TrelloCardDetailTitleInputEditing {
-  background: var(--InputBackground, #111616);
-  border-color: var(--ButtonHoverBackground, #087d90);
+  background: var(--TrelloInputBackground);
+  border-color: var(--TrelloFocus);
   outline: none;
-  box-shadow: inset 0 0 0 1px var(--ButtonHoverBackground, #087d90);
+  box-shadow: inset 0 0 0 1px var(--TrelloFocus);
 }
 
 .TrelloCardDetailCloseButton {
@@ -546,15 +635,15 @@ button.TrelloSearchResult:hover {
   margin-left: auto;
   padding: 0;
   line-height: 1;
-  color: var(--ForegroundMuted, #aeb8b8);
+  color: var(--TrelloForegroundMuted);
   background: transparent;
   border-color: transparent;
 }
 
 .TrelloCardDetailCloseButton:hover,
 .TrelloCardDetailCloseButton:focus {
-  color: var(--ButtonForeground, #ffffff);
-  background: var(--ToolbarHoverBackground, #2a3434);
+  color: var(--TrelloForegroundStrong);
+  background: var(--TrelloHoverBackground);
   outline: none;
 }
 
@@ -572,7 +661,7 @@ button.TrelloSearchResult:hover {
   font-size: 13px;
   font-weight: 600;
   line-height: 1.3;
-  color: var(--Foreground, #f4f4f4);
+  color: var(--TrelloForegroundStrong);
 }
 
 .TrelloCardDescriptionPreview {
@@ -584,21 +673,21 @@ button.TrelloSearchResult:hover {
   contain: content;
   padding: 8px;
   text-align: left;
-  color: var(--Foreground, #f4f4f4);
-  background: var(--InputBackground, #111616);
+  color: var(--TrelloForegroundStrong);
+  background: var(--TrelloInputBackground);
   border: 1px solid transparent;
   border-radius: 6px;
 }
 
 .TrelloCardDescriptionPreview:hover {
-  background: var(--EditorBackground, #121818);
-  border-color: var(--WidgetBorder, #314040);
+  background: var(--TrelloSurfaceAlt);
+  border-color: var(--TrelloBorder);
 }
 
 .TrelloCardDescriptionPlaceholder {
   align-items: center;
   justify-content: center;
-  color: var(--ForegroundMuted, #aeb8b8);
+  color: var(--TrelloForegroundMuted);
 }
 
 .TrelloCardDescriptionTextArea {
@@ -618,13 +707,13 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloCardDetailCancelButton {
-  color: var(--Foreground, #f4f4f4);
+  color: var(--TrelloForegroundStrong);
   background: transparent;
   border-color: transparent;
 }
 
 .TrelloCardDetailCancelButton:hover {
-  background: var(--ToolbarHoverBackground, #2a3434);
+  background: var(--TrelloHoverBackground);
 }
 
 .TrelloMarkdownParagraph {
@@ -673,13 +762,13 @@ button.TrelloSearchResult:hover {
   padding: 1px 4px;
   font-family: var(--EditorFontFamily, monospace);
   font-size: 0.92em;
-  color: var(--Foreground, #f4f4f4);
-  background: var(--InputBackground, #111616);
+  color: var(--TrelloForegroundStrong);
+  background: var(--TrelloInputBackground);
   border-radius: 4px;
 }
 
 .TrelloMarkdownLink {
-  color: var(--TextLinkForeground, #4dc8ff);
+  color: var(--TrelloLinkForeground);
   text-decoration: none;
   overflow-wrap: anywhere;
 }
@@ -753,7 +842,7 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloCardLabelColorNeutral {
-  background: var(--ButtonBackground, #0e639c);
+  background: var(--TrelloButtonBackground);
 }
 
 .TrelloCardComments {
@@ -783,10 +872,10 @@ button.TrelloSearchResult:hover {
   font-size: 12px;
   font-weight: 700;
   line-height: 1;
-  color: var(--ButtonForeground, #ffffff);
+  color: var(--TrelloButtonForeground);
   text-transform: uppercase;
-  background: var(--ButtonBackground, #006a7a);
-  border: 1px solid var(--WidgetBorder, #314040);
+  background: var(--TrelloButtonBackground);
+  border: 1px solid var(--TrelloBorder);
   border-radius: 50%;
   object-fit: cover;
 }
@@ -814,7 +903,7 @@ button.TrelloSearchResult:hover {
   font-size: 12px;
   font-weight: 600;
   line-height: 1.4;
-  color: var(--Foreground, #f4f4f4);
+  color: var(--TrelloForegroundStrong);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -824,7 +913,7 @@ button.TrelloSearchResult:hover {
   overflow: hidden;
   font-size: 11px;
   line-height: 1.4;
-  color: var(--ForegroundMuted, #aeb8b8);
+  color: var(--TrelloForegroundMuted);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -835,12 +924,12 @@ button.TrelloSearchResult:hover {
   padding: 8px;
   white-space: pre-wrap;
   line-height: 1.5;
-  color: var(--Foreground, #f4f4f4);
+  color: var(--TrelloForegroundStrong);
   overflow-wrap: anywhere;
-  background: var(--EditorBackground, #121818);
-  border: 1px solid var(--WidgetBorder, #314040);
+  background: var(--TrelloSurfaceAlt);
+  border: 1px solid var(--TrelloBorder);
   border-radius: 6px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 1px 2px var(--TrelloShadow);
 }
 
 .TrelloCardDetailImages {
@@ -857,25 +946,25 @@ button.TrelloSearchResult:hover {
   max-height: 220px;
   contain: content;
   object-fit: contain;
-  background: var(--EditorBackground, #121818);
-  border: 1px solid var(--WidgetBorder, #314040);
+  background: var(--TrelloSurfaceAlt);
+  border: 1px solid var(--TrelloBorder);
   border-radius: 6px;
 }
 
 .TrelloCardDetailEmpty {
   contain: content;
-  color: var(--ForegroundMuted, #aeb8b8);
+  color: var(--TrelloForegroundMuted);
 }
 
 .TrelloCardDetailLink {
   contain: content;
-  color: var(--TextLinkForeground, #4dc8ff);
+  color: var(--TrelloLinkForeground);
 }
 
 .TrelloError {
   contain: content;
   padding: 8px;
-  color: var(--ErrorForeground, #ffd7d7);
-  background: var(--ErrorBackground, #5a1d1d);
+  color: var(--TrelloErrorForeground);
+  background: var(--TrelloErrorBackground);
   border-radius: 6px;
 }
