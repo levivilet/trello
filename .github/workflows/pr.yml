@@ -45,6 +45,8 @@ jobs:
         run: npm run e2e:headless
         env:
           PLAYWRIGHT_BROWSERS_PATH: 0
+      - name: Build release archive
+        run: node scripts/build.ts
       - name: Ensure static build dependencies
         run: node -e "const { createRequire } = require('node:module'); createRequire(process.cwd() + '/packages/server/package.json').resolve('@lvce-editor/shared-process')" || npm ci
         shell: bash
