@@ -80,6 +80,8 @@ export const input = (
     className: 'TrelloInput',
     ...(inputType && { inputType }),
     name,
+    onBlur: 'handleBlur',
+    onFocus: 'handleFocus',
     onInput: 'handleInput',
     placeholder,
     value,
@@ -94,6 +96,8 @@ export const textArea = (
   return node(VirtualDomElements.TextArea, {
     className: 'TrelloTextArea',
     name,
+    onBlur: 'handleBlur',
+    onFocus: 'handleFocus',
     onInput: 'handleInput',
     placeholder,
     value,
