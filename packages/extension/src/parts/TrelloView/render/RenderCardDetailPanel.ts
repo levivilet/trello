@@ -103,15 +103,26 @@ const renderCardDetailTitle = (
   const className = state.editingCardTitle
     ? 'TrelloCardDetailTitleInput TrelloCardDetailTitleInputEditing'
     : 'TrelloCardDetailTitleInput'
-  return Dom.node(VirtualDomElements.Input, {
-    className,
-    name: 'cardTitle',
-    onBlur: 'handleBlur',
-    onClick: 'handleClick',
-    onFocus: 'handleFocus',
-    onInput: 'handleInput',
-    value: state.draftCardTitle,
-  })
+  return Dom.div('TrelloCardDetailTitleSizer', [
+    Dom.node(VirtualDomElements.TextArea, {
+      className,
+      name: 'cardTitle',
+      onBlur: 'handleBlur',
+      onClick: 'handleClick',
+      onFocus: 'handleFocus',
+      onInput: 'handleInput',
+      rows: 1,
+      value: state.draftCardTitle,
+    }),
+    Dom.node(
+      VirtualDomElements.Div,
+      {
+        ariaHidden: true,
+        className: 'TrelloCardDetailTitleMirror',
+      },
+      [Dom.textNode(state.draftCardTitle || ' ')],
+    ),
+  ])
 }
 
 const renderCardDescriptionEditor = (

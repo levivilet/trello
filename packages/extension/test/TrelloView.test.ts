@@ -2,6 +2,7 @@
 
 import type { VirtualDomViewInstance } from '@lvce-editor/api'
 import { expect, test } from '@jest/globals'
+import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import type { TrelloClient } from '../src/parts/TrelloClient/TrelloClient.ts'
 import type {
   TrelloBoard,
@@ -1347,6 +1348,73 @@ test('clicking card renders card detail and close dismisses it', async () => {
   expect(getListTitleInput(closedDom, 'list-1')?.value).toBe('Todo')
   expect(getText(closedDom)).toContain('Ship Trello view')
   expect(getClassNames(closedDom)).not.toContain('TrelloCardDetailPanel')
+  resetTrelloViewDependencyFactory()
+})
+
+test('card detail title renders as wrapping textarea with full long title', async () => {
+  const longTitle =
+    'trello: input fields on firefox look not so good when the card detail title needs more than one line'
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', name: longTitle }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      boards: [{ id: 'board-1', name: 'Roadmap' }],
+      cardDetails: {
+        'card-1': {
+          attachments: [],
+          card: {
+            desc: '',
+            id: 'card-1',
+            name: longTitle,
+          },
+          comments: [],
+        },
+      },
+    }),
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage(),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: validApiKey,
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: validToken,
+  })
+  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+
+  const detailDom = await instance.render()
+  expect(getClassNames(detailDom)).toContain('TrelloCardDetailTitleSizer')
+  expect(getClassNames(detailDom)).toContain('TrelloCardDetailTitleMirror')
+  expect(getText(detailDom)).toContain(longTitle)
+  expect(
+    hasNode(detailDom, (node) => {
+      return (
+        node.name === 'cardTitle' &&
+        node.type === VirtualDomElements.TextArea &&
+        node.rows === 1 &&
+        node.value === longTitle &&
+        hasClass(node, 'TrelloCardDetailTitleInput')
+      )
+    }),
+  ).toBe(true)
   resetTrelloViewDependencyFactory()
 })
 
