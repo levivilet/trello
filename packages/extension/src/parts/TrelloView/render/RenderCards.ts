@@ -67,9 +67,12 @@ const renderCardCommentCount = (
 const renderCardLabel = (
   label: NonNullable<TrelloCard['labels']>[number],
 ): Dom.TreeNode => {
-  return Dom.div(`TrelloCardLabel ${getLabelColorClassName(label.color)}`, [
-    Dom.textNode(getLabelText(label)),
-  ])
+  const labelText = getLabelText(label)
+  return Dom.node(VirtualDomElements.Div, {
+    'aria-label': labelText,
+    className: `TrelloCardLabel TrelloCardPreviewLabel ${getLabelColorClassName(label.color)}`,
+    title: labelText,
+  })
 }
 
 const renderCardLabels = (
