@@ -462,7 +462,7 @@ button.TrelloSearchResult:hover {
   overflow: hidden;
   padding: 8px;
   background: var(--TrelloSurface);
-  border: 1px solid var(--TrelloBorderSubtle);
+  border: none;
   border-radius: 8px;
   box-shadow:
     0 1px 2px var(--TrelloShadow),
@@ -471,7 +471,8 @@ button.TrelloSearchResult:hover {
 
 .TrelloListDragTarget {
   background: color-mix(in srgb, var(--TrelloFocus) 18%, var(--TrelloSurface));
-  border-color: var(--TrelloFocus);
+  outline: 1px solid var(--TrelloFocus);
+  outline-offset: -1px;
 }
 
 .TrelloCards {
