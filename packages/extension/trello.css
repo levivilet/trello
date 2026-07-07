@@ -765,6 +765,7 @@ button.TrelloSearchResult:hover {
   padding: 8px;
   text-align: left;
   color: var(--TrelloForegroundStrong);
+  cursor: pointer;
   background: var(--TrelloInputBackground);
   border: 1px solid transparent;
   border-radius: 6px;
