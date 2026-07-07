@@ -38,6 +38,11 @@ import { handleSubmitEvent } from './actions/HandleSubmitEvent.ts'
 import { loadBoards } from './actions/LoadBoards.ts'
 import { logout } from './actions/Logout.ts'
 import { openCard } from './actions/OpenCard.ts'
+import {
+  resizeCardDetail,
+  startResizeCardDetail,
+  stopResizeCardDetail,
+} from './actions/ResizeCardDetail.ts'
 import { restoreCurrentBoard } from './actions/RestoreCurrentBoard.ts'
 import { saveCardDetail as saveCardDetailAction } from './actions/SaveCardDetail.ts'
 import { getMenuEntries, type MenuEntry } from './MenuEntries.ts'
@@ -84,6 +89,25 @@ interface MutableTrelloViewActionContext extends TrelloViewActionContext {
 }
 
 const activeInstances = new Set<ActiveTrelloViewInstance>()
+
+const handlePointerEvent = (
+  context: Readonly<TrelloViewActionContext>,
+  event: Readonly<ViewEvent>,
+): boolean => {
+  if (event.type === 'pointerdown' && event.name === 'resizeCardDetail') {
+    startResizeCardDetail(context, event)
+    return true
+  }
+  if (event.type === 'pointermove') {
+    resizeCardDetail(context, event)
+    return true
+  }
+  if (event.type === 'pointerup') {
+    stopResizeCardDetail(context)
+    return true
+  }
+  return false
+}
 
 const getActiveInstance = (): ActiveTrelloViewInstance | undefined => {
   let activeInstance: ActiveTrelloViewInstance | undefined
@@ -272,6 +296,9 @@ export const createInstance = async (
         }
         if (event.type === 'keydown') {
           await handleKeyDownEvent(viewContext, event)
+          return
+        }
+        if (handlePointerEvent(viewContext, event)) {
           return
         }
         if (event.type === 'click') {

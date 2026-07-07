@@ -919,6 +919,28 @@ test('cards and lists render drag and drop attributes', async () => {
       name: 'handleKeyDown',
       params: ['handleViewEvent', 'keydown', 'event.target.name', 'event.key'],
     },
+    {
+      name: 'handlePointerDown',
+      params: [
+        'handleViewEvent',
+        'pointerdown',
+        'event.target.name',
+        'event.clientX',
+      ],
+    },
+    {
+      name: 'handlePointerMove',
+      params: [
+        'handleViewEvent',
+        'pointermove',
+        'event.target.name',
+        'event.clientX',
+      ],
+    },
+    {
+      name: 'handlePointerUp',
+      params: ['handleViewEvent', 'pointerup', 'event.target.name'],
+    },
   ])
   const contextMenuInvocations: unknown[] = []
   const instance = await createAuthenticatedInstance(
@@ -2105,6 +2127,78 @@ test('clicking card renders card detail and close dismisses it', async () => {
   expect(getListTitleInput(closedDom, 'list-1')?.value).toBe('Todo')
   expect(getText(closedDom)).toContain('Ship Trello view')
   expect(getClassNames(closedDom)).not.toContain('TrelloCardDetailPanel')
+  resetTrelloViewDependencyFactory()
+})
+
+test('card detail panel resizes from the left sash', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', name: 'Ship Trello view' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      cardDetails: {
+        'card-1': {
+          attachments: [],
+          card: {
+            desc: '',
+            id: 'card-1',
+            name: 'Ship Trello view',
+          },
+          comments: [],
+        },
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+
+  const initialDom = await instance.render()
+  expect(getNodeByName(initialDom, 'resizeCardDetail')).toMatchObject({
+    className: 'TrelloCardDetailResizeSash',
+    onPointerDown: 'handlePointerDown',
+  })
+  expect(getNodeByName(initialDom, 'cardDetail')?.style).toBe(
+    '--TrelloCardDetailWidth: 360px',
+  )
+
+  await instance.handleEvent?.({
+    clientX: 100,
+    name: 'resizeCardDetail',
+    type: 'pointerdown',
+  } as unknown as ViewEvent)
+  await instance.handleEvent?.({
+    clientX: 60,
+    name: 'cardDetail',
+    type: 'pointermove',
+  } as unknown as ViewEvent)
+
+  const resizedDom = await instance.render()
+  expect(getNodeByName(resizedDom, 'cardDetail')?.style).toBe(
+    '--TrelloCardDetailWidth: 400px',
+  )
+
+  await instance.handleEvent?.({
+    clientX: 500,
+    name: 'cardDetail',
+    type: 'pointermove',
+  } as unknown as ViewEvent)
+  await instance.handleEvent?.({ name: 'cardDetail', type: 'pointerup' })
+
+  const clampedDom = await instance.render()
+  expect(getNodeByName(clampedDom, 'cardDetail')?.style).toBe(
+    '--TrelloCardDetailWidth: 200px',
+  )
   resetTrelloViewDependencyFactory()
 })
 
