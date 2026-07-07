@@ -2,6 +2,7 @@ import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import type { TrelloCard } from '../../TrelloTypes/TrelloTypes.ts'
 import * as Dom from '../../VirtualDom/VirtualDom.ts'
 import { getCardCoverImageUrl } from '../CardCoverHelpers.ts'
+import { getLabelColorClassName, getLabelText } from '../LabelHelpers.ts'
 
 const getCardCommentCount = (card: Readonly<TrelloCard>): number => {
   return card.badges?.comments || 0
@@ -63,9 +64,32 @@ const renderCardCommentCount = (
   ]
 }
 
+const renderCardLabel = (
+  label: NonNullable<TrelloCard['labels']>[number],
+): Dom.TreeNode => {
+  return Dom.div(`TrelloCardLabel ${getLabelColorClassName(label.color)}`, [
+    Dom.textNode(getLabelText(label)),
+  ])
+}
+
+const renderCardLabels = (
+  card: Readonly<TrelloCard>,
+): readonly Dom.TreeNode[] => {
+  if (!card.labels || card.labels.length === 0) {
+    return []
+  }
+  return [
+    Dom.div(
+      'TrelloCardLabels TrelloCardPreviewLabels',
+      card.labels.map(renderCardLabel),
+    ),
+  ]
+}
+
 const renderCard = (card: Readonly<TrelloCard>): Dom.TreeNode => {
   const coverImageUrl = getCardCoverImageUrl(card)
   const cardBody = Dom.div('TrelloCardBody', [
+    ...renderCardLabels(card),
     Dom.div('TrelloCardTitle', [Dom.textNode(card.name)]),
     ...renderCardCommentCount(card),
   ])

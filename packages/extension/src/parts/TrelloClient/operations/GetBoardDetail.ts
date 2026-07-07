@@ -18,7 +18,7 @@ const listParams = {
 } as const
 
 const cardsParams = {
-  fields: 'name,url,idBoard,idList,badges,cover',
+  fields: 'name,url,idBoard,idList,badges,cover,labels',
 } as const
 
 export const deleteCachedListCards = async (
