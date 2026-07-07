@@ -123,15 +123,11 @@ const hasCardLabel = (
   )
 }
 
-const getAvailableLabels = (
+const getMatchingLabels = (
   state: Readonly<TrelloViewState>,
-  labels: readonly TrelloLabel[] | undefined,
 ): readonly TrelloLabel[] => {
   const query = state.draftLabelSearchQuery.trim().toLowerCase()
   return state.boardLabels.filter((label) => {
-    if (hasCardLabel(labels, label.id)) {
-      return false
-    }
     if (!query) {
       return true
     }
@@ -141,8 +137,22 @@ const getAvailableLabels = (
 
 const renderCardLabelChoice = (
   state: Readonly<TrelloViewState>,
+  labels: readonly TrelloLabel[] | undefined,
   label: Readonly<TrelloLabel>,
 ): Dom.TreeNode => {
+  const checked = hasCardLabel(labels, label.id)
+  const checkbox = Dom.node(VirtualDomElements.Input, {
+    checked,
+    className: 'TrelloCardLabelChoiceCheckbox',
+    inputType: 'checkbox',
+    name: `cardLabelCheckbox:${label.id}`,
+    tabIndex: -1,
+  })
+  const text = Dom.node(
+    VirtualDomElements.Span,
+    { className: 'TrelloCardLabelChoiceText' },
+    [Dom.textNode(getLabelText(label))],
+  )
   return Dom.node(
     VirtualDomElements.Button,
     {
@@ -151,7 +161,7 @@ const renderCardLabelChoice = (
       name: `addCardLabel:${label.id}`,
       onClick: 'handleClick',
     },
-    [Dom.textNode(getLabelText(label))],
+    [checkbox, text],
   )
 }
 
@@ -164,8 +174,8 @@ const renderCardLabelPickerContent = (
       Dom.textNode('Loading labels...'),
     ])
   }
-  const availableLabels = getAvailableLabels(state, labels)
-  if (availableLabels.length === 0) {
+  const matchingLabels = getMatchingLabels(state)
+  if (matchingLabels.length === 0) {
     const text = state.draftLabelSearchQuery.trim()
       ? 'No matching labels'
       : 'No labels available'
@@ -173,8 +183,8 @@ const renderCardLabelPickerContent = (
   }
   return Dom.div(
     'TrelloCardLabelPickerList',
-    availableLabels.map((label) => {
-      return renderCardLabelChoice(state, label)
+    matchingLabels.map((label) => {
+      return renderCardLabelChoice(state, labels, label)
     }),
   )
 }

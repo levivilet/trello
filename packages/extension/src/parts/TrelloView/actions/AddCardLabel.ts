@@ -92,8 +92,6 @@ export const addCardLabel = async (
   }
   const { card } = state.selectedCardDetail
   if (hasLabel(card.labels, label.id)) {
-    state.cardLabelPickerOpen = false
-    state.draftLabelSearchQuery = ''
     requestRerender()
     return
   }
@@ -117,8 +115,7 @@ export const addCardLabel = async (
       card: mergedCard,
     }
     updateBoardDetailCard(state, mergedCard)
-    state.cardLabelPickerOpen = false
-    state.draftLabelSearchQuery = ''
+    state.cardLabelPickerOpen = true
   } catch (error) {
     state.error = getErrorMessage(error)
   } finally {
