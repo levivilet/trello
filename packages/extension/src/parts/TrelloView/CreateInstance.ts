@@ -1,5 +1,4 @@
 import type {
-  MenuEntry,
   ViewContext,
   ViewEvent,
   VirtualDomViewInstance,
@@ -38,7 +37,7 @@ import { logout } from './actions/Logout.ts'
 import { openCard } from './actions/OpenCard.ts'
 import { restoreCurrentBoard } from './actions/RestoreCurrentBoard.ts'
 import { saveCardDetail as saveCardDetailAction } from './actions/SaveCardDetail.ts'
-import { getMenuEntries } from './MenuEntries.ts'
+import { getMenuEntries, type MenuEntry } from './MenuEntries.ts'
 import { renderAuth } from './render/RenderAuth.ts'
 import { renderBoardDetail } from './render/RenderBoardDetail.ts'
 import { renderBoards } from './render/RenderBoards.ts'

@@ -1,6 +1,6 @@
 // cspell:ignore prefs
 
-import type { VirtualDomViewInstance } from '@lvce-editor/api'
+import type { ViewEvent, VirtualDomViewInstance } from '@lvce-editor/api'
 import { expect, test } from '@jest/globals'
 import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import type { TrelloClient } from '../src/parts/TrelloClient/TrelloClient.ts'
@@ -44,6 +44,24 @@ const validLongToken =
 const getExpectedAssetBaseUrl = (): string => {
   const url = new URL('../', import.meta.url)
   return `/remote${url.pathname}`
+}
+
+type ContextMenuViewEvent = ViewEvent & {
+  readonly x: number
+  readonly y: number
+}
+
+const createContextMenuEvent = (
+  name: string,
+  x: number,
+  y: number,
+): ContextMenuViewEvent => {
+  return {
+    name,
+    type: 'contextmenu',
+    x,
+    y,
+  }
 }
 
 const getText = (dom: readonly any[]): string => {
@@ -513,11 +531,15 @@ test('connect loads boards and clicking board loads detail', async () => {
   })
   expect(detailClassNames).toContain('TrelloLists')
   expect(detailClassNames).toContain('TrelloList')
+  expect(detailClassNames).toContain('TrelloListHeader')
+  expect(detailClassNames).toContain('TrelloListCardCount')
   expect(detailClassNames).toContain('TrelloCards')
   expect(detailClassNames).toContain('TrelloCardTitle')
   expect(detailClassNames).toContain('TrelloCardMeta')
   expect(detailClassNames).toContain('TrelloCardCommentIcon')
   expect(getNodeByClass(detailDom, 'TrelloCardCommentIcon')).toMatchObject({
+    alt: '',
+    'aria-hidden': true,
     src: `${getExpectedAssetBaseUrl()}comments.svg`,
   })
   expect(detailClassNames).toContain('TrelloCardCommentCount')
@@ -536,13 +558,22 @@ test('connect loads boards and clicking board loads detail', async () => {
       )
     }),
   ).toBe(true)
+  const listCardCount = getNodeByClass(detailDom, 'TrelloListCardCount')
+  const listCardCountIndex = detailDom.indexOf(listCardCount)
+  expect(detailDom[listCardCountIndex + 1]?.text).toBe('3')
+  expect(
+    hasDirectChildClass(detailDom, 'TrelloListHeader', 'TrelloListTitleInput'),
+  ).toBe(true)
+  expect(
+    hasDirectChildClass(detailDom, 'TrelloListHeader', 'TrelloListCardCount'),
+  ).toBe(true)
   expect(hasDirectChildClass(detailDom, 'TrelloList', 'TrelloCards')).toBe(true)
   expect(
     hasDirectChildClass(detailDom, 'TrelloList', 'TrelloAddCardButton'),
   ).toBe(true)
   expect(hasDirectChildClass(detailDom, 'TrelloCards', 'TrelloCard')).toBe(true)
   expect(getDirectChildClassNamesByName(detailDom, 'list:list-1')).toEqual([
-    'TrelloListTitleInput',
+    'TrelloListHeader',
     'TrelloCards',
     'TrelloAddCardButton',
   ])
@@ -590,6 +621,9 @@ test('list title renders as editable input', async () => {
   )
   expect(getText(dom)).toContain('No cards')
   expect(getText(dom)).toContain('+ Add a card')
+  const listCardCount = getNodeByClass(dom, 'TrelloListCardCount')
+  const listCardCountIndex = dom.indexOf(listCardCount)
+  expect(dom[listCardCountIndex + 1]?.text).toBe('0')
   expect(getNodeByName(dom, 'addCard:list-1')).toEqual(
     expect.objectContaining({
       className: 'TrelloAddCardButton',
@@ -677,12 +711,7 @@ test('cards and lists render drag and drop attributes', async () => {
     }),
   )
 
-  await instance.handleEvent?.({
-    name: 'list:list-1',
-    type: 'contextmenu',
-    x: 100,
-    y: 200,
-  })
+  await instance.handleEvent?.(createContextMenuEvent('list:list-1', 100, 200))
   expect(contextMenuInvocations).toEqual([['trello.list', 100, 200]])
   expect((instance as any).getMenuEntries('trello.list')).toEqual([
     {
@@ -775,12 +804,7 @@ test('board overview context menu opens board menu', async () => {
     }),
   )
 
-  await instance.handleEvent?.({
-    name: 'boards',
-    type: 'contextmenu',
-    x: 11,
-    y: 22,
-  })
+  await instance.handleEvent?.(createContextMenuEvent('boards', 11, 22))
 
   expect(contextMenuInvocations).toEqual([['trello.board', 11, 22]])
   expect((instance as any).getMenuEntries('trello.board')).toEqual([
@@ -823,12 +847,7 @@ test('card context menu opens card menu with target args', async () => {
   )
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
 
-  await instance.handleEvent?.({
-    name: 'card:card-1',
-    type: 'contextmenu',
-    x: 33,
-    y: 44,
-  })
+  await instance.handleEvent?.(createContextMenuEvent('card:card-1', 33, 44))
 
   expect(contextMenuInvocations).toEqual([['trello.card', 33, 44]])
   expect((instance as any).getMenuEntries('trello.card')).toEqual([
@@ -892,12 +911,7 @@ test('card detail context menu opens card detail menu', async () => {
     }),
   )
 
-  await instance.handleEvent?.({
-    name: 'cardDetail',
-    type: 'contextmenu',
-    x: 55,
-    y: 66,
-  })
+  await instance.handleEvent?.(createContextMenuEvent('cardDetail', 55, 66))
 
   expect(contextMenuInvocations).toEqual([['trello.cardDetail', 55, 66]])
   expect((instance as any).getMenuEntries('trello.cardDetail')).toEqual([
