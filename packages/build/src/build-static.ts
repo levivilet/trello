@@ -80,8 +80,7 @@ const patchExtensionManagementWorker = async (
   after = replaceRequired(
     after,
     `const getRpcForView = async (viewId, assetDir, platform) => {
-  const extension = await getExtensionForView(viewId, assetDir, platform);
-  const existingRpc = get$3(getExtensionId(extension));`,
+  const extension = await getExtensionForView(viewId, assetDir, platform);`,
     `const getRpcForView = async (viewId, assetDir, platform) => {
   if (typeof assetDir !== 'string' || assetDir.length === 0) {
     assetDir = await invoke$3('Layout.getAssetDir');
@@ -92,8 +91,7 @@ const patchExtensionManagementWorker = async (
   if (typeof globalThis.location !== 'undefined' && globalThis.location.protocol.startsWith('http') && (assetDir.startsWith('/') || assetDir.startsWith('http'))) {
     platform = Web;
   }
-  const extension = await getExtensionForView(viewId, assetDir, platform);
-  const existingRpc = get$3(getExtensionId(extension));`,
+  const extension = await getExtensionForView(viewId, assetDir, platform);`,
     workerPath,
     'view rpc assetDir resolution',
   )
