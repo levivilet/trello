@@ -310,32 +310,58 @@ const createDeferred = <T>(): PromiseWithResolvers<T> => {
   return Promise.withResolvers<T>()
 }
 
+const getFreshAttachments = async (
+  fresh: Readonly<Promise<TrelloCardDetail>>,
+): Promise<TrelloCardDetail['attachments']> => {
+  const detail = await fresh
+  return detail.attachments
+}
+
+const getFreshCard = async (
+  fresh: Readonly<Promise<TrelloCardDetail>>,
+): Promise<TrelloCard> => {
+  const detail = await fresh
+  return detail.card
+}
+
+const getFreshComments = async (
+  fresh: Readonly<Promise<TrelloCardDetail>>,
+): Promise<TrelloCardDetail['comments']> => {
+  const detail = await fresh
+  return detail.comments
+}
+
 const createStagedCardClient = (options: {
   readonly boardDetail: TrelloBoardDetail
   readonly boards: readonly TrelloBoard[]
   readonly getCardDetailPartsCacheFirst: TrelloClient['getCardDetailPartsCacheFirst']
 }): TrelloClient => {
   return {
-    async addCardLabel(card: TrelloCard) {
+    async addCardLabel(card: Readonly<TrelloCard>): Promise<TrelloCard> {
       return card
     },
-    async createCard(list: TrelloList) {
+    async createCard(list: Readonly<TrelloList>): Promise<TrelloCard> {
       return {
         id: 'created-card-1',
         idList: list.id,
         name: 'Created card',
       }
     },
-    async getBoardDetail() {
+    async getBoardDetail(): Promise<TrelloBoardDetail> {
       return options.boardDetail
     },
-    async getBoardDetailCacheFirst() {
+    async getBoardDetailCacheFirst(): ReturnType<
+      TrelloClient['getBoardDetailCacheFirst']
+    > {
       return {
         cached: undefined,
         fresh: Promise.resolve(options.boardDetail),
       }
     },
-    async getCardDetail(card: TrelloCard, credentials: TrelloCredentials) {
+    async getCardDetail(
+      card: Readonly<TrelloCard>,
+      credentials: Readonly<TrelloCredentials>,
+    ): Promise<TrelloCardDetail> {
       const result = await options.getCardDetailPartsCacheFirst(
         card,
         credentials,
@@ -352,63 +378,76 @@ const createStagedCardClient = (options: {
       }
     },
     async getCardDetailCacheFirst(
-      card: TrelloCard,
-      credentials: TrelloCredentials,
-    ) {
+      card: Readonly<TrelloCard>,
+      credentials: Readonly<TrelloCredentials>,
+    ): ReturnType<TrelloClient['getCardDetailCacheFirst']> {
       const result = await options.getCardDetailPartsCacheFirst(
         card,
         credentials,
       )
-      return {
-        cached: result.cached,
-        fresh: Promise.all([
+      const fresh = async (): Promise<TrelloCardDetail> => {
+        const [detailCard, attachments, comments] = await Promise.all([
           result.fresh.card,
           result.fresh.attachments,
           result.fresh.comments,
-        ]).then(([detailCard, attachments, comments]) => {
-          return {
-            attachments,
-            card: detailCard,
-            comments,
-          }
-        }),
+        ])
+        return {
+          attachments,
+          card: detailCard,
+          comments,
+        }
+      }
+      return {
+        cached: result.cached,
+        fresh: fresh(),
       }
     },
     getCardDetailPartsCacheFirst: options.getCardDetailPartsCacheFirst,
-    async listBoardLabels() {
+    async listBoardLabels(): Promise<readonly TrelloLabel[]> {
       return []
     },
-    async listBoards() {
+    async listBoards(): Promise<readonly TrelloBoard[]> {
       return options.boards
     },
-    async listBoardsCacheFirst() {
+    async listBoardsCacheFirst(): ReturnType<
+      TrelloClient['listBoardsCacheFirst']
+    > {
       return {
         cached: undefined,
         fresh: Promise.resolve(options.boards),
       }
     },
-    async moveCard(card: TrelloCard, move: TrelloCardMove) {
+    async moveCard(
+      card: Readonly<TrelloCard>,
+      move: Readonly<TrelloCardMove>,
+    ): Promise<TrelloCard> {
       return {
         ...card,
         idList: move.idList,
       }
     },
-    async search() {
+    async search(): Promise<readonly TrelloSearchResult[]> {
       return []
     },
-    async searchCacheFirst() {
+    async searchCacheFirst(): ReturnType<TrelloClient['searchCacheFirst']> {
       return {
         cached: undefined,
         fresh: Promise.resolve([]),
       }
     },
-    async updateCard(card: TrelloCard, update: TrelloCardUpdate) {
+    async updateCard(
+      card: Readonly<TrelloCard>,
+      update: Readonly<TrelloCardUpdate>,
+    ): Promise<TrelloCard> {
       return {
         ...card,
         ...update,
       }
     },
-    async updateList(list: TrelloList, update: TrelloListUpdate) {
+    async updateList(
+      list: Readonly<TrelloList>,
+      update: Readonly<TrelloListUpdate>,
+    ): Promise<TrelloList> {
       return {
         ...list,
         ...update,
@@ -2312,15 +2351,9 @@ test('clicking card renders cached detail before fresh detail resolves', async (
       return {
         cached: cachedCardDetail,
         fresh: {
-          attachments: freshCardDeferred.promise.then((detail) => {
-            return detail.attachments
-          }),
-          card: freshCardDeferred.promise.then((detail) => {
-            return detail.card
-          }),
-          comments: freshCardDeferred.promise.then((detail) => {
-            return detail.comments
-          }),
+          attachments: getFreshAttachments(freshCardDeferred.promise),
+          card: getFreshCard(freshCardDeferred.promise),
+          comments: getFreshComments(freshCardDeferred.promise),
         },
       }
     },
@@ -2600,15 +2633,13 @@ test('stale staged card detail results are ignored after opening another card', 
         return {
           cached: undefined,
           fresh: {
-            attachments: isFirstCard
-              ? attachmentsOneDeferred.promise
-              : attachmentsTwoDeferred.promise,
-            card: isFirstCard
-              ? cardOneDeferred.promise
-              : cardTwoDeferred.promise,
-            comments: isFirstCard
-              ? commentsOneDeferred.promise
-              : commentsTwoDeferred.promise,
+            attachments: (isFirstCard
+              ? attachmentsOneDeferred
+              : attachmentsTwoDeferred
+            ).promise,
+            card: (isFirstCard ? cardOneDeferred : cardTwoDeferred).promise,
+            comments: (isFirstCard ? commentsOneDeferred : commentsTwoDeferred)
+              .promise,
           },
         }
       },

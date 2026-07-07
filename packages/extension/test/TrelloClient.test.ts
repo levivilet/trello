@@ -166,7 +166,11 @@ test('getCardDetailPartsCacheFirst returns cached data and staged fresh requests
   })
   await expect(result.fresh.attachments).resolves.toHaveLength(1)
   await expect(result.fresh.comments).resolves.toHaveLength(1)
-  expect(requests.map((request) => new URL(request).pathname).sort()).toEqual([
+  expect(
+    requests
+      .map((request) => new URL(request).pathname)
+      .toSorted((a, b) => a.localeCompare(b)),
+  ).toEqual([
     '/1/cards/card-1',
     '/1/cards/card-1/actions',
     '/1/cards/card-1/attachments',

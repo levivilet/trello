@@ -34,6 +34,27 @@ export interface MockTrelloData {
   readonly searchResults?: readonly TrelloSearchResult[]
 }
 
+const getFreshAttachments = async (
+  fresh: Readonly<Promise<TrelloCardDetail>>,
+): Promise<TrelloCardDetail['attachments']> => {
+  const detail = await fresh
+  return detail.attachments
+}
+
+const getFreshCard = async (
+  fresh: Readonly<Promise<TrelloCardDetail>>,
+): Promise<TrelloCard> => {
+  const detail = await fresh
+  return detail.card
+}
+
+const getFreshComments = async (
+  fresh: Readonly<Promise<TrelloCardDetail>>,
+): Promise<TrelloCardDetail['comments']> => {
+  const detail = await fresh
+  return detail.comments
+}
+
 export const createMockTrelloClient = (
   data: Readonly<MockTrelloData>,
 ): TrelloClient => {
@@ -217,15 +238,9 @@ export const createMockTrelloClient = (
       return {
         cached: undefined,
         fresh: {
-          attachments: fresh.then((detail) => {
-            return detail.attachments
-          }),
-          card: fresh.then((detail) => {
-            return detail.card
-          }),
-          comments: fresh.then((detail) => {
-            return detail.comments
-          }),
+          attachments: getFreshAttachments(fresh),
+          card: getFreshCard(fresh),
+          comments: getFreshComments(fresh),
         },
       }
     },
