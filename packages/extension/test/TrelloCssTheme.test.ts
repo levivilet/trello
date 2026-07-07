@@ -72,3 +72,10 @@ test('trello readable content allows text selection', async () => {
   expect(css).toContain('.TrelloCardCommentText,')
   expect(css).toContain('user-select: text;')
 })
+
+test('trello card description preview uses pointer cursor', async () => {
+  const css = await readTrelloCss()
+
+  expect(css).toContain('.TrelloCardDescriptionPreview {')
+  expect(css).toContain('cursor: pointer;')
+})
