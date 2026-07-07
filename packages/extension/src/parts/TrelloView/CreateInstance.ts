@@ -44,7 +44,11 @@ import { renderBoardDetail } from './render/RenderBoardDetail.ts'
 import { renderBoards } from './render/RenderBoards.ts'
 import { createInitialState } from './state/CreateInitialState.ts'
 import { dependencyState } from './state/DependencyFactory.ts'
-import { updateContext } from './state/UpdateContext.ts'
+import {
+  contextKeyCardDescriptionFocus,
+  contextKeyNewCardInputFocus,
+  updateContext,
+} from './state/UpdateContext.ts'
 
 interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly backToBoards: () => Promise<void>
@@ -56,6 +60,10 @@ interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly openCard: (cardId: string) => Promise<void>
   readonly refreshBoards: () => Promise<void>
   readonly reload: () => Promise<void>
+  readonly renderFocus: (
+    oldContext: Readonly<Record<string, boolean>>,
+    newContext: Readonly<Record<string, boolean>>,
+  ) => string
   readonly saveCardDetail: () => Promise<void>
   readonly startAddCard: (listId: string) => void
   readonly submitNewCard: () => Promise<void>
@@ -79,6 +87,14 @@ const getActiveInstance = (): ActiveTrelloViewInstance | undefined => {
     activeInstance = instance
   }
   return activeInstance
+}
+
+const becameActive = (
+  oldContext: Readonly<Record<string, boolean>>,
+  newContext: Readonly<Record<string, boolean>>,
+  key: string,
+): boolean => {
+  return oldContext[key] !== true && newContext[key] === true
 }
 
 export const backToBoardsActiveTrelloViewInstance = async (): Promise<void> => {
@@ -310,6 +326,23 @@ export const createInstance = async (
         return renderBoardDetail(state, state.boardDetail)
       }
       return renderBoards(state)
+    },
+    renderFocus(
+      oldContext: Readonly<Record<string, boolean>>,
+      newContext: Readonly<Record<string, boolean>>,
+    ): string {
+      if (
+        becameActive(oldContext, newContext, contextKeyNewCardInputFocus) &&
+        state.addingCardListId
+      ) {
+        return `[name="newCardTitle:${state.addingCardListId}"]`
+      }
+      if (
+        becameActive(oldContext, newContext, contextKeyCardDescriptionFocus)
+      ) {
+        return '[name="cardDescription"]'
+      }
+      return ''
     },
     async saveCardDetail(): Promise<void> {
       await saveCardDetailAction(viewContext)

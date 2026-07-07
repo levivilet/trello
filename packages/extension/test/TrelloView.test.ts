@@ -930,6 +930,10 @@ test('view context tracks board and new-card input focus', async () => {
   )
   const withContext = instance as VirtualDomViewInstance & {
     readonly getContext: () => Readonly<Record<string, boolean>>
+    readonly renderFocus: (
+      oldContext: Readonly<Record<string, boolean>>,
+      newContext: Readonly<Record<string, boolean>>,
+    ) => string
   }
 
   expect(withContext.getContext()).toEqual({
@@ -942,6 +946,20 @@ test('view context tracks board and new-card input focus', async () => {
   })
 
   await instance.handleEvent?.({ name: 'addCard:list-1', type: 'click' })
+  const addCardContext = withContext.getContext()
+  expect(addCardContext).toEqual({
+    'trello.boardDetailFocus': true,
+    'trello.newCardInputFocus': true,
+  })
+  expect(
+    withContext.renderFocus(
+      {
+        'trello.boardDetailFocus': true,
+      },
+      addCardContext,
+    ),
+  ).toBe('[name="newCardTitle:list-1"]')
+
   await instance.handleEvent?.({
     name: 'newCardTitle:list-1',
     type: 'focus',
@@ -958,6 +976,63 @@ test('view context tracks board and new-card input focus', async () => {
   expect(withContext.getContext()).toEqual({
     'trello.boardDetailFocus': true,
   })
+
+  resetTrelloViewDependencyFactory()
+})
+
+test('renderFocus returns card description selector when editing description starts', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', idList: 'list-1', name: 'Plan work' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      cardDetails: {
+        'card-1': {
+          attachments: [],
+          card: {
+            desc: 'Existing description',
+            id: 'card-1',
+            idList: 'list-1',
+            name: 'Plan work',
+          },
+          comments: [],
+        },
+      },
+    },
+  )
+  const withFocus = instance as VirtualDomViewInstance & {
+    readonly getContext: () => Readonly<Record<string, boolean>>
+    readonly renderFocus: (
+      oldContext: Readonly<Record<string, boolean>>,
+      newContext: Readonly<Record<string, boolean>>,
+    ) => string
+  }
+
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+  const cardContext = withFocus.getContext()
+  await instance.handleEvent?.({ name: 'editCardDescription', type: 'click' })
+  const descriptionContext = withFocus.getContext()
+
+  expect(descriptionContext).toEqual({
+    'trello.boardDetailFocus': true,
+    'trello.cardDescriptionFocus': true,
+    'trello.cardDetailFocus': true,
+  })
+  expect(withFocus.renderFocus(cardContext, descriptionContext)).toBe(
+    '[name="cardDescription"]',
+  )
 
   resetTrelloViewDependencyFactory()
 })
