@@ -677,12 +677,13 @@ test('cards and lists render drag and drop attributes', async () => {
     }),
   )
 
-  await instance.handleEvent?.({
+  const listContextMenuEvent = {
     name: 'list:list-1',
     type: 'contextmenu',
     x: 100,
     y: 200,
-  })
+  }
+  await instance.handleEvent?.(listContextMenuEvent)
   expect(contextMenuInvocations).toEqual([['trello.list', 100, 200]])
   expect((instance as any).getMenuEntries('trello.list')).toEqual([
     {
@@ -775,12 +776,13 @@ test('board overview context menu opens board menu', async () => {
     }),
   )
 
-  await instance.handleEvent?.({
+  const boardContextMenuEvent = {
     name: 'boards',
     type: 'contextmenu',
     x: 11,
     y: 22,
-  })
+  }
+  await instance.handleEvent?.(boardContextMenuEvent)
 
   expect(contextMenuInvocations).toEqual([['trello.board', 11, 22]])
   expect((instance as any).getMenuEntries('trello.board')).toEqual([
@@ -823,12 +825,13 @@ test('card context menu opens card menu with target args', async () => {
   )
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
 
-  await instance.handleEvent?.({
+  const cardContextMenuEvent = {
     name: 'card:card-1',
     type: 'contextmenu',
     x: 33,
     y: 44,
-  })
+  }
+  await instance.handleEvent?.(cardContextMenuEvent)
 
   expect(contextMenuInvocations).toEqual([['trello.card', 33, 44]])
   expect((instance as any).getMenuEntries('trello.card')).toEqual([
@@ -892,12 +895,13 @@ test('card detail context menu opens card detail menu', async () => {
     }),
   )
 
-  await instance.handleEvent?.({
+  const cardDetailContextMenuEvent = {
     name: 'cardDetail',
     type: 'contextmenu',
     x: 55,
     y: 66,
-  })
+  }
+  await instance.handleEvent?.(cardDetailContextMenuEvent)
 
   expect(contextMenuInvocations).toEqual([['trello.cardDetail', 55, 66]])
   expect((instance as any).getMenuEntries('trello.cardDetail')).toEqual([
