@@ -310,6 +310,113 @@ const createDeferred = <T>(): PromiseWithResolvers<T> => {
   return Promise.withResolvers<T>()
 }
 
+const createStagedCardClient = (options: {
+  readonly boardDetail: TrelloBoardDetail
+  readonly boards: readonly TrelloBoard[]
+  readonly getCardDetailPartsCacheFirst: TrelloClient['getCardDetailPartsCacheFirst']
+}): TrelloClient => {
+  return {
+    async addCardLabel(card: TrelloCard) {
+      return card
+    },
+    async createCard(list: TrelloList) {
+      return {
+        id: 'created-card-1',
+        idList: list.id,
+        name: 'Created card',
+      }
+    },
+    async getBoardDetail() {
+      return options.boardDetail
+    },
+    async getBoardDetailCacheFirst() {
+      return {
+        cached: undefined,
+        fresh: Promise.resolve(options.boardDetail),
+      }
+    },
+    async getCardDetail(card: TrelloCard, credentials: TrelloCredentials) {
+      const result = await options.getCardDetailPartsCacheFirst(
+        card,
+        credentials,
+      )
+      const [detailCard, attachments, comments] = await Promise.all([
+        result.fresh.card,
+        result.fresh.attachments,
+        result.fresh.comments,
+      ])
+      return {
+        attachments,
+        card: detailCard,
+        comments,
+      }
+    },
+    async getCardDetailCacheFirst(
+      card: TrelloCard,
+      credentials: TrelloCredentials,
+    ) {
+      const result = await options.getCardDetailPartsCacheFirst(
+        card,
+        credentials,
+      )
+      return {
+        cached: result.cached,
+        fresh: Promise.all([
+          result.fresh.card,
+          result.fresh.attachments,
+          result.fresh.comments,
+        ]).then(([detailCard, attachments, comments]) => {
+          return {
+            attachments,
+            card: detailCard,
+            comments,
+          }
+        }),
+      }
+    },
+    getCardDetailPartsCacheFirst: options.getCardDetailPartsCacheFirst,
+    async listBoardLabels() {
+      return []
+    },
+    async listBoards() {
+      return options.boards
+    },
+    async listBoardsCacheFirst() {
+      return {
+        cached: undefined,
+        fresh: Promise.resolve(options.boards),
+      }
+    },
+    async moveCard(card: TrelloCard, move: TrelloCardMove) {
+      return {
+        ...card,
+        idList: move.idList,
+      }
+    },
+    async search() {
+      return []
+    },
+    async searchCacheFirst() {
+      return {
+        cached: undefined,
+        fresh: Promise.resolve([]),
+      }
+    },
+    async updateCard(card: TrelloCard, update: TrelloCardUpdate) {
+      return {
+        ...card,
+        ...update,
+      }
+    },
+    async updateList(list: TrelloList, update: TrelloListUpdate) {
+      return {
+        ...list,
+        ...update,
+      }
+    },
+  }
+}
+
 test('renders auth inputs when unauthenticated', async () => {
   setTrelloViewDependencyFactory(() => ({
     client: createMockTrelloClient({}),
@@ -2201,6 +2308,22 @@ test('clicking card renders cached detail before fresh detail resolves', async (
         fresh: freshCardDeferred.promise,
       }
     },
+    async getCardDetailPartsCacheFirst() {
+      return {
+        cached: cachedCardDetail,
+        fresh: {
+          attachments: freshCardDeferred.promise.then((detail) => {
+            return detail.attachments
+          }),
+          card: freshCardDeferred.promise.then((detail) => {
+            return detail.card
+          }),
+          comments: freshCardDeferred.promise.then((detail) => {
+            return detail.comments
+          }),
+        },
+      }
+    },
     async listBoardLabels() {
       return []
     },
@@ -2274,6 +2397,284 @@ test('clicking card renders cached detail before fresh detail resolves', async (
   const refreshedText = getText(await instance.render())
   expect(refreshedText).toContain('Fresh description')
   expect(refreshedText).not.toContain('Cached description')
+  resetTrelloViewDependencyFactory()
+})
+
+test('card detail renders title and description before comments finish loading', async () => {
+  const cardDeferred = createDeferred<TrelloCard>()
+  const commentsDeferred = createDeferred<TrelloCardDetail['comments']>()
+  const attachmentsDeferred = createDeferred<TrelloCardDetail['attachments']>()
+  const boards = [{ id: 'board-1', name: 'Roadmap' }]
+  const boardDetail = {
+    board: { id: 'board-1', name: 'Roadmap' },
+    lists: [
+      {
+        cards: [{ id: 'card-1', name: 'Ship Trello view' }],
+        id: 'list-1',
+        name: 'Todo',
+      },
+    ],
+  }
+  setTrelloViewDependencyFactory(() => ({
+    client: createStagedCardClient({
+      boardDetail,
+      boards,
+      async getCardDetailPartsCacheFirst() {
+        return {
+          cached: undefined,
+          fresh: {
+            attachments: attachmentsDeferred.promise,
+            card: cardDeferred.promise,
+            comments: commentsDeferred.promise,
+          },
+        }
+      },
+    }),
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage(),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: validApiKey,
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: validToken,
+  })
+  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  const openCardPromise = instance.handleEvent?.({
+    name: 'card:card-1',
+    type: 'click',
+  }) as Promise<void>
+
+  cardDeferred.resolve({
+    desc: 'Fresh staged description',
+    id: 'card-1',
+    name: 'Fresh staged title',
+  })
+  await Promise.resolve()
+  await Promise.resolve()
+
+  const stagedText = getText(await instance.render())
+  expect(stagedText).toContain('Fresh staged title')
+  expect(stagedText).toContain('Fresh staged description')
+  expect(stagedText).toContain('Loading comments...')
+  expect(stagedText).toContain('Loading images...')
+  expect(stagedText).not.toContain('A staged comment')
+
+  commentsDeferred.resolve([
+    {
+      data: {
+        text: 'A staged comment',
+      },
+      id: 'comment-1',
+    },
+  ])
+  attachmentsDeferred.resolve([])
+  await openCardPromise
+
+  const finishedText = getText(await instance.render())
+  expect(finishedText).toContain('A staged comment')
+  expect(finishedText).not.toContain('Loading comments...')
+  resetTrelloViewDependencyFactory()
+})
+
+test('late comments do not reset edited card description draft', async () => {
+  const cardDeferred = createDeferred<TrelloCard>()
+  const commentsDeferred = createDeferred<TrelloCardDetail['comments']>()
+  const attachmentsDeferred = createDeferred<TrelloCardDetail['attachments']>()
+  const boards = [{ id: 'board-1', name: 'Roadmap' }]
+  const boardDetail = {
+    board: { id: 'board-1', name: 'Roadmap' },
+    lists: [
+      {
+        cards: [{ id: 'card-1', name: 'Ship Trello view' }],
+        id: 'list-1',
+        name: 'Todo',
+      },
+    ],
+  }
+  setTrelloViewDependencyFactory(() => ({
+    client: createStagedCardClient({
+      boardDetail,
+      boards,
+      async getCardDetailPartsCacheFirst() {
+        return {
+          cached: undefined,
+          fresh: {
+            attachments: attachmentsDeferred.promise,
+            card: cardDeferred.promise,
+            comments: commentsDeferred.promise,
+          },
+        }
+      },
+    }),
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage(),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: validApiKey,
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: validToken,
+  })
+  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  const openCardPromise = instance.handleEvent?.({
+    name: 'card:card-1',
+    type: 'click',
+  }) as Promise<void>
+  cardDeferred.resolve({
+    desc: 'Original staged description',
+    id: 'card-1',
+    name: 'Fresh staged title',
+  })
+  await Promise.resolve()
+  await Promise.resolve()
+
+  await instance.handleEvent?.({ name: 'editCardDescription', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'cardDescription',
+    type: 'input',
+    value: 'Draft while comments load',
+  })
+  commentsDeferred.resolve([
+    {
+      data: {
+        text: 'Late comment',
+      },
+      id: 'comment-1',
+    },
+  ])
+  attachmentsDeferred.resolve([])
+  await openCardPromise
+
+  const dom = await instance.render()
+  expect(getNodeByName(dom, 'cardDescription')?.value).toBe(
+    'Draft while comments load',
+  )
+  expect(getText(dom)).toContain('Late comment')
+  resetTrelloViewDependencyFactory()
+})
+
+test('stale staged card detail results are ignored after opening another card', async () => {
+  const cardOneDeferred = createDeferred<TrelloCard>()
+  const cardTwoDeferred = createDeferred<TrelloCard>()
+  const commentsOneDeferred = createDeferred<TrelloCardDetail['comments']>()
+  const commentsTwoDeferred = createDeferred<TrelloCardDetail['comments']>()
+  const attachmentsOneDeferred =
+    createDeferred<TrelloCardDetail['attachments']>()
+  const attachmentsTwoDeferred =
+    createDeferred<TrelloCardDetail['attachments']>()
+  const boards = [{ id: 'board-1', name: 'Roadmap' }]
+  const boardDetail = {
+    board: { id: 'board-1', name: 'Roadmap' },
+    lists: [
+      {
+        cards: [
+          { id: 'card-1', name: 'First card' },
+          { id: 'card-2', name: 'Second card' },
+        ],
+        id: 'list-1',
+        name: 'Todo',
+      },
+    ],
+  }
+  setTrelloViewDependencyFactory(() => ({
+    client: createStagedCardClient({
+      boardDetail,
+      boards,
+      async getCardDetailPartsCacheFirst(card) {
+        const isFirstCard = card.id === 'card-1'
+        return {
+          cached: undefined,
+          fresh: {
+            attachments: isFirstCard
+              ? attachmentsOneDeferred.promise
+              : attachmentsTwoDeferred.promise,
+            card: isFirstCard
+              ? cardOneDeferred.promise
+              : cardTwoDeferred.promise,
+            comments: isFirstCard
+              ? commentsOneDeferred.promise
+              : commentsTwoDeferred.promise,
+          },
+        }
+      },
+    }),
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage(),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: validApiKey,
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: validToken,
+  })
+  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  const openFirstCardPromise = instance.handleEvent?.({
+    name: 'card:card-1',
+    type: 'click',
+  }) as Promise<void>
+  await Promise.resolve()
+  const openSecondCardPromise = instance.handleEvent?.({
+    name: 'card:card-2',
+    type: 'click',
+  }) as Promise<void>
+
+  cardOneDeferred.resolve({
+    desc: 'First stale description',
+    id: 'card-1',
+    name: 'First stale title',
+  })
+  commentsOneDeferred.resolve([
+    {
+      data: {
+        text: 'First stale comment',
+      },
+      id: 'comment-1',
+    },
+  ])
+  attachmentsOneDeferred.resolve([])
+  cardTwoDeferred.resolve({
+    desc: 'Second current description',
+    id: 'card-2',
+    name: 'Second current title',
+  })
+  commentsTwoDeferred.resolve([
+    {
+      data: {
+        text: 'Second current comment',
+      },
+      id: 'comment-2',
+    },
+  ])
+  attachmentsTwoDeferred.resolve([])
+  await Promise.all([openFirstCardPromise, openSecondCardPromise])
+
+  const text = getText(await instance.render())
+  expect(text).toContain('Second current description')
+  expect(text).toContain('Second current comment')
+  expect(text).not.toContain('First stale description')
+  expect(text).not.toContain('First stale comment')
   resetTrelloViewDependencyFactory()
 })
 

@@ -209,6 +209,26 @@ export const createMockTrelloClient = (
         }),
       }
     },
+    async getCardDetailPartsCacheFirst(card: TrelloCard) {
+      const fresh = client.getCardDetail(card, {
+        apiKey: '',
+        token: '',
+      })
+      return {
+        cached: undefined,
+        fresh: {
+          attachments: fresh.then((detail) => {
+            return detail.attachments
+          }),
+          card: fresh.then((detail) => {
+            return detail.card
+          }),
+          comments: fresh.then((detail) => {
+            return detail.comments
+          }),
+        },
+      }
+    },
     async listBoardLabels(board: TrelloBoard): Promise<readonly TrelloLabel[]> {
       if (data.error) {
         throw new Error(data.error)
