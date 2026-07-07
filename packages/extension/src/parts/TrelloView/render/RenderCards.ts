@@ -17,8 +17,8 @@ const getCardCommentLabel = (count: number): string => {
 
 const renderCardCommentIcon = (): Dom.TreeNode => {
   return Dom.node(VirtualDomElements.Img, {
-    'aria-hidden': true,
     alt: '',
+    'aria-hidden': true,
     className: 'TrelloCardCommentIcon',
     src: './comments.svg',
   })
