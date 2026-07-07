@@ -26,11 +26,15 @@ export {
   backToBoardsActiveTrelloViewInstance,
   cancelNewCardActiveTrelloViewInstance,
   closeCardDetailActiveTrelloViewInstance,
+  logoutActiveTrelloViewInstance,
+  openCardActiveTrelloViewInstance,
   refreshBoardsActiveTrelloViewInstance,
   reloadActiveTrelloViewInstances,
   saveCardDetailActiveTrelloViewInstance,
+  startAddCardActiveTrelloViewInstance,
   submitNewCardActiveTrelloViewInstance,
 } from './CreateInstance.ts'
+export { getMenuEntries } from './MenuEntries.ts'
 export {
   boardBackgroundEnabledPreference,
   searchEnabledPreference,

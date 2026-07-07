@@ -37,6 +37,8 @@ export interface TrelloViewState {
   cardDetailLoading: boolean
   cardLabelPickerOpen: boolean
   context: Readonly<Record<string, boolean>>
+  contextMenuCardId: string
+  contextMenuListId: string
   credentials: TrelloCredentials | undefined
   draftApiKey: string
   draftCardDescription: string
@@ -66,6 +68,11 @@ export interface TrelloViewContext {
   readonly currentBoardStorage: CurrentBoardStorage
   readonly recentStorage: RecentBoardStorage
   readonly requestRerender: () => void
+  readonly showContextMenu: (
+    menuId: string,
+    x: number,
+    y: number,
+  ) => Promise<void>
   readonly state: TrelloViewState
   readonly storage: CredentialStorage
 }
@@ -75,6 +82,11 @@ export interface TrelloViewActionContext {
   readonly currentBoardStorage: CurrentBoardStorage
   readonly recentStorage: RecentBoardStorage
   readonly requestRerender: () => void
+  readonly showContextMenu: (
+    menuId: string,
+    x: number,
+    y: number,
+  ) => Promise<void>
   readonly state: Readonly<TrelloViewState>
   readonly storage: CredentialStorage
 }

@@ -338,5 +338,15 @@ export const renderCardDetailPanel = (
       ? [Dom.link('TrelloCardDetailLink', card.url, 'Open in Trello')]
       : []),
   ]
-  return [Dom.div('TrelloCardDetailPanel', children)]
+  return [
+    Dom.node(
+      VirtualDomElements.Div,
+      {
+        className: 'TrelloCardDetailPanel',
+        name: 'cardDetail',
+        onContextMenu: 'handleContextMenu',
+      },
+      children,
+    ),
+  ]
 }
