@@ -1,4 +1,7 @@
-import type { VirtualDomNode } from '@lvce-editor/virtual-dom-worker'
+import {
+  VirtualDomElements,
+  type VirtualDomNode,
+} from '@lvce-editor/virtual-dom-worker'
 import type {
   TrelloBoard,
   TrelloSearchResult,
@@ -128,5 +131,15 @@ export const renderBoards = (
     ...renderBoardContent(state),
     ...renderError(state.error),
   ]
-  return Dom.flatten(Dom.div('TrelloView TrelloBoards', children))
+  return Dom.flatten(
+    Dom.node(
+      VirtualDomElements.Div,
+      {
+        className: 'TrelloView TrelloBoards',
+        name: 'boards',
+        onContextMenu: 'handleContextMenu',
+      },
+      children,
+    ),
+  )
 }

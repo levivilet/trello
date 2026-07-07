@@ -2,6 +2,8 @@ import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import type { TrelloCard } from '../../TrelloTypes/TrelloTypes.ts'
 import * as Dom from '../../VirtualDom/VirtualDom.ts'
 import { getCardCoverImageUrl } from '../CardCoverHelpers.ts'
+import { getLabelColorClassName, getLabelText } from '../LabelHelpers.ts'
+import { getAssetUrl } from '../state/AssetBaseUrl.ts'
 
 const getCardCommentCount = (card: Readonly<TrelloCard>): number => {
   return card.badges?.comments || 0
@@ -14,30 +16,17 @@ const getCardCommentLabel = (count: number): string => {
   return `${count} comments`
 }
 
-const renderCardCommentIcon = (): Dom.TreeNode => {
-  return Dom.node(
-    VirtualDomElements.Svg,
-    {
-      'aria-hidden': true,
-      className: 'TrelloCardCommentIcon',
-      fill: 'none',
-      height: 14,
-      viewBox: '0 0 24 24',
-      width: 14,
-    },
-    [
-      Dom.node(VirtualDomElements.Path, {
-        d: 'M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z',
-        stroke: 'currentColor',
-        strokeLinecap: 'round',
-        strokeLinejoin: 'round',
-        strokeWidth: 2,
-      }),
-    ],
-  )
+const renderCardCommentIcon = (baseUrl: string): Dom.TreeNode => {
+  return Dom.node(VirtualDomElements.Img, {
+    alt: '',
+    'aria-hidden': true,
+    className: 'TrelloCardCommentIcon',
+    src: getAssetUrl(baseUrl, 'comments.svg'),
+  })
 }
 
 const renderCardCommentCount = (
+  baseUrl: string,
   card: Readonly<TrelloCard>,
 ): readonly Dom.TreeNode[] => {
   const commentCount = getCardCommentCount(card)
@@ -58,16 +47,45 @@ const renderCardCommentCount = (
         className: 'TrelloCardMeta',
         title: commentLabel,
       },
-      [renderCardCommentIcon(), commentCountNode],
+      [renderCardCommentIcon(baseUrl), commentCountNode],
     ),
   ]
 }
 
-const renderCard = (card: Readonly<TrelloCard>): Dom.TreeNode => {
+const renderCardLabel = (
+  label: NonNullable<TrelloCard['labels']>[number],
+): Dom.TreeNode => {
+  const labelText = getLabelText(label)
+  return Dom.node(VirtualDomElements.Div, {
+    'aria-label': labelText,
+    className: `TrelloCardLabel TrelloCardPreviewLabel ${getLabelColorClassName(label.color)}`,
+    title: labelText,
+  })
+}
+
+const renderCardLabels = (
+  card: Readonly<TrelloCard>,
+): readonly Dom.TreeNode[] => {
+  if (!card.labels || card.labels.length === 0) {
+    return []
+  }
+  return [
+    Dom.div(
+      'TrelloCardLabels TrelloCardPreviewLabels',
+      card.labels.map(renderCardLabel),
+    ),
+  ]
+}
+
+const renderCard = (
+  baseUrl: string,
+  card: Readonly<TrelloCard>,
+): Dom.TreeNode => {
   const coverImageUrl = getCardCoverImageUrl(card)
   const cardBody = Dom.div('TrelloCardBody', [
+    ...renderCardLabels(card),
     Dom.div('TrelloCardTitle', [Dom.textNode(card.name)]),
-    ...renderCardCommentCount(card),
+    ...renderCardCommentCount(baseUrl, card),
   ])
   const children = coverImageUrl
     ? [
@@ -83,6 +101,7 @@ const renderCard = (card: Readonly<TrelloCard>): Dom.TreeNode => {
         : 'TrelloCard',
       draggable: true,
       name: `card:${card.id}`,
+      onContextMenu: 'handleContextMenu',
       onDragEnd: 'handleDragEnd',
       onDragStart: 'handleDragStart',
     },
@@ -91,10 +110,11 @@ const renderCard = (card: Readonly<TrelloCard>): Dom.TreeNode => {
 }
 
 export const renderCards = (
+  baseUrl: string,
   cards: readonly TrelloCard[],
 ): readonly Dom.TreeNode[] => {
   if (cards.length === 0) {
     return [Dom.textNode('No cards')]
   }
-  return cards.map(renderCard)
+  return cards.map((card) => renderCard(baseUrl, card))
 }

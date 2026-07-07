@@ -340,5 +340,11 @@ test('label helpers prefer label names and known color classes', () => {
     }),
   ).toBe('Label')
   expect(getLabelColorClassName('blue')).toBe('TrelloCardLabelColorBlue')
+  expect(getLabelColorClassName('green_dark')).toBe(
+    'TrelloCardLabelColorGreenDark',
+  )
+  expect(getLabelColorClassName('yellow_light')).toBe(
+    'TrelloCardLabelColorYellowLight',
+  )
   expect(getLabelColorClassName('unknown')).toBe('TrelloCardLabelColorNeutral')
 })

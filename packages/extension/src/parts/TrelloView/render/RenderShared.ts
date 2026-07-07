@@ -33,7 +33,7 @@ export const renderField = (
   inputType?: string,
 ): Dom.TreeNode => {
   return Dom.div('TrelloField', [
-    Dom.textNode(label),
+    Dom.label(label),
     Dom.input(name, value, label, inputType),
   ])
 }

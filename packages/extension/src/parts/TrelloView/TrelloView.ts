@@ -22,7 +22,19 @@ export {
   resetTrelloViewDependencyFactory,
   setTrelloViewDependencyFactory,
 } from './state/DependencyFactory.ts'
-export { reloadActiveTrelloViewInstances } from './CreateInstance.ts'
+export {
+  backToBoardsActiveTrelloViewInstance,
+  cancelNewCardActiveTrelloViewInstance,
+  closeCardDetailActiveTrelloViewInstance,
+  logoutActiveTrelloViewInstance,
+  openCardActiveTrelloViewInstance,
+  refreshBoardsActiveTrelloViewInstance,
+  reloadActiveTrelloViewInstances,
+  saveCardDetailActiveTrelloViewInstance,
+  startAddCardActiveTrelloViewInstance,
+  submitNewCardActiveTrelloViewInstance,
+} from './CreateInstance.ts'
+export { getMenuEntries } from './MenuEntries.ts'
 export {
   boardBackgroundEnabledPreference,
   searchEnabledPreference,

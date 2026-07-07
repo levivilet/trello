@@ -12,5 +12,6 @@ export const editCardTitle = (context: TrelloViewActionContext): void => {
 export const editCardDescription = (context: TrelloViewActionContext): void => {
   const state = context.state as TrelloViewState
   state.editingCardDescription = true
+  state.focusedName = 'cardDescription'
   context.requestRerender()
 }

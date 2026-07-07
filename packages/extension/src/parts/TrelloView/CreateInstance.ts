@@ -1,4 +1,5 @@
 import type {
+  MenuEntry,
   ViewContext,
   ViewEvent,
   VirtualDomViewInstance,
@@ -13,8 +14,16 @@ import type {
   TrelloViewState,
 } from './state/TrelloViewState.ts'
 import { createMemoryCurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
+import {
+  cancelAddCard,
+  startAddCard,
+  submitAddCard,
+} from './actions/AddCard.ts'
+import { closeCardDetail as closeCardDetailAction } from './actions/CloseCardDetail.ts'
+import { goBackToBoards } from './actions/GoBackToBoards.ts'
 import { handleBlurEvent } from './actions/HandleBlurEvent.ts'
 import { handleClickEvent } from './actions/HandleClickEvent.ts'
+import { handleContextMenuEvent } from './actions/HandleContextMenuEvent.ts'
 import {
   handleDragEndEvent,
   handleDragLeaveEvent,
@@ -25,15 +34,39 @@ import {
 import { handleInputEvent } from './actions/HandleInputEvent.ts'
 import { handleSubmitEvent } from './actions/HandleSubmitEvent.ts'
 import { loadBoards } from './actions/LoadBoards.ts'
+import { logout } from './actions/Logout.ts'
+import { openCard } from './actions/OpenCard.ts'
 import { restoreCurrentBoard } from './actions/RestoreCurrentBoard.ts'
+import { saveCardDetail as saveCardDetailAction } from './actions/SaveCardDetail.ts'
+import { getMenuEntries } from './MenuEntries.ts'
 import { renderAuth } from './render/RenderAuth.ts'
 import { renderBoardDetail } from './render/RenderBoardDetail.ts'
 import { renderBoards } from './render/RenderBoards.ts'
 import { createInitialState } from './state/CreateInitialState.ts'
 import { dependencyState } from './state/DependencyFactory.ts'
+import {
+  contextKeyCardDescriptionFocus,
+  contextKeyNewCardInputFocus,
+  updateContext,
+} from './state/UpdateContext.ts'
 
 interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
+  readonly backToBoards: () => Promise<void>
+  readonly cancelNewCard: () => void
+  readonly closeCardDetail: () => void
+  readonly getContext: () => Readonly<Record<string, boolean>>
+  readonly getMenuEntries: (menuId: string) => readonly MenuEntry[]
+  readonly logout: () => Promise<void>
+  readonly openCard: (cardId: string) => Promise<void>
+  readonly refreshBoards: () => Promise<void>
   readonly reload: () => Promise<void>
+  readonly renderFocus: (
+    oldContext: Readonly<Record<string, boolean>>,
+    newContext: Readonly<Record<string, boolean>>,
+  ) => string
+  readonly saveCardDetail: () => Promise<void>
+  readonly startAddCard: (listId: string) => void
+  readonly submitNewCard: () => Promise<void>
 }
 
 interface MutableTrelloViewActionContext extends TrelloViewActionContext {
@@ -41,11 +74,69 @@ interface MutableTrelloViewActionContext extends TrelloViewActionContext {
   currentBoardStorage: CurrentBoardStorage
   recentStorage: RecentBoardStorage
   requestRerender: () => void
+  showContextMenu: (menuId: string, x: number, y: number) => Promise<void>
   state: TrelloViewState
   storage: CredentialStorage
 }
 
 const activeInstances = new Set<ActiveTrelloViewInstance>()
+
+const getActiveInstance = (): ActiveTrelloViewInstance | undefined => {
+  let activeInstance: ActiveTrelloViewInstance | undefined
+  for (const instance of activeInstances) {
+    activeInstance = instance
+  }
+  return activeInstance
+}
+
+const becameActive = (
+  oldContext: Readonly<Record<string, boolean>>,
+  newContext: Readonly<Record<string, boolean>>,
+  key: string,
+): boolean => {
+  return !oldContext[key] && newContext[key]
+}
+
+export const backToBoardsActiveTrelloViewInstance = async (): Promise<void> => {
+  await getActiveInstance()?.backToBoards()
+}
+
+export const cancelNewCardActiveTrelloViewInstance = (): void => {
+  getActiveInstance()?.cancelNewCard()
+}
+
+export const closeCardDetailActiveTrelloViewInstance = (): void => {
+  getActiveInstance()?.closeCardDetail()
+}
+
+export const logoutActiveTrelloViewInstance = async (): Promise<void> => {
+  await getActiveInstance()?.logout()
+}
+
+export const refreshBoardsActiveTrelloViewInstance =
+  async (): Promise<void> => {
+    await getActiveInstance()?.refreshBoards()
+  }
+
+export const saveCardDetailActiveTrelloViewInstance =
+  async (): Promise<void> => {
+    await getActiveInstance()?.saveCardDetail()
+  }
+
+export const startAddCardActiveTrelloViewInstance = (listId: string): void => {
+  getActiveInstance()?.startAddCard(listId)
+}
+
+export const openCardActiveTrelloViewInstance = async (
+  cardId: string,
+): Promise<void> => {
+  await getActiveInstance()?.openCard(cardId)
+}
+
+export const submitNewCardActiveTrelloViewInstance =
+  async (): Promise<void> => {
+    await getActiveInstance()?.submitNewCard()
+  }
 
 export const reloadActiveTrelloViewInstances = async (): Promise<void> => {
   await Promise.all(
@@ -64,11 +155,13 @@ export const createInstance = async (
     currentBoardStorage: createMemoryCurrentBoardStorage(),
     recentStorage: undefined as never,
     requestRerender: undefined as never,
+    showContextMenu: undefined as never,
     state,
     storage: undefined as never,
   }
 
   const requestRerender = (): void => {
+    updateContext(state)
     // @ts-ignore
     const request = context?.requestRerender
     if (!request) {
@@ -77,6 +170,18 @@ export const createInstance = async (
     globalThis.setTimeout(() => {
       void request()
     }, 0)
+  }
+
+  const showContextMenu = async (
+    menuId: string,
+    x: number,
+    y: number,
+  ): Promise<void> => {
+    const request = (context as any)?.showContextMenu
+    if (!request) {
+      return
+    }
+    await request(menuId, x, y)
   }
 
   const initialize = async (rerender: boolean): Promise<void> => {
@@ -96,6 +201,7 @@ export const createInstance = async (
     viewContext.currentBoardStorage = currentBoardStorage
     viewContext.recentStorage = recentStorage
     viewContext.requestRerender = requestRerender
+    viewContext.showContextMenu = showContextMenu
     viewContext.storage = storage
 
     if (readSearchEnabled) {
@@ -113,6 +219,7 @@ export const createInstance = async (
       await loadBoards(viewContext, false)
       await restoreCurrentBoard(viewContext)
     }
+    updateContext(state)
     if (rerender) {
       requestRerender()
     }
@@ -121,48 +228,92 @@ export const createInstance = async (
   await initialize(false)
 
   const instance: ActiveTrelloViewInstance = {
+    async backToBoards(): Promise<void> {
+      await goBackToBoards(viewContext)
+      updateContext(state)
+    },
+    cancelNewCard(): void {
+      cancelAddCard(viewContext)
+      updateContext(state)
+    },
+    closeCardDetail(): void {
+      closeCardDetailAction(viewContext)
+      updateContext(state)
+    },
     async dispose(): Promise<void> {
       activeInstances.delete(instance)
     },
+    getContext(): Readonly<Record<string, boolean>> {
+      return state.context
+    },
+    getMenuEntries(menuId: string): readonly MenuEntry[] {
+      return getMenuEntries(state, menuId)
+    },
     async handleEvent(event: Readonly<ViewEvent>): Promise<void> {
-      if (event.type === 'input') {
-        handleInputEvent(state, event)
-        return
+      activeInstances.delete(instance)
+      activeInstances.add(instance)
+      try {
+        if (event.type === 'focus') {
+          state.focusedName = event.name || ''
+          return
+        }
+        if (event.type === 'input') {
+          await handleInputEvent(viewContext, event)
+          return
+        }
+        if (event.type === 'click') {
+          await handleClickEvent(viewContext, event)
+          return
+        }
+        if (event.type === 'contextmenu') {
+          await handleContextMenuEvent(viewContext, event)
+          return
+        }
+        if (event.type === 'submit') {
+          await handleSubmitEvent(viewContext, event)
+          return
+        }
+        if (event.type === 'blur') {
+          await handleBlurEvent(viewContext, event)
+          if (!event.name || state.focusedName === event.name) {
+            state.focusedName = ''
+          }
+          return
+        }
+        if (event.type === 'dragstart') {
+          handleDragStartEvent(viewContext, event)
+          return
+        }
+        if (event.type === 'dragover') {
+          handleDragOverEvent(viewContext, event)
+          return
+        }
+        if (event.type === 'dragleave') {
+          handleDragLeaveEvent(viewContext)
+          return
+        }
+        if (event.type === 'dragend') {
+          handleDragEndEvent(viewContext)
+          return
+        }
+        if (event.type === 'drop') {
+          await handleDropEvent(viewContext, event)
+        }
+      } finally {
+        updateContext(state)
       }
-      if (event.type === 'click') {
-        await handleClickEvent(viewContext, event)
-        return
-      }
-      if (event.type === 'contextmenu') {
-        return
-      }
-      if (event.type === 'submit') {
-        await handleSubmitEvent(viewContext, event)
-        return
-      }
-      if (event.type === 'blur') {
-        await handleBlurEvent(viewContext, event)
-        return
-      }
-      if (event.type === 'dragstart') {
-        handleDragStartEvent(viewContext, event)
-        return
-      }
-      if (event.type === 'dragover') {
-        handleDragOverEvent(viewContext, event)
-        return
-      }
-      if (event.type === 'dragleave') {
-        handleDragLeaveEvent(viewContext)
-        return
-      }
-      if (event.type === 'dragend') {
-        handleDragEndEvent(viewContext)
-        return
-      }
-      if (event.type === 'drop') {
-        await handleDropEvent(viewContext, event)
-      }
+    },
+    async logout(): Promise<void> {
+      await logout(viewContext)
+      updateContext(state)
+    },
+    async openCard(cardId: string): Promise<void> {
+      await openCard(viewContext, cardId)
+      updateContext(state)
+    },
+    async refreshBoards(): Promise<void> {
+      await loadBoards(viewContext)
+      updateContext(state)
     },
     async reload(): Promise<void> {
       await initialize(true)
@@ -176,12 +327,44 @@ export const createInstance = async (
       }
       return renderBoards(state)
     },
+    renderFocus(
+      oldContext: Readonly<Record<string, boolean>>,
+      newContext: Readonly<Record<string, boolean>>,
+    ): string {
+      if (
+        becameActive(oldContext, newContext, contextKeyNewCardInputFocus) &&
+        state.addingCardListId
+      ) {
+        return `[name="newCardTitle:${state.addingCardListId}"]`
+      }
+      if (
+        becameActive(oldContext, newContext, contextKeyCardDescriptionFocus)
+      ) {
+        return '[name="cardDescription"]'
+      }
+      return ''
+    },
+    async saveCardDetail(): Promise<void> {
+      await saveCardDetailAction(viewContext)
+      updateContext(state)
+    },
     saveState(): unknown {
       return {
         boardId: state.boardDetail?.board.id,
         cardId: state.selectedCardDetail?.card.id,
         isAuthenticated: Boolean(state.credentials),
       }
+    },
+    startAddCard(listId: string): void {
+      startAddCard(viewContext, listId)
+      updateContext(state)
+    },
+    async submitNewCard(): Promise<void> {
+      if (!state.addingCardListId) {
+        return
+      }
+      await submitAddCard(viewContext, `addCard:${state.addingCardListId}`)
+      updateContext(state)
     },
   }
   activeInstances.add(instance)

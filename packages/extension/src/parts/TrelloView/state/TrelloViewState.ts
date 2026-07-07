@@ -10,6 +10,7 @@ import type {
   TrelloBoardDetail,
   TrelloCardDetail,
   TrelloCredentials,
+  TrelloLabel,
   TrelloSearchResult,
 } from '../../TrelloTypes/TrelloTypes.ts'
 
@@ -25,15 +26,25 @@ export interface TrelloViewDependencies {
 
 export interface TrelloViewState {
   activeSearchQuery: string
+  addingCardLabelId: string
   addingCardListId: string
+  baseUrl: string
   boardBackgroundEnabled: boolean
   boardDetail: TrelloBoardDetail | undefined
+  boardLabels: readonly TrelloLabel[]
+  boardLabelsLoaded: boolean
+  boardLabelsLoading: boolean
   boards: readonly TrelloBoard[]
   cardDetailLoading: boolean
+  cardLabelPickerOpen: boolean
+  context: Readonly<Record<string, boolean>>
+  contextMenuCardId: string
+  contextMenuListId: string
   credentials: TrelloCredentials | undefined
   draftApiKey: string
   draftCardDescription: string
   draftCardTitle: string
+  draftLabelSearchQuery: string
   draftListTitles: Readonly<Record<string, string>>
   draftNewCardTitle: string
   draftSearchQuery: string
@@ -43,7 +54,9 @@ export interface TrelloViewState {
   editingCardDescription: boolean
   editingCardTitle: boolean
   error: string
+  focusedName: string
   loading: boolean
+  movingCardId: string
   recentBoardViews: readonly RecentBoardView[]
   savingCardDetail: boolean
   savingNewCard: boolean
@@ -57,6 +70,11 @@ export interface TrelloViewContext {
   readonly currentBoardStorage: CurrentBoardStorage
   readonly recentStorage: RecentBoardStorage
   readonly requestRerender: () => void
+  readonly showContextMenu: (
+    menuId: string,
+    x: number,
+    y: number,
+  ) => Promise<void>
   readonly state: TrelloViewState
   readonly storage: CredentialStorage
 }
@@ -66,6 +84,11 @@ export interface TrelloViewActionContext {
   readonly currentBoardStorage: CurrentBoardStorage
   readonly recentStorage: RecentBoardStorage
   readonly requestRerender: () => void
+  readonly showContextMenu: (
+    menuId: string,
+    x: number,
+    y: number,
+  ) => Promise<void>
   readonly state: Readonly<TrelloViewState>
   readonly storage: CredentialStorage
 }

@@ -1,17 +1,28 @@
 import type { TrelloViewState } from './TrelloViewState.ts'
+import { getAssetBaseUrl } from './AssetBaseUrl.ts'
 
 export const createInitialState = (): TrelloViewState => {
   return {
     activeSearchQuery: '',
+    addingCardLabelId: '',
     addingCardListId: '',
+    baseUrl: getAssetBaseUrl(import.meta.url),
     boardBackgroundEnabled: false,
     boardDetail: undefined,
+    boardLabels: [],
+    boardLabelsLoaded: false,
+    boardLabelsLoading: false,
     boards: [],
     cardDetailLoading: false,
+    cardLabelPickerOpen: false,
+    context: {},
+    contextMenuCardId: '',
+    contextMenuListId: '',
     credentials: undefined,
     draftApiKey: '',
     draftCardDescription: '',
     draftCardTitle: '',
+    draftLabelSearchQuery: '',
     draftListTitles: {},
     draftNewCardTitle: '',
     draftSearchQuery: '',
@@ -21,7 +32,9 @@ export const createInitialState = (): TrelloViewState => {
     editingCardDescription: false,
     editingCardTitle: false,
     error: '',
+    focusedName: '',
     loading: false,
+    movingCardId: '',
     recentBoardViews: [],
     savingCardDetail: false,
     savingNewCard: false,

@@ -1,8 +1,10 @@
 import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import type {
   TrelloAttachment,
+  TrelloCard,
   TrelloComment,
   TrelloLabel,
+  TrelloList,
 } from '../../TrelloTypes/TrelloTypes.ts'
 import type { TrelloViewState } from '../state/TrelloViewState.ts'
 import * as Dom from '../../VirtualDom/VirtualDom.ts'
@@ -88,13 +90,128 @@ const renderCardDetailLabel = (label: Readonly<TrelloLabel>): Dom.TreeNode => {
   ])
 }
 
+const hasCardLabel = (
+  labels: readonly TrelloLabel[] | undefined,
+  labelId: string,
+): boolean => {
+  return Boolean(
+    labels?.some((label) => {
+      return label.id === labelId
+    }),
+  )
+}
+
+const getAvailableLabels = (
+  state: Readonly<TrelloViewState>,
+  labels: readonly TrelloLabel[] | undefined,
+): readonly TrelloLabel[] => {
+  const query = state.draftLabelSearchQuery.trim().toLowerCase()
+  return state.boardLabels.filter((label) => {
+    if (hasCardLabel(labels, label.id)) {
+      return false
+    }
+    if (!query) {
+      return true
+    }
+    return getLabelText(label).toLowerCase().includes(query)
+  })
+}
+
+const renderCardLabelChoice = (
+  state: Readonly<TrelloViewState>,
+  label: Readonly<TrelloLabel>,
+): Dom.TreeNode => {
+  return Dom.node(
+    VirtualDomElements.Button,
+    {
+      className: `TrelloCardLabelChoice ${getLabelColorClassName(label.color)}`,
+      disabled: Boolean(state.addingCardLabelId),
+      name: `addCardLabel:${label.id}`,
+      onClick: 'handleClick',
+    },
+    [Dom.textNode(getLabelText(label))],
+  )
+}
+
+const renderCardLabelPickerContent = (
+  state: Readonly<TrelloViewState>,
+  labels: readonly TrelloLabel[] | undefined,
+): Dom.TreeNode => {
+  if (state.boardLabelsLoading) {
+    return Dom.div('TrelloCardLabelPickerEmpty', [
+      Dom.textNode('Loading labels...'),
+    ])
+  }
+  const availableLabels = getAvailableLabels(state, labels)
+  if (availableLabels.length === 0) {
+    const text = state.draftLabelSearchQuery.trim()
+      ? 'No matching labels'
+      : 'No labels available'
+    return Dom.div('TrelloCardLabelPickerEmpty', [Dom.textNode(text)])
+  }
+  return Dom.div(
+    'TrelloCardLabelPickerList',
+    availableLabels.map((label) => {
+      return renderCardLabelChoice(state, label)
+    }),
+  )
+}
+
+const renderCardLabelPicker = (
+  state: Readonly<TrelloViewState>,
+  labels: readonly TrelloLabel[] | undefined,
+): Dom.TreeNode => {
+  return Dom.node(
+    VirtualDomElements.Div,
+    {
+      className: 'TrelloCardLabelPicker',
+      name: 'cardLabelPicker',
+    },
+    [
+      Dom.node(VirtualDomElements.Input, {
+        autocomplete: 'off',
+        className: 'TrelloInput TrelloCardLabelSearchInput',
+        name: 'cardLabelSearch',
+        onInput: 'handleInput',
+        placeholder: 'Search labels',
+        value: state.draftLabelSearchQuery,
+      }),
+      renderCardLabelPickerContent(state, labels),
+    ],
+  )
+}
+
 const renderCardDetailLabels = (
+  state: Readonly<TrelloViewState>,
   labels: readonly TrelloLabel[] | undefined,
 ): readonly Dom.TreeNode[] => {
-  if (!labels || labels.length === 0) {
-    return []
-  }
-  return [Dom.div('TrelloCardLabels', labels.map(renderCardDetailLabel))]
+  const labelNodes =
+    labels && labels.length > 0
+      ? [
+          Dom.div('TrelloCardLabelRow', [
+            Dom.div('TrelloCardLabels', labels.map(renderCardDetailLabel)),
+            Dom.button(
+              'openCardLabelPicker',
+              '+',
+              'TrelloButton TrelloCardLabelAddIconButton',
+            ),
+          ]),
+        ]
+      : [
+          Dom.button(
+            'openCardLabelPicker',
+            'Labels',
+            'TrelloButton TrelloCardLabelAddButton',
+          ),
+        ]
+  return [
+    Dom.div('TrelloCardLabelSection', [
+      ...labelNodes,
+      ...(state.cardLabelPickerOpen
+        ? [renderCardLabelPicker(state, labels)]
+        : []),
+    ]),
+  ]
 }
 
 const renderCardDetailTitle = (
@@ -103,14 +220,87 @@ const renderCardDetailTitle = (
   const className = state.editingCardTitle
     ? 'TrelloCardDetailTitleInput TrelloCardDetailTitleInputEditing'
     : 'TrelloCardDetailTitleInput'
-  return Dom.node(VirtualDomElements.Input, {
-    className,
-    name: 'cardTitle',
-    onBlur: 'handleBlur',
-    onClick: 'handleClick',
-    onInput: 'handleInput',
-    value: state.draftCardTitle,
+  return Dom.div('TrelloCardDetailTitleSizer', [
+    Dom.node(VirtualDomElements.TextArea, {
+      className,
+      name: 'cardTitle',
+      onBlur: 'handleBlur',
+      onClick: 'handleClick',
+      onFocus: 'handleFocus',
+      onInput: 'handleInput',
+      rows: 1,
+      value: state.draftCardTitle,
+    }),
+    Dom.node(
+      VirtualDomElements.Div,
+      {
+        ariaHidden: true,
+        className: 'TrelloCardDetailTitleMirror',
+      },
+      [Dom.textNode(state.draftCardTitle || ' ')],
+    ),
+  ])
+}
+
+const getCardListId = (
+  state: Readonly<TrelloViewState>,
+  card: Readonly<TrelloCard>,
+): string => {
+  if (card.idList) {
+    return card.idList
+  }
+  const lists = state.boardDetail?.lists || []
+  const list = lists.find((item) => {
+    return item.cards.some((listCard) => {
+      return listCard.id === card.id
+    })
   })
+  return list?.id || ''
+}
+
+const renderCardListOption = (
+  list: Readonly<TrelloList>,
+  selectedListId: string,
+): Dom.TreeNode => {
+  return Dom.node(
+    VirtualDomElements.Option,
+    {
+      selected: list.id === selectedListId,
+      value: list.id,
+    },
+    [Dom.textNode(list.name)],
+  )
+}
+
+const renderCardListSelect = (
+  state: Readonly<TrelloViewState>,
+  card: Readonly<TrelloCard>,
+): readonly Dom.TreeNode[] => {
+  const lists = state.boardDetail?.lists || []
+  if (lists.length === 0) {
+    return []
+  }
+  const selectedListId = getCardListId(state, card)
+  return [
+    Dom.div('TrelloCardListSection', [
+      Dom.node(VirtualDomElements.Label, { className: 'TrelloCardListLabel' }, [
+        Dom.textNode('List'),
+      ]),
+      Dom.node(
+        VirtualDomElements.Select,
+        {
+          className: 'TrelloInput TrelloCardListSelect',
+          disabled: state.movingCardId === card.id,
+          name: `cardList:${card.id}`,
+          onInput: 'handleInput',
+          value: selectedListId,
+        },
+        lists.map((list) => {
+          return renderCardListOption(list, selectedListId)
+        }),
+      ),
+    ]),
+  ]
 }
 
 const renderCardDescriptionEditor = (
@@ -121,6 +311,7 @@ const renderCardDescriptionEditor = (
       className: 'TrelloTextArea TrelloCardDescriptionTextArea',
       name: 'cardDescription',
       onBlur: 'handleBlur',
+      onFocus: 'handleFocus',
       onInput: 'handleInput',
       placeholder: 'Add a more detailed description...',
       value: state.draftCardDescription,
@@ -200,7 +391,8 @@ export const renderCardDetailPanel = (
         'TrelloButton TrelloCardDetailCloseButton',
       ),
     ]),
-    ...renderCardDetailLabels(card.labels),
+    ...renderCardDetailLabels(state, card.labels),
+    ...renderCardListSelect(state, card),
     renderCardDescription(state, card.desc || ''),
     renderListTitle('Comments'),
     renderCardDetailComments(comments),
@@ -210,5 +402,15 @@ export const renderCardDetailPanel = (
       ? [Dom.link('TrelloCardDetailLink', card.url, 'Open in Trello')]
       : []),
   ]
-  return [Dom.div('TrelloCardDetailPanel', children)]
+  return [
+    Dom.node(
+      VirtualDomElements.Div,
+      {
+        className: 'TrelloCardDetailPanel',
+        name: 'cardDetail',
+        onContextMenu: 'handleContextMenu',
+      },
+      children,
+    ),
+  ]
 }
