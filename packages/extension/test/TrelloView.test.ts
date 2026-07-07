@@ -3035,7 +3035,7 @@ test('card description preview renders safe markdown subset', async () => {
         'card-1': {
           attachments: [],
           card: {
-            desc: '# Heading\n\n- **Bold** item\n- [Link](https://example.com)\n\nUse `code` and *emphasis*',
+            desc: '# Heading\n\n- **Bold** item\n- [Link](https://example.com)\n\nUse `code` and *emphasis*\n\nEscaped \\- hyphen',
             id: 'card-1',
             name: 'Ship Trello view',
           },
@@ -3063,7 +3063,10 @@ test('card description preview renders safe markdown subset', async () => {
   await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
 
   const detailDom = await instance.render()
-  expect(getText(detailDom)).toContain('Heading')
+  const text = getText(detailDom)
+  expect(text).toContain('Heading')
+  expect(text).toContain('Escaped - hyphen')
+  expect(text).not.toContain('Escaped \\- hyphen')
   expect(getClassNames(detailDom)).toContain(
     'TrelloMarkdownHeading TrelloMarkdownHeading1',
   )
