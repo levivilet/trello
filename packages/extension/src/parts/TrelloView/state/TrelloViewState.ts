@@ -42,6 +42,9 @@ export interface TrelloViewState {
   cardCommentsLoading: boolean
   cardDetailLoading: boolean
   cardDetailLoadingCardId: string
+  cardDetailResizeStartWidth: number
+  cardDetailResizeStartX: number
+  cardDetailWidth: number
   cardLabelPickerOpen: boolean
   context: Readonly<Record<string, boolean>>
   contextMenuCardId: string
@@ -67,6 +70,7 @@ export interface TrelloViewState {
   loading: boolean
   movingCardId: string
   recentBoardViews: readonly RecentBoardView[]
+  resizingCardDetail: boolean
   savingCardDetail: boolean
   savingComment: boolean
   savingNewCard: boolean

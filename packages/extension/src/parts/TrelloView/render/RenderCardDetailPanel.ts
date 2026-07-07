@@ -459,6 +459,11 @@ export const renderCardDetailPanel = (
   }
   const { attachments, card, comments } = state.selectedCardDetail
   const children = [
+    Dom.node(VirtualDomElements.Div, {
+      className: 'TrelloCardDetailResizeSash',
+      name: 'resizeCardDetail',
+      onPointerDown: 'handlePointerDown',
+    }),
     Dom.div('TrelloCardDetailHeader', [
       renderCardDetailTitle(state),
       Dom.button(
@@ -485,6 +490,9 @@ export const renderCardDetailPanel = (
         className: 'TrelloCardDetailPanel',
         name: 'cardDetail',
         onContextMenu: 'handleContextMenu',
+        onPointerMove: 'handlePointerMove',
+        onPointerUp: 'handlePointerUp',
+        style: `--TrelloCardDetailWidth: ${state.cardDetailWidth}px`,
       },
       children,
     ),

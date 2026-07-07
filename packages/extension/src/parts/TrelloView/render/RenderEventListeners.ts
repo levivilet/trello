@@ -32,5 +32,27 @@ export const renderEventListeners = (): readonly DomEventListener[] => {
       name: 'handleKeyDown',
       params: ['handleViewEvent', 'keydown', 'event.target.name', 'event.key'],
     },
+    {
+      name: 'handlePointerDown',
+      params: [
+        'handleViewEvent',
+        'pointerdown',
+        'event.target.name',
+        'event.clientX',
+      ],
+    },
+    {
+      name: 'handlePointerMove',
+      params: [
+        'handleViewEvent',
+        'pointermove',
+        'event.target.name',
+        'event.clientX',
+      ],
+    },
+    {
+      name: 'handlePointerUp',
+      params: ['handleViewEvent', 'pointerup', 'event.target.name'],
+    },
   ]
 }

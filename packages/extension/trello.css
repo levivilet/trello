@@ -659,10 +659,12 @@ button.TrelloSearchResult:hover {
 
 .TrelloCardDetailPanel {
   box-sizing: border-box;
+  position: relative;
   display: flex;
-  flex: 0 0 360px;
+  flex: 0 0 var(--TrelloCardDetailWidth, 360px);
   flex-direction: column;
   gap: 12px;
+  min-width: 200px;
   min-height: 0;
   contain: strict;
   overflow-y: auto;
@@ -670,6 +672,19 @@ button.TrelloSearchResult:hover {
   background: var(--TrelloSurface);
   border: 1px solid var(--TrelloBorder);
   border-radius: 8px;
+}
+
+.TrelloCardDetailResizeSash {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 8px;
+  contain: strict;
+  cursor: ew-resize;
+}
+
+.TrelloCardDetailResizeSash:hover {
+  background: color-mix(in srgb, var(--TrelloFocus) 28%, transparent);
 }
 
 .TrelloCardDetailHeader {
