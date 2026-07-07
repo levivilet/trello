@@ -1,10 +1,10 @@
 import type { TrelloViewState } from './TrelloViewState.ts'
 
-const contextKeyBoardDetailFocus = 'trello.boardDetailFocus'
-const contextKeyBoardsFocus = 'trello.boardsFocus'
-const contextKeyCardDescriptionFocus = 'trello.cardDescriptionFocus'
-const contextKeyCardDetailFocus = 'trello.cardDetailFocus'
-const contextKeyNewCardInputFocus = 'trello.newCardInputFocus'
+export const contextKeyBoardDetailFocus = 'trello.boardDetailFocus'
+export const contextKeyBoardsFocus = 'trello.boardsFocus'
+export const contextKeyCardDescriptionFocus = 'trello.cardDescriptionFocus'
+export const contextKeyCardDetailFocus = 'trello.cardDetailFocus'
+export const contextKeyNewCardInputFocus = 'trello.newCardInputFocus'
 
 export const updateContext = (state: Readonly<TrelloViewState>): void => {
   const context: Record<string, boolean> = {}
