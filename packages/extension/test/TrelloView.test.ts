@@ -2287,9 +2287,20 @@ test('card detail label picker adds an existing board label', async () => {
   const openDom = await instance.render()
   expect(getNodeByName(openDom, 'cardLabelSearch')?.value).toBe('')
   expect(getSubtreeTextByNodeName(openDom, 'cardLabelPicker')).toContain(
+    'Labels',
+  )
+  expect(getNodeByName(openDom, 'closeCardLabelPicker')).toBeDefined()
+  expect(getSubtreeTextByNodeName(openDom, 'cardLabelPicker')).toContain(
     'Extension Api',
   )
   expect(getSubtreeTextByNodeName(openDom, 'cardLabelPicker')).toContain('Bug')
+
+  await instance.handleEvent?.({ name: 'closeCardLabelPicker', type: 'click' })
+
+  const closedDom = await instance.render()
+  expect(getNodeByName(closedDom, 'cardLabelPicker')).toBeUndefined()
+
+  await instance.handleEvent?.({ name: 'openCardLabelPicker', type: 'click' })
 
   await instance.handleEvent?.({
     name: 'cardLabelSearch',

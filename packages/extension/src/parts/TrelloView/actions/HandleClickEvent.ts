@@ -1,7 +1,11 @@
 import type { ViewEvent } from '@lvce-editor/api'
 import type { TrelloViewActionContext } from '../state/TrelloViewState.ts'
 import { startAddCard } from './AddCard.ts'
-import { addCardLabel, openCardLabelPicker } from './AddCardLabel.ts'
+import {
+  addCardLabel,
+  closeCardLabelPicker,
+  openCardLabelPicker,
+} from './AddCardLabel.ts'
 import { closeCardDetail } from './CloseCardDetail.ts'
 import { connect } from './Connect.ts'
 import { editCardDescription, editCardTitle } from './EditCardDetail.ts'
@@ -34,6 +38,9 @@ export const handleClickEvent = async (
       return
     case 'closeCardDetail':
       closeCardDetail(context)
+      return
+    case 'closeCardLabelPicker':
+      closeCardLabelPicker(context)
       return
     case 'connect':
       await connect(context)

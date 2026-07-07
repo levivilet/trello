@@ -179,6 +179,16 @@ const renderCardLabelPickerContent = (
   )
 }
 
+const renderCardLabelPickerHeader = (): Dom.TreeNode => {
+  const title = Dom.div('TrelloCardLabelPickerTitle', [Dom.textNode('Labels')])
+  const closeButton = Dom.button(
+    'closeCardLabelPicker',
+    'x',
+    'TrelloButton TrelloCardLabelPickerCloseButton',
+  )
+  return Dom.div('TrelloCardLabelPickerHeader', [title, closeButton])
+}
+
 const renderCardLabelPicker = (
   state: Readonly<TrelloViewState>,
   labels: readonly TrelloLabel[] | undefined,
@@ -190,6 +200,7 @@ const renderCardLabelPicker = (
       name: 'cardLabelPicker',
     },
     [
+      renderCardLabelPickerHeader(),
       Dom.node(VirtualDomElements.Input, {
         autocomplete: 'off',
         className: 'TrelloInput TrelloCardLabelSearchInput',
