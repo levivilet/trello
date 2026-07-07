@@ -434,7 +434,8 @@ button.TrelloSearchResult:hover {
   gap: 7px;
   contain: strict;
   min-height: 0;
-  padding: 1px 2px 2px;
+  margin-inline: -8px;
+  padding: 1px 10px 2px;
   overflow-y: auto;
 }
 
@@ -487,7 +488,8 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloCardBody {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 6px;
   contain: content;
   padding: 8px 9px;
@@ -523,6 +525,7 @@ button.TrelloSearchResult:hover {
   flex: none;
   width: 14px;
   height: 14px;
+  contain: strict;
   color: inherit;
 }
 
@@ -593,13 +596,14 @@ button.TrelloSearchResult:hover {
 
 .TrelloCardDetailTitleSizer {
   flex: 1 1 auto;
-  display: grid;
+  position: relative;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
 }
 
 .TrelloCardDetailTitleInput,
 .TrelloCardDetailTitleMirror {
-  grid-area: 1 / 1;
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
@@ -616,6 +620,9 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloCardDetailTitleInput {
+  position: absolute;
+  inset: 0;
+  height: 100%;
   contain: content;
   overflow: hidden;
   color: var(--TrelloForegroundStrong);
@@ -662,6 +669,25 @@ button.TrelloSearchResult:hover {
   color: var(--TrelloForegroundStrong);
   background: var(--TrelloHoverBackground);
   outline: none;
+}
+
+.TrelloCardListSection {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  contain: content;
+}
+
+.TrelloCardListLabel {
+  contain: content;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--TrelloForegroundMuted);
+}
+
+.TrelloCardListSelect {
+  min-height: 30px;
+  padding: 5px 8px;
 }
 
 .TrelloCardDescriptionSection,
@@ -831,6 +857,23 @@ button.TrelloSearchResult:hover {
   border-radius: 4px;
 }
 
+.TrelloCardPreviewLabels {
+  flex: 0 0 auto;
+  gap: 4px;
+}
+
+.TrelloCardPreviewLabel {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 8px;
+  min-height: 8px;
+  padding: 0;
+  overflow: hidden;
+  font-size: 0;
+  line-height: 0;
+  border-radius: 999px;
+}
+
 .TrelloCardLabelAddButton {
   align-self: flex-start;
 }
@@ -906,25 +949,79 @@ button.TrelloSearchResult:hover {
   background: #1f845a;
 }
 
+.TrelloCardLabelColorGreenDark {
+  background: #216e4e;
+}
+
+.TrelloCardLabelColorGreenLight {
+  color: #172b4d;
+  background: #baf3db;
+}
+
 .TrelloCardLabelColorYellow {
   color: #172b4d;
   background: #f5cd47;
+}
+
+.TrelloCardLabelColorYellowDark {
+  background: #7f5f01;
+}
+
+.TrelloCardLabelColorYellowLight {
+  color: #172b4d;
+  background: #f8e6a0;
 }
 
 .TrelloCardLabelColorOrange {
   background: #c25100;
 }
 
+.TrelloCardLabelColorOrangeDark {
+  background: #974f0c;
+}
+
+.TrelloCardLabelColorOrangeLight {
+  color: #172b4d;
+  background: #fedec8;
+}
+
 .TrelloCardLabelColorRed {
   background: #c9372c;
+}
+
+.TrelloCardLabelColorRedDark {
+  background: #ae2e24;
+}
+
+.TrelloCardLabelColorRedLight {
+  color: #172b4d;
+  background: #ffd5d2;
 }
 
 .TrelloCardLabelColorPurple {
   background: #6e5dc6;
 }
 
+.TrelloCardLabelColorPurpleDark {
+  background: #5e4db2;
+}
+
+.TrelloCardLabelColorPurpleLight {
+  color: #172b4d;
+  background: #dfd8fd;
+}
+
 .TrelloCardLabelColorBlue {
   background: #0c66e4;
+}
+
+.TrelloCardLabelColorBlueDark {
+  background: #0055cc;
+}
+
+.TrelloCardLabelColorBlueLight {
+  color: #172b4d;
+  background: #cce0ff;
 }
 
 .TrelloCardLabelColorSky {
@@ -932,17 +1029,53 @@ button.TrelloSearchResult:hover {
   background: #6cc3e0;
 }
 
+.TrelloCardLabelColorSkyDark {
+  background: #206a83;
+}
+
+.TrelloCardLabelColorSkyLight {
+  color: #172b4d;
+  background: #c6edfb;
+}
+
 .TrelloCardLabelColorLime {
   color: #172b4d;
   background: #94c748;
+}
+
+.TrelloCardLabelColorLimeDark {
+  background: #5b7f24;
+}
+
+.TrelloCardLabelColorLimeLight {
+  color: #172b4d;
+  background: #d3f1a7;
 }
 
 .TrelloCardLabelColorPink {
   background: #ae4787;
 }
 
+.TrelloCardLabelColorPinkDark {
+  background: #943d73;
+}
+
+.TrelloCardLabelColorPinkLight {
+  color: #172b4d;
+  background: #fdd0ec;
+}
+
 .TrelloCardLabelColorBlack {
   background: #626f86;
+}
+
+.TrelloCardLabelColorBlackDark {
+  background: #44546f;
+}
+
+.TrelloCardLabelColorBlackLight {
+  color: #172b4d;
+  background: #dcdfe4;
 }
 
 .TrelloCardLabelColorNeutral {

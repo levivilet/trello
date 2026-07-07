@@ -129,6 +129,14 @@ test('getBoardDetail requests lists and cards', async () => {
         id: 'card-1',
         idBoard: 'board-1',
         idList: 'list-1',
+        labels: [
+          {
+            color: 'blue',
+            id: 'label-1',
+            idBoard: 'board-1',
+            name: 'Extension Api',
+          },
+        ],
         name: 'Ship Trello view',
       },
     ])
@@ -157,6 +165,14 @@ test('getBoardDetail requests lists and cards', async () => {
             id: 'card-1',
             idBoard: 'board-1',
             idList: 'list-1',
+            labels: [
+              {
+                color: 'blue',
+                id: 'label-1',
+                idBoard: 'board-1',
+                name: 'Extension Api',
+              },
+            ],
             name: 'Ship Trello view',
           },
         ],
@@ -171,7 +187,7 @@ test('getBoardDetail requests lists and cards', async () => {
     '/1/lists/list-1/cards',
   ])
   expect(new URL(requests[1]).searchParams.get('fields')).toBe(
-    'name,url,idBoard,idList,badges,cover',
+    'name,url,idBoard,idList,badges,cover,labels',
   )
 })
 
