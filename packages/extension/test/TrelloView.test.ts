@@ -1,7 +1,6 @@
 // cspell:ignore prefs
 
 import type { VirtualDomViewInstance } from '@lvce-editor/api'
-import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import { expect, test } from '@jest/globals'
 import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import type { TrelloClient } from '../src/parts/TrelloClient/TrelloClient.ts'
