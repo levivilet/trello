@@ -20,6 +20,9 @@ import {
 } from './operations/GetBoardDetail.ts'
 import {
   getCardDetail,
+  getCardDetailAttachments,
+  getCardDetailCard,
+  getCardDetailComments,
   readCachedCardDetail,
 } from './operations/GetCardDetail.ts'
 import { listBoardLabels } from './operations/ListBoardLabels.ts'
@@ -82,6 +85,24 @@ export const createTrelloClient = (
       return {
         cached: await readCachedCardDetail(cache, card, credentials),
         fresh: getCardDetail(fetchLike, card, credentials, cache),
+      }
+    },
+    async getCardDetailPartsCacheFirst(
+      card: TrelloCard,
+      credentials: TrelloCredentials,
+    ): ReturnType<TrelloClient['getCardDetailPartsCacheFirst']> {
+      return {
+        cached: await readCachedCardDetail(cache, card, credentials),
+        fresh: {
+          attachments: getCardDetailAttachments(
+            fetchLike,
+            card,
+            credentials,
+            cache,
+          ),
+          card: getCardDetailCard(fetchLike, card, credentials, cache),
+          comments: getCardDetailComments(fetchLike, card, credentials, cache),
+        },
       }
     },
     listBoardLabels(

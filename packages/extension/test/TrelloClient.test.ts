@@ -111,6 +111,90 @@ test('getCardDetailCacheFirst returns cached data before fresh data', async () =
   })
 })
 
+test('getCardDetailPartsCacheFirst returns cached data and staged fresh requests', async () => {
+  const cache = createMemoryTrelloApiCache()
+  const requests: string[] = []
+  let cardName = 'Cached card'
+  const client = createTrelloClient(async (url) => {
+    requests.push(url)
+    if (url.includes('/cards/card-1/attachments')) {
+      return jsonResponse([
+        {
+          id: 'attachment-1',
+          mimeType: 'image/png',
+          name: 'Screenshot',
+          previews: [{ url: 'https://example.com/preview.png' }],
+          url: 'https://example.com/screenshot.png',
+        },
+      ])
+    }
+    if (url.includes('/cards/card-1/actions')) {
+      return jsonResponse([
+        {
+          data: {
+            text: 'Staged comment',
+          },
+          id: 'comment-1',
+        },
+      ])
+    }
+    return jsonResponse({
+      desc: 'Detailed card description',
+      id: 'card-1',
+      name: cardName,
+    })
+  }, cache)
+  const credentials = {
+    apiKey: validApiKey,
+    token: validToken,
+  }
+
+  await client.getCardDetail({ id: 'card-1', name: 'Cached card' }, credentials)
+  cardName = 'Fresh card'
+  requests.length = 0
+
+  const result = await client.getCardDetailPartsCacheFirst(
+    { id: 'card-1', name: 'Cached card' },
+    credentials,
+  )
+
+  expect(result.cached?.card.name).toBe('Cached card')
+  await expect(result.fresh.card).resolves.toEqual({
+    desc: 'Detailed card description',
+    id: 'card-1',
+    name: 'Fresh card',
+  })
+  await expect(result.fresh.attachments).resolves.toHaveLength(1)
+  await expect(result.fresh.comments).resolves.toHaveLength(1)
+  expect(
+    requests
+      .map((request) => new URL(request).pathname)
+      .toSorted((a, b) => a.localeCompare(b)),
+  ).toEqual([
+    '/1/cards/card-1',
+    '/1/cards/card-1/actions',
+    '/1/cards/card-1/attachments',
+  ])
+  const cardRequest = requests.find((request) => {
+    return new URL(request).pathname === '/1/cards/card-1'
+  })
+  const attachmentsRequest = requests.find((request) => {
+    return new URL(request).pathname === '/1/cards/card-1/attachments'
+  })
+  const commentsRequest = requests.find((request) => {
+    return new URL(request).pathname === '/1/cards/card-1/actions'
+  })
+  expect(new URL(cardRequest || '').searchParams.get('fields')).toBe(
+    'name,desc,url,idBoard,idList,labels',
+  )
+  expect(new URL(attachmentsRequest || '').searchParams.get('fields')).toBe(
+    'name,url,mimeType,previews',
+  )
+  expect(new URL(commentsRequest || '').searchParams.get('filter')).toBe(
+    'commentCard',
+  )
+})
+
 test('getBoardDetail requests lists and cards', async () => {
   const requests: string[] = []
   const client = createTrelloClient(async (url) => {

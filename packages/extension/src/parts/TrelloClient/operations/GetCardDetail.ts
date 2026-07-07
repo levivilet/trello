@@ -69,6 +69,54 @@ export const deleteCachedCardDetail = async (
   await deleteCachedJson(cache, `/cards/${card.id}`, credentials, cardParams)
 }
 
+export const getCardDetailCard = (
+  fetchLike: FetchLike,
+  card: TrelloCard,
+  credentials: TrelloCredentials,
+  cache?: TrelloApiCache,
+): Promise<TrelloCard> => {
+  return requestJson<TrelloCard>(
+    fetchLike,
+    `/cards/${card.id}`,
+    credentials,
+    cardParams,
+    undefined,
+    cache,
+  )
+}
+
+export const getCardDetailAttachments = (
+  fetchLike: FetchLike,
+  card: TrelloCard,
+  credentials: TrelloCredentials,
+  cache?: TrelloApiCache,
+): Promise<TrelloCardDetail['attachments']> => {
+  return requestJson<TrelloCardDetail['attachments']>(
+    fetchLike,
+    `/cards/${card.id}/attachments`,
+    credentials,
+    attachmentsParams,
+    undefined,
+    cache,
+  )
+}
+
+export const getCardDetailComments = (
+  fetchLike: FetchLike,
+  card: TrelloCard,
+  credentials: TrelloCredentials,
+  cache?: TrelloApiCache,
+): Promise<TrelloCardDetail['comments']> => {
+  return requestJson<TrelloCardDetail['comments']>(
+    fetchLike,
+    `/cards/${card.id}/actions`,
+    credentials,
+    commentsParams,
+    undefined,
+    cache,
+  )
+}
+
 export const getCardDetail = async (
   fetchLike: FetchLike,
   card: TrelloCard,
@@ -76,30 +124,9 @@ export const getCardDetail = async (
   cache?: TrelloApiCache,
 ): Promise<TrelloCardDetail> => {
   const [detailCard, attachments, comments] = await Promise.all([
-    requestJson<TrelloCard>(
-      fetchLike,
-      `/cards/${card.id}`,
-      credentials,
-      cardParams,
-      undefined,
-      cache,
-    ),
-    requestJson<TrelloCardDetail['attachments']>(
-      fetchLike,
-      `/cards/${card.id}/attachments`,
-      credentials,
-      attachmentsParams,
-      undefined,
-      cache,
-    ),
-    requestJson<TrelloCardDetail['comments']>(
-      fetchLike,
-      `/cards/${card.id}/actions`,
-      credentials,
-      commentsParams,
-      undefined,
-      cache,
-    ),
+    getCardDetailCard(fetchLike, card, credentials, cache),
+    getCardDetailAttachments(fetchLike, card, credentials, cache),
+    getCardDetailComments(fetchLike, card, credentials, cache),
   ])
   return {
     attachments,

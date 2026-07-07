@@ -35,7 +35,10 @@ export interface TrelloViewState {
   boardLabelsLoaded: boolean
   boardLabelsLoading: boolean
   boards: readonly TrelloBoard[]
+  cardAttachmentsLoading: boolean
+  cardCommentsLoading: boolean
   cardDetailLoading: boolean
+  cardDetailLoadingCardId: string
   cardLabelPickerOpen: boolean
   context: Readonly<Record<string, boolean>>
   contextMenuCardId: string
