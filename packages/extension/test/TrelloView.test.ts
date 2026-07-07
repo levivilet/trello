@@ -1365,7 +1365,6 @@ test('clicking card renders card detail and close dismisses it', async () => {
   resetTrelloViewDependencyFactory()
 })
 
-<<<<<<< HEAD
 test('card detail label picker adds an existing board label', async () => {
   const labels: readonly TrelloLabel[] = [
     {
@@ -1385,53 +1384,33 @@ test('card detail label picker adds an existing board label', async () => {
     [{ id: 'board-1', name: 'Roadmap' }],
     [],
     {
-=======
-test('card detail title renders as wrapping textarea with full long title', async () => {
-  const longTitle =
-    'trello: input fields on firefox look not so good when the card detail title needs more than one line'
-  setTrelloViewDependencyFactory(() => ({
-    client: createMockTrelloClient({
->>>>>>> origin/main
       boardDetails: {
         'board-1': {
           board: { id: 'board-1', name: 'Roadmap' },
           lists: [
             {
-<<<<<<< HEAD
               cards: [{ id: 'card-1', name: 'Ship Trello view' }],
-=======
-              cards: [{ id: 'card-1', name: longTitle }],
->>>>>>> origin/main
               id: 'list-1',
               name: 'Todo',
             },
           ],
         },
       },
-<<<<<<< HEAD
       boardLabels: {
         'board-1': labels,
       },
-=======
-      boards: [{ id: 'board-1', name: 'Roadmap' }],
->>>>>>> origin/main
       cardDetails: {
         'card-1': {
           attachments: [],
           card: {
             desc: '',
             id: 'card-1',
-<<<<<<< HEAD
             labels: [],
             name: 'Ship Trello view',
-=======
-            name: longTitle,
->>>>>>> origin/main
           },
           comments: [],
         },
       },
-<<<<<<< HEAD
     },
   )
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
@@ -1551,24 +1530,41 @@ test('card detail label picker excludes assigned labels and keeps open on failur
   expect(getText(failedDom)).toContain('Trello request failed: 500 unavailable')
   expect(getNodeByName(failedDom, 'cardLabelPicker')).toBeDefined()
   expect(getText(failedDom)).not.toContain('No labels available')
-=======
-    }),
-    recentStorage: createMemoryRecentBoardStorage(),
-    storage: createMemoryCredentialStorage(),
-  }))
+  resetTrelloViewDependencyFactory()
+})
 
-  const instance = (await view.create()) as VirtualDomViewInstance
-  await instance.handleEvent?.({
-    name: 'apiKey',
-    type: 'input',
-    value: validApiKey,
-  })
-  await instance.handleEvent?.({
-    name: 'token',
-    type: 'input',
-    value: validToken,
-  })
-  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+test('card detail title renders as wrapping textarea with full long title', async () => {
+  const longTitle =
+    'trello: input fields on firefox look not so good when the card detail title needs more than one line'
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', name: longTitle }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      cardDetails: {
+        'card-1': {
+          attachments: [],
+          card: {
+            desc: '',
+            id: 'card-1',
+            name: longTitle,
+          },
+          comments: [],
+        },
+      },
+    },
+  )
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
   await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
 
@@ -1587,7 +1583,6 @@ test('card detail label picker excludes assigned labels and keeps open on failur
       )
     }),
   ).toBe(true)
->>>>>>> origin/main
   resetTrelloViewDependencyFactory()
 })
 
