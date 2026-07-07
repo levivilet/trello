@@ -1,8 +1,10 @@
 import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import type {
   TrelloAttachment,
+  TrelloCard,
   TrelloComment,
   TrelloLabel,
+  TrelloList,
 } from '../../TrelloTypes/TrelloTypes.ts'
 import type { TrelloViewState } from '../state/TrelloViewState.ts'
 import * as Dom from '../../VirtualDom/VirtualDom.ts'
@@ -240,6 +242,67 @@ const renderCardDetailTitle = (
   ])
 }
 
+const getCardListId = (
+  state: Readonly<TrelloViewState>,
+  card: Readonly<TrelloCard>,
+): string => {
+  if (card.idList) {
+    return card.idList
+  }
+  const lists = state.boardDetail?.lists || []
+  const list = lists.find((item) => {
+    return item.cards.some((listCard) => {
+      return listCard.id === card.id
+    })
+  })
+  return list?.id || ''
+}
+
+const renderCardListOption = (
+  list: Readonly<TrelloList>,
+  selectedListId: string,
+): Dom.TreeNode => {
+  return Dom.node(
+    VirtualDomElements.Option,
+    {
+      selected: list.id === selectedListId,
+      value: list.id,
+    },
+    [Dom.textNode(list.name)],
+  )
+}
+
+const renderCardListSelect = (
+  state: Readonly<TrelloViewState>,
+  card: Readonly<TrelloCard>,
+): readonly Dom.TreeNode[] => {
+  const lists = state.boardDetail?.lists || []
+  if (lists.length === 0) {
+    return []
+  }
+  const selectedListId = getCardListId(state, card)
+  return [
+    Dom.div('TrelloCardListSection', [
+      Dom.node(VirtualDomElements.Label, { className: 'TrelloCardListLabel' }, [
+        Dom.textNode('List'),
+      ]),
+      Dom.node(
+        VirtualDomElements.Select,
+        {
+          className: 'TrelloInput TrelloCardListSelect',
+          disabled: state.movingCardId === card.id,
+          name: `cardList:${card.id}`,
+          onInput: 'handleInput',
+          value: selectedListId,
+        },
+        lists.map((list) => {
+          return renderCardListOption(list, selectedListId)
+        }),
+      ),
+    ]),
+  ]
+}
+
 const renderCardDescriptionEditor = (
   state: Readonly<TrelloViewState>,
 ): Dom.TreeNode => {
@@ -329,6 +392,7 @@ export const renderCardDetailPanel = (
       ),
     ]),
     ...renderCardDetailLabels(state, card.labels),
+    ...renderCardListSelect(state, card),
     renderCardDescription(state, card.desc || ''),
     renderListTitle('Comments'),
     renderCardDetailComments(comments),
