@@ -2336,6 +2336,16 @@ test('card detail label picker excludes assigned labels and keeps open on failur
   const labeledDom = await instance.render()
   expect(getText(labeledDom)).toContain('Extension Api')
   expect(getNodeByName(labeledDom, 'openCardLabelPicker')).toBeDefined()
+  expect(
+    hasNode(labeledDom, (node) => {
+      return (
+        node.name === 'openCardLabelPicker' &&
+        node.onClick === 'handleClick' &&
+        hasClass(node, 'TrelloCardLabelButton') &&
+        hasClass(node, 'TrelloCardLabelColorBlue')
+      )
+    }),
+  ).toBe(true)
 
   await instance.handleEvent?.({ name: 'openCardLabelPicker', type: 'click' })
 
