@@ -524,6 +524,7 @@ button.TrelloSearchResult:hover {
   flex: none;
   width: 14px;
   height: 14px;
+  contain: strict;
   color: inherit;
 }
 

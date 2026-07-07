@@ -28,6 +28,7 @@ export interface TrelloViewState {
   activeSearchQuery: string
   addingCardLabelId: string
   addingCardListId: string
+  baseUrl: string
   boardBackgroundEnabled: boolean
   boardDetail: TrelloBoardDetail | undefined
   boardLabels: readonly TrelloLabel[]

@@ -3,6 +3,7 @@ import type { TrelloCard } from '../../TrelloTypes/TrelloTypes.ts'
 import * as Dom from '../../VirtualDom/VirtualDom.ts'
 import { getCardCoverImageUrl } from '../CardCoverHelpers.ts'
 import { getLabelColorClassName, getLabelText } from '../LabelHelpers.ts'
+import { getAssetUrl } from '../state/AssetBaseUrl.ts'
 
 const getCardCommentCount = (card: Readonly<TrelloCard>): number => {
   return card.badges?.comments || 0
@@ -15,16 +16,17 @@ const getCardCommentLabel = (count: number): string => {
   return `${count} comments`
 }
 
-const renderCardCommentIcon = (): Dom.TreeNode => {
+const renderCardCommentIcon = (baseUrl: string): Dom.TreeNode => {
   return Dom.node(VirtualDomElements.Img, {
     alt: '',
     'aria-hidden': true,
     className: 'TrelloCardCommentIcon',
-    src: './comments.svg',
+    src: getAssetUrl(baseUrl, 'comments.svg'),
   })
 }
 
 const renderCardCommentCount = (
+  baseUrl: string,
   card: Readonly<TrelloCard>,
 ): readonly Dom.TreeNode[] => {
   const commentCount = getCardCommentCount(card)
@@ -45,7 +47,7 @@ const renderCardCommentCount = (
         className: 'TrelloCardMeta',
         title: commentLabel,
       },
-      [renderCardCommentIcon(), commentCountNode],
+      [renderCardCommentIcon(baseUrl), commentCountNode],
     ),
   ]
 }
@@ -75,12 +77,15 @@ const renderCardLabels = (
   ]
 }
 
-const renderCard = (card: Readonly<TrelloCard>): Dom.TreeNode => {
+const renderCard = (
+  baseUrl: string,
+  card: Readonly<TrelloCard>,
+): Dom.TreeNode => {
   const coverImageUrl = getCardCoverImageUrl(card)
   const cardBody = Dom.div('TrelloCardBody', [
     ...renderCardLabels(card),
     Dom.div('TrelloCardTitle', [Dom.textNode(card.name)]),
-    ...renderCardCommentCount(card),
+    ...renderCardCommentCount(baseUrl, card),
   ])
   const children = coverImageUrl
     ? [
@@ -105,10 +110,11 @@ const renderCard = (card: Readonly<TrelloCard>): Dom.TreeNode => {
 }
 
 export const renderCards = (
+  baseUrl: string,
   cards: readonly TrelloCard[],
 ): readonly Dom.TreeNode[] => {
   if (cards.length === 0) {
     return [Dom.textNode('No cards')]
   }
-  return cards.map(renderCard)
+  return cards.map((card) => renderCard(baseUrl, card))
 }

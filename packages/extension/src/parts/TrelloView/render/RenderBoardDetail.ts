@@ -93,7 +93,7 @@ export const renderBoardDetail = (
   detail: Readonly<TrelloBoardDetail>,
 ): readonly VirtualDomNode[] => {
   const lists = detail.lists.map((list) => {
-    const cards = renderCards(list.cards)
+    const cards = renderCards(state.baseUrl, list.cards)
     return Dom.node(
       VirtualDomElements.Div,
       {
