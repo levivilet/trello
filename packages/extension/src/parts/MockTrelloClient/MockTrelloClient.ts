@@ -8,6 +8,8 @@ import type {
   TrelloCardDetail,
   TrelloCardMove,
   TrelloCardUpdate,
+  TrelloCredentials,
+  TrelloLabel,
   TrelloList,
   TrelloListUpdate,
   TrelloSearchResult,
@@ -16,10 +18,12 @@ import type {
 export interface MockTrelloData {
   readonly boardDetailErrors?: Readonly<Record<string, string>>
   readonly boardDetails?: Readonly<Record<string, TrelloBoardDetail>>
+  readonly boardLabels?: Readonly<Record<string, readonly TrelloLabel[]>>
   readonly boards?: readonly TrelloBoard[]
   readonly cardCreateErrors?: Readonly<Record<string, string>>
   readonly cardDetailErrors?: Readonly<Record<string, string>>
   readonly cardDetails?: Readonly<Record<string, TrelloCardDetail>>
+  readonly cardLabelAddErrors?: Readonly<Record<string, string>>
   readonly cardMoveErrors?: Readonly<Record<string, string>>
   readonly cardUpdateErrors?: Readonly<Record<string, string>>
   readonly error?: string
@@ -55,6 +59,49 @@ export const createMockTrelloClient = (
   }
 
   const client: TrelloClient = {
+    async addCardLabel(
+      card: TrelloCard,
+      label: TrelloLabel,
+      _credentials: TrelloCredentials,
+    ): Promise<TrelloCard> {
+      if (data.error) {
+        throw new Error(data.error)
+      }
+      const addError = data.cardLabelAddErrors?.[card.id]
+      if (addError) {
+        throw new Error(addError)
+      }
+      const previousDetail = cardDetails[card.id]
+      const previousCard = previousDetail?.card || findCard(card.id) || card
+      const labels = previousCard.labels?.some((item) => {
+        return item.id === label.id
+      })
+        ? previousCard.labels
+        : [...(previousCard.labels || []), label]
+      const updatedCard = {
+        ...previousCard,
+        labels,
+      }
+      cardDetails[card.id] = {
+        attachments: previousDetail?.attachments || [],
+        card: updatedCard,
+        comments: previousDetail?.comments || [],
+      }
+      for (const [boardId, detail] of Object.entries(boardDetails)) {
+        boardDetails[boardId] = {
+          ...detail,
+          lists: detail.lists.map((list) => {
+            return {
+              ...list,
+              cards: list.cards.map((item) => {
+                return item.id === card.id ? { ...item, ...updatedCard } : item
+              }),
+            }
+          }),
+        }
+      }
+      return updatedCard
+    },
     async createCard(
       list: TrelloList,
       create: TrelloCardCreate,
@@ -161,6 +208,12 @@ export const createMockTrelloClient = (
           token: '',
         }),
       }
+    },
+    async listBoardLabels(board: TrelloBoard): Promise<readonly TrelloLabel[]> {
+      if (data.error) {
+        throw new Error(data.error)
+      }
+      return data.boardLabels?.[board.id] || []
     },
     async listBoards(): Promise<readonly TrelloBoard[]> {
       if (data.error) {

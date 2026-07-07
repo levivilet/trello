@@ -18,6 +18,9 @@ export const handleInputEvent = (
     case 'cardDescription':
       mutableState.draftCardDescription = value
       return
+    case 'cardLabelSearch':
+      mutableState.draftLabelSearchQuery = value
+      return
     case 'cardTitle':
       mutableState.draftCardTitle = value
       return
