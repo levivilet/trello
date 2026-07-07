@@ -665,6 +665,25 @@ button.TrelloSearchResult:hover {
   outline: none;
 }
 
+.TrelloCardListSection {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  contain: content;
+}
+
+.TrelloCardListLabel {
+  contain: content;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--TrelloForegroundMuted);
+}
+
+.TrelloCardListSelect {
+  min-height: 30px;
+  padding: 5px 8px;
+}
+
 .TrelloCardDescriptionSection,
 .TrelloCardDescriptionEditor {
   display: flex;

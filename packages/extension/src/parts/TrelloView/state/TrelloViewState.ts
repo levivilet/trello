@@ -55,6 +55,7 @@ export interface TrelloViewState {
   error: string
   focusedName: string
   loading: boolean
+  movingCardId: string
   recentBoardViews: readonly RecentBoardView[]
   savingCardDetail: boolean
   savingNewCard: boolean
