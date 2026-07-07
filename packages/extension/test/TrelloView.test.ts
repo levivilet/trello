@@ -625,8 +625,7 @@ test('connect loads boards and clicking board loads detail', async () => {
       boards: [{ id: 'board-1', name: 'Roadmap' }],
     }),
     imageCache: createMockTrelloImageCache({
-      'https://example.com/quiet-card-large.png':
-        'blob:quiet-card-large-cover',
+      'https://example.com/quiet-card-large.png': 'blob:quiet-card-large-cover',
     }),
     recentStorage: createMemoryRecentBoardStorage(),
     storage: createMemoryCredentialStorage(),

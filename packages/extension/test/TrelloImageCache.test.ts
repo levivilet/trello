@@ -96,4 +96,3 @@ test('resolveImageUrl fails closed for non-ok image responses', async () => {
   expect(putUrls).toEqual([])
   imageCache.dispose()
 })
-
