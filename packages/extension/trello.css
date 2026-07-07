@@ -905,6 +905,14 @@ button.TrelloSearchResult:hover {
   border-radius: 4px;
 }
 
+.TrelloCardLabelButton {
+  border: 0;
+}
+
+.TrelloCardLabelButton:hover {
+  filter: brightness(1.08);
+}
+
 .TrelloCardPreviewLabels {
   flex: 0 0 auto;
   gap: 4px;

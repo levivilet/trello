@@ -95,9 +95,15 @@ const renderCardDetailComments = (
 }
 
 const renderCardDetailLabel = (label: Readonly<TrelloLabel>): Dom.TreeNode => {
-  return Dom.div(`TrelloCardLabel ${getLabelColorClassName(label.color)}`, [
-    Dom.textNode(getLabelText(label)),
-  ])
+  return Dom.node(
+    VirtualDomElements.Button,
+    {
+      className: `TrelloCardLabel TrelloCardLabelButton ${getLabelColorClassName(label.color)}`,
+      name: 'openCardLabelPicker',
+      onClick: 'handleClick',
+    },
+    [Dom.textNode(getLabelText(label))],
+  )
 }
 
 const hasCardLabel = (
