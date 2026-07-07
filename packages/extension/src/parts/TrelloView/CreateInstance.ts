@@ -1,4 +1,5 @@
 import type {
+  MenuEntry,
   ViewContext,
   ViewEvent,
   VirtualDomViewInstance,
@@ -50,7 +51,7 @@ interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly cancelNewCard: () => void
   readonly closeCardDetail: () => void
   readonly getContext: () => Readonly<Record<string, boolean>>
-  readonly getMenuEntries: (menuId: string) => readonly unknown[]
+  readonly getMenuEntries: (menuId: string) => readonly MenuEntry[]
   readonly logout: () => Promise<void>
   readonly openCard: (cardId: string) => Promise<void>
   readonly refreshBoards: () => Promise<void>
@@ -229,7 +230,7 @@ export const createInstance = async (
     getContext(): Readonly<Record<string, boolean>> {
       return state.context
     },
-    getMenuEntries(menuId: string): readonly unknown[] {
+    getMenuEntries(menuId: string): readonly MenuEntry[] {
       return getMenuEntries(state, menuId)
     },
     async handleEvent(event: Readonly<ViewEvent>): Promise<void> {

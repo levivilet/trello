@@ -621,7 +621,7 @@ test('cards and lists render drag and drop attributes', async () => {
     type: 'contextmenu',
     x: 100,
     y: 200,
-  } as any)
+  })
   expect(contextMenuInvocations).toEqual([['trello.list', 100, 200]])
   expect((instance as any).getMenuEntries('trello.list')).toEqual([
     {
@@ -719,7 +719,7 @@ test('board overview context menu opens board menu', async () => {
     type: 'contextmenu',
     x: 11,
     y: 22,
-  } as any)
+  })
 
   expect(contextMenuInvocations).toEqual([['trello.board', 11, 22]])
   expect((instance as any).getMenuEntries('trello.board')).toEqual([
@@ -767,7 +767,7 @@ test('card context menu opens card menu with target args', async () => {
     type: 'contextmenu',
     x: 33,
     y: 44,
-  } as any)
+  })
 
   expect(contextMenuInvocations).toEqual([['trello.card', 33, 44]])
   expect((instance as any).getMenuEntries('trello.card')).toEqual([
@@ -836,7 +836,7 @@ test('card detail context menu opens card detail menu', async () => {
     type: 'contextmenu',
     x: 55,
     y: 66,
-  } as any)
+  })
 
   expect(contextMenuInvocations).toEqual([['trello.cardDetail', 55, 66]])
   expect((instance as any).getMenuEntries('trello.cardDetail')).toEqual([
