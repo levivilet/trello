@@ -1,9 +1,9 @@
 import type { TrelloViewState } from './state/TrelloViewState.ts'
 
 export const MenuIdBoard = 'trello.board'
-export const MenuIdList = 'trello.list'
 export const MenuIdCard = 'trello.card'
 export const MenuIdCardDetail = 'trello.cardDetail'
+export const MenuIdList = 'trello.list'
 
 interface MenuEntry {
   readonly args?: readonly unknown[]
@@ -43,7 +43,9 @@ const menuEntryCloseCard: MenuEntry = {
   label: 'Close Card',
 }
 
-const getAddCardEntry = (state: Readonly<TrelloViewState>): readonly MenuEntry[] => {
+const getAddCardEntry = (
+  state: Readonly<TrelloViewState>,
+): readonly MenuEntry[] => {
   if (!state.contextMenuListId) {
     return []
   }
@@ -57,7 +59,9 @@ const getAddCardEntry = (state: Readonly<TrelloViewState>): readonly MenuEntry[]
   ]
 }
 
-const getOpenCardEntry = (state: Readonly<TrelloViewState>): readonly MenuEntry[] => {
+const getOpenCardEntry = (
+  state: Readonly<TrelloViewState>,
+): readonly MenuEntry[] => {
   if (!state.contextMenuCardId) {
     return []
   }
@@ -71,16 +75,33 @@ const getOpenCardEntry = (state: Readonly<TrelloViewState>): readonly MenuEntry[
   ]
 }
 
-export const getMenuEntries = (state: Readonly<TrelloViewState>, menuId: string): readonly MenuEntry[] => {
+export const getMenuEntries = (
+  state: Readonly<TrelloViewState>,
+  menuId: string,
+): readonly MenuEntry[] => {
   switch (menuId) {
     case MenuIdBoard:
       return [menuEntryRefreshBoards, menuEntrySignOut]
-    case MenuIdList:
-      return [...getAddCardEntry(state), menuEntryRefreshBoards, menuEntryBackToBoards]
     case MenuIdCard:
-      return [...getOpenCardEntry(state), ...getAddCardEntry(state), menuEntryRefreshBoards, menuEntryBackToBoards]
+      return [
+        ...getOpenCardEntry(state),
+        ...getAddCardEntry(state),
+        menuEntryRefreshBoards,
+        menuEntryBackToBoards,
+      ]
     case MenuIdCardDetail:
-      return [menuEntrySaveCard, menuEntryCloseCard, menuEntryRefreshBoards, menuEntryBackToBoards]
+      return [
+        menuEntrySaveCard,
+        menuEntryCloseCard,
+        menuEntryRefreshBoards,
+        menuEntryBackToBoards,
+      ]
+    case MenuIdList:
+      return [
+        ...getAddCardEntry(state),
+        menuEntryRefreshBoards,
+        menuEntryBackToBoards,
+      ]
     default:
       return []
   }

@@ -68,7 +68,11 @@ export interface TrelloViewContext {
   readonly currentBoardStorage: CurrentBoardStorage
   readonly recentStorage: RecentBoardStorage
   readonly requestRerender: () => void
-  readonly showContextMenu: (menuId: string, x: number, y: number) => Promise<void>
+  readonly showContextMenu: (
+    menuId: string,
+    x: number,
+    y: number,
+  ) => Promise<void>
   readonly state: TrelloViewState
   readonly storage: CredentialStorage
 }
@@ -78,7 +82,11 @@ export interface TrelloViewActionContext {
   readonly currentBoardStorage: CurrentBoardStorage
   readonly recentStorage: RecentBoardStorage
   readonly requestRerender: () => void
-  readonly showContextMenu: (menuId: string, x: number, y: number) => Promise<void>
+  readonly showContextMenu: (
+    menuId: string,
+    x: number,
+    y: number,
+  ) => Promise<void>
   readonly state: Readonly<TrelloViewState>
   readonly storage: CredentialStorage
 }

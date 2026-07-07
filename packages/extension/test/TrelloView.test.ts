@@ -182,7 +182,11 @@ const createAuthenticatedInstance = async (
     readonly cardLabelAddErrors?: Readonly<Record<string, string>>
     readonly cardMoveErrors?: Readonly<Record<string, string>>
     readonly listUpdateErrors?: Readonly<Record<string, string>>
-    readonly showContextMenu?: (menuId: string, x: number, y: number) => Promise<void>
+    readonly showContextMenu?: (
+      menuId: string,
+      x: number,
+      y: number,
+    ) => Promise<void>
   } = {},
 ): Promise<VirtualDomViewInstance> => {
   const {

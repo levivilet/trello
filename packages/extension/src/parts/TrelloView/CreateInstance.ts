@@ -13,7 +13,11 @@ import type {
   TrelloViewState,
 } from './state/TrelloViewState.ts'
 import { createMemoryCurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
-import { cancelAddCard, startAddCard, submitAddCard } from './actions/AddCard.ts'
+import {
+  cancelAddCard,
+  startAddCard,
+  submitAddCard,
+} from './actions/AddCard.ts'
 import { closeCardDetail as closeCardDetailAction } from './actions/CloseCardDetail.ts'
 import { goBackToBoards } from './actions/GoBackToBoards.ts'
 import { handleBlurEvent } from './actions/HandleBlurEvent.ts'
@@ -33,10 +37,10 @@ import { logout } from './actions/Logout.ts'
 import { openCard } from './actions/OpenCard.ts'
 import { restoreCurrentBoard } from './actions/RestoreCurrentBoard.ts'
 import { saveCardDetail as saveCardDetailAction } from './actions/SaveCardDetail.ts'
+import { getMenuEntries } from './MenuEntries.ts'
 import { renderAuth } from './render/RenderAuth.ts'
 import { renderBoardDetail } from './render/RenderBoardDetail.ts'
 import { renderBoards } from './render/RenderBoards.ts'
-import { getMenuEntries } from './MenuEntries.ts'
 import { createInitialState } from './state/CreateInitialState.ts'
 import { dependencyState } from './state/DependencyFactory.ts'
 import { updateContext } from './state/UpdateContext.ts'
@@ -48,12 +52,12 @@ interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly getContext: () => Readonly<Record<string, boolean>>
   readonly getMenuEntries: (menuId: string) => readonly unknown[]
   readonly logout: () => Promise<void>
+  readonly openCard: (cardId: string) => Promise<void>
   readonly refreshBoards: () => Promise<void>
   readonly reload: () => Promise<void>
   readonly saveCardDetail: () => Promise<void>
   readonly startAddCard: (listId: string) => void
   readonly submitNewCard: () => Promise<void>
-  readonly openCard: (cardId: string) => Promise<void>
 }
 
 interface MutableTrelloViewActionContext extends TrelloViewActionContext {
@@ -225,6 +229,9 @@ export const createInstance = async (
     getContext(): Readonly<Record<string, boolean>> {
       return state.context
     },
+    getMenuEntries(menuId: string): readonly unknown[] {
+      return getMenuEntries(state, menuId)
+    },
     async handleEvent(event: Readonly<ViewEvent>): Promise<void> {
       activeInstances.delete(instance)
       activeInstances.add(instance)
@@ -279,15 +286,16 @@ export const createInstance = async (
         updateContext(state)
       }
     },
-    getMenuEntries(menuId: string): readonly unknown[] {
-      return getMenuEntries(state, menuId)
+    async logout(): Promise<void> {
+      await logout(viewContext)
+      updateContext(state)
+    },
+    async openCard(cardId: string): Promise<void> {
+      await openCard(viewContext, cardId)
+      updateContext(state)
     },
     async refreshBoards(): Promise<void> {
       await loadBoards(viewContext)
-      updateContext(state)
-    },
-    async logout(): Promise<void> {
-      await logout(viewContext)
       updateContext(state)
     },
     async reload(): Promise<void> {
@@ -313,19 +321,15 @@ export const createInstance = async (
         isAuthenticated: Boolean(state.credentials),
       }
     },
+    startAddCard(listId: string): void {
+      startAddCard(viewContext, listId)
+      updateContext(state)
+    },
     async submitNewCard(): Promise<void> {
       if (!state.addingCardListId) {
         return
       }
       await submitAddCard(viewContext, `addCard:${state.addingCardListId}`)
-      updateContext(state)
-    },
-    async openCard(cardId: string): Promise<void> {
-      await openCard(viewContext, cardId)
-      updateContext(state)
-    },
-    startAddCard(listId: string): void {
-      startAddCard(viewContext, listId)
       updateContext(state)
     },
   }
