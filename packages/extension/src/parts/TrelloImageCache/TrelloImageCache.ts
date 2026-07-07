@@ -17,7 +17,7 @@ const revokeObjectUrl = (url: string): void => {
 }
 
 const getCachedResponse = async (
-  cache: Cache | undefined,
+  cache: Readonly<Cache> | undefined,
   url: string,
 ): Promise<Response | undefined> => {
   if (!cache) {
@@ -27,7 +27,7 @@ const getCachedResponse = async (
 }
 
 const writeCachedResponse = async (
-  cache: Cache | undefined,
+  cache: Readonly<Cache> | undefined,
   url: string,
   response: Response,
 ): Promise<void> => {

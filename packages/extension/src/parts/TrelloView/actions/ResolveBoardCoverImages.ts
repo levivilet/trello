@@ -57,14 +57,14 @@ export const resolveBoardCoverImages = async (
   const nextCoverImageUrls = { ...state.coverImageUrls }
   let changed = false
   for (const [sourceUrl, objectUrl] of resolvedUrls) {
-    if (objectUrl) {
-      nextCoverImageUrls[sourceUrl] = objectUrl
-      changed = true
+    if (!objectUrl) {
+      continue
     }
+    nextCoverImageUrls[sourceUrl] = objectUrl
+    changed = true
   }
   if (changed) {
     state.coverImageUrls = nextCoverImageUrls
     context.requestRerender()
   }
 }
-

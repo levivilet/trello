@@ -221,9 +221,9 @@ const createAuthenticatedInstance = async (
     readonly boardLabels?: Readonly<Record<string, readonly TrelloLabel[]>>
     readonly cardCreateErrors?: Readonly<Record<string, string>>
     readonly cardDetails?: Readonly<Record<string, TrelloCardDetail>>
-    readonly imageCache?: TrelloImageCache
     readonly cardLabelAddErrors?: Readonly<Record<string, string>>
     readonly cardMoveErrors?: Readonly<Record<string, string>>
+    readonly imageCache?: TrelloImageCache
     readonly listUpdateErrors?: Readonly<Record<string, string>>
     readonly showContextMenu?: (
       menuId: string,
@@ -237,9 +237,9 @@ const createAuthenticatedInstance = async (
     boardLabels,
     cardCreateErrors,
     cardDetails,
-    imageCache,
     cardLabelAddErrors,
     cardMoveErrors,
+    imageCache,
     listUpdateErrors,
   } = options
   setTrelloViewDependencyFactory(() => ({
@@ -325,11 +325,11 @@ const createDeferred = <T>(): PromiseWithResolvers<T> => {
   return Promise.withResolvers<T>()
 }
 
-<<<<<<< HEAD
 const waitForCoverImages = async (): Promise<void> => {
   await Promise.resolve()
   await Promise.resolve()
-=======
+}
+
 const getFreshAttachments = async (
   fresh: Readonly<Promise<TrelloCardDetail>>,
 ): Promise<TrelloCardDetail['attachments']> => {
@@ -474,7 +474,6 @@ const createStagedCardClient = (options: {
       }
     },
   }
->>>>>>> origin/main
 }
 
 test('renders auth inputs when unauthenticated', async () => {
