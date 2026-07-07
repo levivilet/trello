@@ -149,14 +149,21 @@ const getSubtreeTextByNodeName = (
   dom: readonly any[],
   name: string,
 ): string => {
+  return getText(getSubtreeByNodeName(dom, name))
+}
+
+const getSubtreeByNodeName = (
+  dom: readonly any[],
+  name: string,
+): readonly any[] => {
   const index = dom.findIndex((node) => {
     return node.name === name
   })
   if (index === -1) {
-    return ''
+    return []
   }
   const endIndex = getNodeEndIndex(dom, index)
-  return getText(dom.slice(index, endIndex))
+  return dom.slice(index, endIndex)
 }
 
 const getBoardButtonLabels = (dom: readonly any[]): readonly string[] => {
@@ -382,6 +389,20 @@ test('connect loads boards and clicking board loads detail', async () => {
                     comments: 3,
                   },
                   id: 'card-1',
+                  labels: [
+                    {
+                      color: 'blue',
+                      id: 'label-1',
+                      idBoard: 'board-1',
+                      name: 'Extension Api',
+                    },
+                    {
+                      color: 'green_dark',
+                      id: 'label-2',
+                      idBoard: 'board-1',
+                      name: 'Backend',
+                    },
+                  ],
                   name: 'Ship Trello view',
                 },
                 {
@@ -443,11 +464,35 @@ test('connect loads boards and clicking board loads detail', async () => {
   const detailClassNames = getClassNames(detailDom)
   expect(getListTitleInput(detailDom, 'list-1')?.value).toBe('Todo')
   expect(detailText).toContain('Ship Trello view')
+  const labeledCardDom = getSubtreeByNodeName(detailDom, 'card:card-1')
+  expect(getText(labeledCardDom)).toContain('Extension Api')
+  expect(getText(labeledCardDom)).toContain('Backend')
+  expect(
+    hasNode(labeledCardDom, (node) => {
+      return node.className === 'TrelloCardLabels TrelloCardPreviewLabels'
+    }),
+  ).toBe(true)
+  expect(
+    hasNode(labeledCardDom, (node) => {
+      return hasClass(node, 'TrelloCardLabelColorBlue')
+    }),
+  ).toBe(true)
+  expect(
+    hasNode(labeledCardDom, (node) => {
+      return hasClass(node, 'TrelloCardLabelColorGreenDark')
+    }),
+  ).toBe(true)
   expect(detailText).toContain('+ Add a card')
   expect(detailText).not.toContain('3 comments')
   expect(getSubtreeTextByNodeName(detailDom, 'card:card-1')).toContain('3')
   expect(detailText).toContain('Quiet card')
   expect(detailText).toContain('Plain card')
+  const plainCardDom = getSubtreeByNodeName(detailDom, 'card:card-3')
+  expect(
+    hasNode(plainCardDom, (node) => {
+      return hasClass(node, 'TrelloCardPreviewLabels')
+    }),
+  ).toBe(false)
   expect(detailText).not.toContain('0 comments')
   expect(getNodeByClass(detailDom, 'TrelloCardMeta')).toMatchObject({
     'aria-label': '3 comments',
