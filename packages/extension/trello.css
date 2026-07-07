@@ -84,6 +84,14 @@
     var(--TextLinkForeground, var(--TrelloFocus))
   );
   --TrelloShadow: color-mix(in srgb, var(--TrelloBackground) 72%, transparent);
+  --TrelloScrollbarThumb: var(
+    --vscode-scrollbarSlider-background,
+    var(
+      --EditorScrollBarBackground,
+      color-mix(in srgb, var(--TrelloForeground) 35%, transparent)
+    )
+  );
+  --TrelloScrollbarTrack: transparent;
   --TrelloErrorBackground: var(
     --ErrorBackground,
     color-mix(in srgb, #c9372c 22%, var(--TrelloBackground))
@@ -409,6 +417,12 @@ button.TrelloSearchResult:hover {
   contain: strict;
   min-height: 0;
   overflow: hidden;
+}
+
+.TrelloLists,
+.TrelloCards,
+.TrelloCardDetailPanel {
+  scrollbar-color: var(--TrelloScrollbarThumb) var(--TrelloScrollbarTrack);
 }
 
 .TrelloLists {

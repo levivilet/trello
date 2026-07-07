@@ -36,9 +36,23 @@ test('trello css defines local theme tokens from editor theme variables', async 
   expect(css).toContain('--SplitButtonBackground')
   expect(css).toContain('--BadgeBackground')
   expect(css).toContain('--LinkForeground')
+  expect(css).toContain('--TrelloScrollbarThumb: var(')
+  expect(css).toContain('--vscode-scrollbarSlider-background')
+  expect(css).toContain('--EditorScrollBarBackground')
   expect(css).toContain('--TrelloBorder: var(')
   expect(css).toContain('--ContrastBorder')
   expect(css).toContain('--InputBoxBorder')
+})
+
+test('trello scroll containers use native themed scrollbars', async () => {
+  const css = await readTrelloCss()
+
+  expect(css).toContain(
+    '.TrelloLists,\n.TrelloCards,\n.TrelloCardDetailPanel {',
+  )
+  expect(css).toContain(
+    'scrollbar-color: var(--TrelloScrollbarThumb) var(--TrelloScrollbarTrack);',
+  )
 })
 
 test('trello component styles use local tokens instead of dark theme fallbacks', async () => {
