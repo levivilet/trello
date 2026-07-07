@@ -10,6 +10,7 @@ import type {
   TrelloBoardDetail,
   TrelloCardDetail,
   TrelloCredentials,
+  TrelloLabel,
   TrelloSearchResult,
 } from '../../TrelloTypes/TrelloTypes.ts'
 
@@ -25,11 +26,16 @@ export interface TrelloViewDependencies {
 
 export interface TrelloViewState {
   activeSearchQuery: string
+  addingCardLabelId: string
   addingCardListId: string
   boardBackgroundEnabled: boolean
   boardDetail: TrelloBoardDetail | undefined
+  boardLabels: readonly TrelloLabel[]
+  boardLabelsLoaded: boolean
+  boardLabelsLoading: boolean
   boards: readonly TrelloBoard[]
   cardDetailLoading: boolean
+  cardLabelPickerOpen: boolean
   context: Readonly<Record<string, boolean>>
   contextMenuCardId: string
   contextMenuListId: string
@@ -37,6 +43,7 @@ export interface TrelloViewState {
   draftApiKey: string
   draftCardDescription: string
   draftCardTitle: string
+  draftLabelSearchQuery: string
   draftListTitles: Readonly<Record<string, string>>
   draftNewCardTitle: string
   draftSearchQuery: string

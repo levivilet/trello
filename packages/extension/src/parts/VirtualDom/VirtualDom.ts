@@ -38,6 +38,10 @@ export const div = (
   return node(VirtualDomElements.Div, { className }, children)
 }
 
+export const label = (text: string): TreeNode => {
+  return node(VirtualDomElements.Label, {}, [textNode(text)])
+}
+
 export const form = (
   name: string,
   className: string,
