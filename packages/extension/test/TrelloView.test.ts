@@ -508,10 +508,23 @@ test('connect loads boards and clicking board loads detail', async () => {
   })
   expect(detailClassNames).toContain('TrelloLists')
   expect(detailClassNames).toContain('TrelloList')
+  expect(detailClassNames).toContain('TrelloListHeader')
+  expect(detailClassNames).toContain('TrelloListCardCount')
   expect(detailClassNames).toContain('TrelloCards')
   expect(detailClassNames).toContain('TrelloCardTitle')
   expect(detailClassNames).toContain('TrelloCardMeta')
   expect(detailClassNames).toContain('TrelloCardCommentIcon')
+  expect(
+    hasNode(detailDom, (node) => {
+      return (
+        node.type === VirtualDomElements.Img &&
+        node.className === 'TrelloCardCommentIcon' &&
+        node.src === './comments.svg' &&
+        node.alt === '' &&
+        node['aria-hidden'] === true
+      )
+    }),
+  ).toBe(true)
   expect(detailClassNames).toContain('TrelloCardCommentCount')
   expect(detailClassNames).toContain('TrelloCardCoverImage')
   expect(
@@ -528,13 +541,22 @@ test('connect loads boards and clicking board loads detail', async () => {
       )
     }),
   ).toBe(true)
+  const listCardCount = getNodeByClass(detailDom, 'TrelloListCardCount')
+  const listCardCountIndex = detailDom.indexOf(listCardCount)
+  expect(detailDom[listCardCountIndex + 1]?.text).toBe('3')
+  expect(
+    hasDirectChildClass(detailDom, 'TrelloListHeader', 'TrelloListTitleInput'),
+  ).toBe(true)
+  expect(
+    hasDirectChildClass(detailDom, 'TrelloListHeader', 'TrelloListCardCount'),
+  ).toBe(true)
   expect(hasDirectChildClass(detailDom, 'TrelloList', 'TrelloCards')).toBe(true)
   expect(
     hasDirectChildClass(detailDom, 'TrelloList', 'TrelloAddCardButton'),
   ).toBe(true)
   expect(hasDirectChildClass(detailDom, 'TrelloCards', 'TrelloCard')).toBe(true)
   expect(getDirectChildClassNamesByName(detailDom, 'list:list-1')).toEqual([
-    'TrelloListTitleInput',
+    'TrelloListHeader',
     'TrelloCards',
     'TrelloAddCardButton',
   ])
@@ -582,6 +604,9 @@ test('list title renders as editable input', async () => {
   )
   expect(getText(dom)).toContain('No cards')
   expect(getText(dom)).toContain('+ Add a card')
+  const listCardCount = getNodeByClass(dom, 'TrelloListCardCount')
+  const listCardCountIndex = dom.indexOf(listCardCount)
+  expect(dom[listCardCountIndex + 1]?.text).toBe('0')
   expect(getNodeByName(dom, 'addCard:list-1')).toEqual(
     expect.objectContaining({
       className: 'TrelloAddCardButton',
