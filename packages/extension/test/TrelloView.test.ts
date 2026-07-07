@@ -623,8 +623,16 @@ test('connect loads boards and clicking board loads detail', async () => {
                   name: 'Quiet card',
                 },
                 {
+                  attachments: [
+                    {
+                      id: 'attachment-1',
+                      mimeType: 'image/png',
+                      name: 'Card attachment',
+                      url: 'https://example.com/attachment-card.png',
+                    },
+                  ],
                   id: 'card-3',
-                  name: 'Plain card',
+                  name: 'Attachment card',
                 },
               ],
               id: 'list-1',
@@ -636,6 +644,7 @@ test('connect loads boards and clicking board loads detail', async () => {
       boards: [{ id: 'board-1', name: 'Roadmap' }],
     }),
     imageCache: createMockTrelloImageCache({
+      'https://example.com/attachment-card.png': 'blob:attachment-card-cover',
       'https://example.com/quiet-card-large.png': 'blob:quiet-card-large-cover',
     }),
     recentStorage: createMemoryRecentBoardStorage(),
@@ -698,10 +707,10 @@ test('connect loads boards and clicking board loads detail', async () => {
   expect(detailText).not.toContain('3 comments')
   expect(getSubtreeTextByNodeName(detailDom, 'card:card-1')).toContain('3')
   expect(detailText).toContain('Quiet card')
-  expect(detailText).toContain('Plain card')
-  const plainCardDom = getSubtreeByNodeName(detailDom, 'card:card-3')
+  expect(detailText).toContain('Attachment card')
+  const attachmentCardDom = getSubtreeByNodeName(detailDom, 'card:card-3')
   expect(
-    hasNode(plainCardDom, (node) => {
+    hasNode(attachmentCardDom, (node) => {
       return hasClass(node, 'TrelloCardPreviewLabels')
     }),
   ).toBe(false)
@@ -736,6 +745,15 @@ test('connect loads boards and clicking board loads detail', async () => {
         node.className === 'TrelloCardCoverImage' &&
         node.src === 'blob:quiet-card-large-cover' &&
         node.alt === 'Quiet card cover'
+      )
+    }),
+  ).toBe(true)
+  expect(
+    hasNode(attachmentCardDom, (node) => {
+      return (
+        node.className === 'TrelloCardCoverImage' &&
+        node.src === 'blob:attachment-card-cover' &&
+        node.alt === 'Attachment card cover'
       )
     }),
   ).toBe(true)

@@ -18,6 +18,8 @@ const listParams = {
 } as const
 
 const cardsParams = {
+  attachment_fields: 'name,url,mimeType,previews',
+  attachments: 'cover',
   fields: 'name,url,idBoard,idList,badges,cover,labels',
 } as const
 
