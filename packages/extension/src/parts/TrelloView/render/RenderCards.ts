@@ -16,26 +16,12 @@ const getCardCommentLabel = (count: number): string => {
 }
 
 const renderCardCommentIcon = (): Dom.TreeNode => {
-  return Dom.node(
-    VirtualDomElements.Svg,
-    {
-      'aria-hidden': true,
-      className: 'TrelloCardCommentIcon',
-      fill: 'none',
-      height: 14,
-      viewBox: '0 0 24 24',
-      width: 14,
-    },
-    [
-      Dom.node(VirtualDomElements.Path, {
-        d: 'M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z',
-        stroke: 'currentColor',
-        strokeLinecap: 'round',
-        strokeLinejoin: 'round',
-        strokeWidth: 2,
-      }),
-    ],
-  )
+  return Dom.node(VirtualDomElements.Img, {
+    alt: '',
+    'aria-hidden': true,
+    className: 'TrelloCardCommentIcon',
+    src: './comments.svg',
+  })
 }
 
 const renderCardCommentCount = (
