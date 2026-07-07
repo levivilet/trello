@@ -465,8 +465,6 @@ test('connect loads boards and clicking board loads detail', async () => {
   expect(getListTitleInput(detailDom, 'list-1')?.value).toBe('Todo')
   expect(detailText).toContain('Ship Trello view')
   const labeledCardDom = getSubtreeByNodeName(detailDom, 'card:card-1')
-  expect(getText(labeledCardDom)).toContain('Extension Api')
-  expect(getText(labeledCardDom)).toContain('Backend')
   expect(
     hasNode(labeledCardDom, (node) => {
       return node.className === 'TrelloCardLabels TrelloCardPreviewLabels'
@@ -474,12 +472,22 @@ test('connect loads boards and clicking board loads detail', async () => {
   ).toBe(true)
   expect(
     hasNode(labeledCardDom, (node) => {
-      return hasClass(node, 'TrelloCardLabelColorBlue')
+      return (
+        hasClass(node, 'TrelloCardPreviewLabel') &&
+        hasClass(node, 'TrelloCardLabelColorBlue') &&
+        node['aria-label'] === 'Extension Api' &&
+        node.title === 'Extension Api'
+      )
     }),
   ).toBe(true)
   expect(
     hasNode(labeledCardDom, (node) => {
-      return hasClass(node, 'TrelloCardLabelColorGreenDark')
+      return (
+        hasClass(node, 'TrelloCardPreviewLabel') &&
+        hasClass(node, 'TrelloCardLabelColorGreenDark') &&
+        node['aria-label'] === 'Backend' &&
+        node.title === 'Backend'
+      )
     }),
   ).toBe(true)
   expect(detailText).toContain('+ Add a card')

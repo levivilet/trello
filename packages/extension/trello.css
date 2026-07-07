@@ -833,6 +833,19 @@ button.TrelloSearchResult:hover {
 
 .TrelloCardPreviewLabels {
   flex: 0 0 auto;
+  gap: 4px;
+}
+
+.TrelloCardPreviewLabel {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 8px;
+  min-height: 8px;
+  padding: 0;
+  overflow: hidden;
+  font-size: 0;
+  line-height: 0;
+  border-radius: 999px;
 }
 
 .TrelloCardLabelAddButton {
