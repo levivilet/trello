@@ -1998,6 +1998,48 @@ test('clicking card renders card detail and close dismisses it', async () => {
   resetTrelloViewDependencyFactory()
 })
 
+test('card detail omits empty images section', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', name: 'Ship Trello view' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      cardDetails: {
+        'card-1': {
+          attachments: [],
+          card: {
+            desc: 'Detailed card description',
+            id: 'card-1',
+            name: 'Ship Trello view',
+          },
+          comments: [],
+        },
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+
+  const detailDom = await instance.render()
+  const text = getText(detailDom)
+  expect(text).toContain('Detailed card description')
+  expect(text).not.toContain('Images')
+  expect(text).not.toContain('No images')
+  expect(getClassNames(detailDom)).not.toContain('TrelloCardDetailImages')
+  resetTrelloViewDependencyFactory()
+})
+
 test('card detail renders current list selector with board lists', async () => {
   const instance = await createAuthenticatedInstance(
     [{ id: 'board-1', name: 'Roadmap' }],
