@@ -1,17 +1,10 @@
+import type { MenuEntry } from '@lvce-editor/api'
 import type { TrelloViewState } from './state/TrelloViewState.ts'
 
 export const MenuIdBoard = 'trello.board'
 export const MenuIdCard = 'trello.card'
 export const MenuIdCardDetail = 'trello.cardDetail'
 export const MenuIdList = 'trello.list'
-
-interface MenuEntry {
-  readonly args?: readonly unknown[]
-  readonly command: string
-  readonly flags?: number
-  readonly id: string
-  readonly label: string
-}
 
 const menuEntryRefreshBoards: MenuEntry = {
   command: 'trello.refreshBoards',
