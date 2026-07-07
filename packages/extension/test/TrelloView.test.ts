@@ -224,12 +224,12 @@ const createAuthenticatedInstance = async (
       : undefined,
   )) as VirtualDomViewInstance
   await instance.handleEvent?.({
-    name: 'apiKey',
+    name: 'trello-api-key',
     type: 'input',
     value: validApiKey,
   })
   await instance.handleEvent?.({
-    name: 'token',
+    name: 'trello-api-token',
     type: 'input',
     value: validToken,
   })
@@ -263,12 +263,12 @@ const createSearchEnabledInstance = async (
 
   const instance = (await view.create()) as VirtualDomViewInstance
   await instance.handleEvent?.({
-    name: 'apiKey',
+    name: 'trello-api-key',
     type: 'input',
     value: validApiKey,
   })
   await instance.handleEvent?.({
-    name: 'token',
+    name: 'trello-api-token',
     type: 'input',
     value: validToken,
   })
@@ -298,8 +298,8 @@ test('renders auth inputs when unauthenticated', async () => {
   expect(text).toContain('The token grants access to your Trello account')
   expect(hasLabelText(dom, 'API key')).toBe(true)
   expect(hasLabelText(dom, 'Token')).toBe(true)
-  const apiKeyInput = dom.find((node) => node.name === 'apiKey')
-  const tokenInput = dom.find((node) => node.name === 'token')
+  const apiKeyInput = dom.find((node) => node.name === 'trello-api-key')
+  const tokenInput = dom.find((node) => node.name === 'trello-api-token')
   if (!apiKeyInput || !tokenInput) {
     throw new Error('Expected auth inputs to render')
   }
@@ -348,12 +348,12 @@ test('dependency reload resets authenticated user state without clearing user cr
   expect(authText).not.toContain('User Board')
 
   await instance.handleEvent?.({
-    name: 'apiKey',
+    name: 'trello-api-key',
     type: 'input',
     value: validApiKey,
   })
   await instance.handleEvent?.({
-    name: 'token',
+    name: 'trello-api-token',
     type: 'input',
     value: validToken,
   })
@@ -420,12 +420,12 @@ test('connect loads boards and clicking board loads detail', async () => {
 
   const instance = (await view.create()) as VirtualDomViewInstance
   await instance.handleEvent?.({
-    name: 'apiKey',
+    name: 'trello-api-key',
     type: 'input',
     value: validApiKey,
   })
   await instance.handleEvent?.({
-    name: 'token',
+    name: 'trello-api-token',
     type: 'input',
     value: validToken,
   })
@@ -1494,12 +1494,12 @@ test('clicking card renders card detail and close dismisses it', async () => {
 
   const instance = (await view.create()) as VirtualDomViewInstance
   await instance.handleEvent?.({
-    name: 'apiKey',
+    name: 'trello-api-key',
     type: 'input',
     value: validApiKey,
   })
   await instance.handleEvent?.({
-    name: 'token',
+    name: 'trello-api-token',
     type: 'input',
     value: validToken,
   })
@@ -1912,12 +1912,12 @@ test('clicking card renders cached detail before fresh detail resolves', async (
 
   const instance = (await view.create()) as VirtualDomViewInstance
   await instance.handleEvent?.({
-    name: 'apiKey',
+    name: 'trello-api-key',
     type: 'input',
     value: validApiKey,
   })
   await instance.handleEvent?.({
-    name: 'token',
+    name: 'trello-api-token',
     type: 'input',
     value: validToken,
   })
@@ -1974,12 +1974,12 @@ test('editing card title and description saves card detail', async () => {
 
   const instance = (await view.create()) as VirtualDomViewInstance
   await instance.handleEvent?.({
-    name: 'apiKey',
+    name: 'trello-api-key',
     type: 'input',
     value: validApiKey,
   })
   await instance.handleEvent?.({
-    name: 'token',
+    name: 'trello-api-token',
     type: 'input',
     value: validToken,
   })
@@ -2102,12 +2102,12 @@ test('unchanged card description blur closes editor without saving', async () =>
 
   const instance = (await view.create()) as VirtualDomViewInstance
   await instance.handleEvent?.({
-    name: 'apiKey',
+    name: 'trello-api-key',
     type: 'input',
     value: validApiKey,
   })
   await instance.handleEvent?.({
-    name: 'token',
+    name: 'trello-api-token',
     type: 'input',
     value: validToken,
   })
@@ -2163,12 +2163,12 @@ test('card description preview renders safe markdown subset', async () => {
 
   const instance = (await view.create()) as VirtualDomViewInstance
   await instance.handleEvent?.({
-    name: 'apiKey',
+    name: 'trello-api-key',
     type: 'input',
     value: validApiKey,
   })
   await instance.handleEvent?.({
-    name: 'token',
+    name: 'trello-api-token',
     type: 'input',
     value: validToken,
   })
@@ -2230,12 +2230,12 @@ test('empty card title on blur restores saved title and shows validation error',
 
   const instance = (await view.create()) as VirtualDomViewInstance
   await instance.handleEvent?.({
-    name: 'apiKey',
+    name: 'trello-api-key',
     type: 'input',
     value: validApiKey,
   })
   await instance.handleEvent?.({
-    name: 'token',
+    name: 'trello-api-token',
     type: 'input',
     value: validToken,
   })
@@ -2286,12 +2286,12 @@ test('connect shows validation error for invalid api key shape', async () => {
 
   const instance = (await view.create()) as VirtualDomViewInstance
   await instance.handleEvent?.({
-    name: 'apiKey',
+    name: 'trello-api-key',
     type: 'input',
     value: 'bad-key',
   })
   await instance.handleEvent?.({
-    name: 'token',
+    name: 'trello-api-token',
     type: 'input',
     value: validToken,
   })
@@ -2315,12 +2315,12 @@ test('connect accepts 76 character token and loads boards', async () => {
 
   const instance = (await view.create()) as VirtualDomViewInstance
   await instance.handleEvent?.({
-    name: 'apiKey',
+    name: 'trello-api-key',
     type: 'input',
     value: validApiKey,
   })
   await instance.handleEvent?.({
-    name: 'token',
+    name: 'trello-api-token',
     type: 'input',
     value: validLongToken,
   })
@@ -2344,12 +2344,12 @@ test('connect shows trello error on auth form when credentials fail', async () =
 
   const instance = (await view.create()) as VirtualDomViewInstance
   await instance.handleEvent?.({
-    name: 'apiKey',
+    name: 'trello-api-key',
     type: 'input',
     value: validApiKey,
   })
   await instance.handleEvent?.({
-    name: 'token',
+    name: 'trello-api-token',
     type: 'input',
     value: validToken,
   })

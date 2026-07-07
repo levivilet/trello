@@ -20,8 +20,8 @@ export const test: Test = async ({ Command, expect, Locator }) => {
     await Command.executeExtensionCommand('trello.show')
 
     step = 'locate inputs'
-    const apiKeyInput = Locator('input[name="apiKey"]')
-    const tokenInput = Locator('input[name="token"]')
+    const apiKeyInput = Locator('input[name="trello-api-key"]')
+    const tokenInput = Locator('input[name="trello-api-token"]')
     step = 'expect inputs'
     await expect(apiKeyInput).toBeVisible()
     await expect(tokenInput).toBeVisible()

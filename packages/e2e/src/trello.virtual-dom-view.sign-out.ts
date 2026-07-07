@@ -19,8 +19,8 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   // eslint-disable-next-line e2e/no-direct-click
   await logout.click()
 
-  const apiKey = Locator('input[name="apiKey"]')
-  const token = Locator('input[name="token"]')
+  const apiKey = Locator('input[name="trello-api-key"]')
+  const token = Locator('input[name="trello-api-token"]')
   const board = Locator('button[name="board:board-1"]')
 
   await expect(apiKey).toBeVisible()

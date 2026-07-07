@@ -12,7 +12,7 @@ export const handleInputEvent = (
     return
   }
   switch (event.name) {
-    case 'apiKey':
+    case 'trello-api-key':
       mutableState.draftApiKey = value
       return
     case 'cardDescription':
@@ -27,7 +27,7 @@ export const handleInputEvent = (
     case 'search':
       mutableState.draftSearchQuery = value
       return
-    case 'token':
+    case 'trello-api-token':
       mutableState.draftToken = value
       return
     default:

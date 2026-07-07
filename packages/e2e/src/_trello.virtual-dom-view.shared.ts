@@ -105,8 +105,8 @@ export const connectWithCredentials = async ({
   expect,
   Locator,
 }: Readonly<Pick<TestApi, 'expect' | 'Locator'>>): Promise<void> => {
-  const apiKey = Locator('input[name="apiKey"]')
-  const token = Locator('input[name="token"]')
+  const apiKey = Locator('input[name="trello-api-key"]')
+  const token = Locator('input[name="trello-api-token"]')
   await expect(apiKey).toBeVisible()
   await expect(token).toBeVisible()
   await apiKey.type('abcdefghijklmnopqrstuvwxyz123456')

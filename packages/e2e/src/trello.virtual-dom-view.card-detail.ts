@@ -26,8 +26,8 @@ const useMockDataAndShowTrello = async (Command, mockData) => {
 }
 
 const connectWithCredentials = async ({ expect, Locator }) => {
-  const apiKey = Locator('input[name="apiKey"]')
-  const token = Locator('input[name="token"]')
+  const apiKey = Locator('input[name="trello-api-key"]')
+  const token = Locator('input[name="trello-api-token"]')
   await expect(apiKey).toBeVisible()
   await expect(token).toBeVisible()
   await apiKey.type('abcdefghijklmnopqrstuvwxyz123456')
