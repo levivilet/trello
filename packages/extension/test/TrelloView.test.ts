@@ -113,6 +113,14 @@ const hasNode = (
   return dom.some(predicate)
 }
 
+const hasLabelText = (dom: readonly any[], text: string): boolean => {
+  return dom.some((node, index) => {
+    return (
+      node.type === VirtualDomElements.Label && dom[index + 1]?.text === text
+    )
+  })
+}
+
 const hasClass = (node: any, className: string): boolean => {
   if (typeof node.className !== 'string') {
     return false
@@ -263,6 +271,8 @@ test('renders auth inputs when unauthenticated', async () => {
   expect(text).toContain('Welcome to Trello')
   expect(text).toContain('https://trello.com/power-ups/admin')
   expect(text).toContain('The token grants access to your Trello account')
+  expect(hasLabelText(dom, 'API key')).toBe(true)
+  expect(hasLabelText(dom, 'Token')).toBe(true)
   const apiKeyInput = dom.find((node) => node.name === 'apiKey')
   const tokenInput = dom.find((node) => node.name === 'token')
   if (!apiKeyInput || !tokenInput) {
