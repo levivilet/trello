@@ -61,6 +61,16 @@ export const openCardLabelPicker = async (
   requestRerender()
 }
 
+export const closeCardLabelPicker = (
+  context: TrelloViewActionContext,
+): void => {
+  const { requestRerender } = context
+  const state = context.state as TrelloViewState
+  state.cardLabelPickerOpen = false
+  state.draftLabelSearchQuery = ''
+  requestRerender()
+}
+
 export const addCardLabel = async (
   context: TrelloViewActionContext,
   labelId: string,

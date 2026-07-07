@@ -960,6 +960,35 @@ button.TrelloSearchResult:hover {
   border-radius: 6px;
 }
 
+.TrelloCardLabelPickerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 24px;
+  contain: content;
+}
+
+.TrelloCardLabelPickerTitle {
+  contain: content;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--TrelloForeground);
+}
+
+.TrelloCardLabelPickerCloseButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
 .TrelloCardLabelSearchInput {
   width: 100%;
 }
