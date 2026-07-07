@@ -46,17 +46,22 @@ const getExpectedAssetBaseUrl = (): string => {
   return `/remote${url.pathname}`
 }
 
+type ContextMenuViewEvent = ViewEvent & {
+  readonly x: number
+  readonly y: number
+}
+
 const createContextMenuEvent = (
   name: string,
   x: number,
   y: number,
-): ViewEvent => {
+): ContextMenuViewEvent => {
   return {
     name,
     type: 'contextmenu',
     x,
     y,
-  } as ViewEvent & { readonly x: number; readonly y: number }
+  }
 }
 
 const getText = (dom: readonly any[]): string => {
