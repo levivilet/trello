@@ -8,6 +8,7 @@ import type {
   TrelloCardDetail,
   TrelloCardMove,
   TrelloCardUpdate,
+  TrelloComment,
   TrelloCredentials,
   TrelloLabel,
   TrelloList,
@@ -21,6 +22,7 @@ export interface MockTrelloData {
   readonly boardDetails?: Readonly<Record<string, TrelloBoardDetail>>
   readonly boardLabels?: Readonly<Record<string, readonly TrelloLabel[]>>
   readonly boards?: readonly TrelloBoard[]
+  readonly cardCommentAddErrors?: Readonly<Record<string, string>>
   readonly cardCreateErrors?: Readonly<Record<string, string>>
   readonly cardDetailErrors?: Readonly<Record<string, string>>
   readonly cardDetails?: Readonly<Record<string, TrelloCardDetail>>
@@ -61,6 +63,7 @@ export const createMockTrelloClient = (
   data: Readonly<MockTrelloData>,
 ): TrelloClient => {
   let listBoardsCallCount = 0
+  let addCommentCallCount = 0
   let createCardCallCount = 0
   let createListCallCount = 0
   const cardDetails: Record<string, TrelloCardDetail> = {
@@ -83,6 +86,38 @@ export const createMockTrelloClient = (
   }
 
   const client: TrelloClient = {
+    async addCardComment(
+      card: TrelloCard,
+      text: string,
+    ): Promise<TrelloComment> {
+      if (data.error) {
+        throw new Error(data.error)
+      }
+      const addError = data.cardCommentAddErrors?.[card.id]
+      if (addError) {
+        throw new Error(addError)
+      }
+      addCommentCallCount++
+      const comment: TrelloComment = {
+        data: {
+          text,
+        },
+        date: '2026-07-07T12:00:00.000Z',
+        id: `created-comment-${addCommentCallCount}`,
+        memberCreator: {
+          fullName: 'Test User',
+          initials: 'TU',
+        },
+      }
+      const previousDetail = cardDetails[card.id]
+      if (previousDetail) {
+        cardDetails[card.id] = {
+          ...previousDetail,
+          comments: [...previousDetail.comments, comment],
+        }
+      }
+      return comment
+    },
     async addCardLabel(
       card: TrelloCard,
       label: TrelloLabel,

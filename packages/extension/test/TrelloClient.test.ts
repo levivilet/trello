@@ -725,6 +725,45 @@ test('addCardLabel sends label id to trello', async () => {
   expect(requestInits[0]?.method).toBe('POST')
 })
 
+test('addCardComment sends comment text to trello', async () => {
+  const requests: string[] = []
+  const requestInits: ({ readonly method?: string } | undefined)[] = []
+  const client = createTrelloClient(async (url, init) => {
+    requests.push(url)
+    requestInits.push(init)
+    return jsonResponse({
+      data: {
+        text: 'Looks good',
+      },
+      id: 'comment-1',
+    })
+  })
+
+  await expect(
+    client.addCardComment(
+      { id: 'card-1', name: 'Ship Trello view' },
+      'Looks good',
+      {
+        apiKey: validApiKey,
+        token: validToken,
+      },
+    ),
+  ).resolves.toEqual({
+    data: {
+      text: 'Looks good',
+    },
+    id: 'comment-1',
+  })
+
+  expect(requests).toHaveLength(1)
+  const url = new URL(requests[0])
+  expect(url.pathname).toBe('/1/cards/card-1/actions/comments')
+  expect(url.searchParams.get('key')).toBe(validApiKey)
+  expect(url.searchParams.get('token')).toBe(validToken)
+  expect(url.searchParams.get('text')).toBe('Looks good')
+  expect(requestInits[0]?.method).toBe('POST')
+})
+
 test('addCardLabel invalidates cached card detail', async () => {
   const cache = createMemoryTrelloApiCache()
   const client = createTrelloClient(async (url) => {

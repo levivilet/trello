@@ -21,6 +21,7 @@ export const clearBoardSpecificState = (
   mutableState.cardLabelPickerOpen = false
   mutableState.draftCardDescription = ''
   mutableState.draftCardTitle = ''
+  mutableState.draftComment = ''
   mutableState.draftListTitles = {}
   mutableState.draftLabelSearchQuery = ''
   mutableState.draftNewCardTitle = ''
@@ -28,6 +29,8 @@ export const clearBoardSpecificState = (
   mutableState.editingCardDescription = false
   mutableState.editingCardTitle = false
   mutableState.savingCardDetail = false
+  mutableState.savingComment = false
   mutableState.savingNewCard = false
   mutableState.savingNewList = false
+  mutableState.writingComment = false
 }

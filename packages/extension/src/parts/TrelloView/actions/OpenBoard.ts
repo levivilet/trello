@@ -56,13 +56,16 @@ export const openBoard = async (
   state.cardLabelPickerOpen = false
   state.draftCardDescription = ''
   state.draftCardTitle = ''
+  state.draftComment = ''
   state.draftListTitles = {}
   state.draftLabelSearchQuery = ''
   state.draftNewCardTitle = ''
   state.draftNewListTitle = ''
   state.savingCardDetail = false
+  state.savingComment = false
   state.savingNewCard = false
   state.savingNewList = false
+  state.writingComment = false
   state.recentBoardViews = updateRecentBoardViews(
     state.recentBoardViews,
     board.id,

@@ -27,6 +27,7 @@ export const createInitialState = (): TrelloViewState => {
     draftApiKey: '',
     draftCardDescription: '',
     draftCardTitle: '',
+    draftComment: '',
     draftLabelSearchQuery: '',
     draftListTitles: {},
     draftNewCardTitle: '',
@@ -43,10 +44,12 @@ export const createInitialState = (): TrelloViewState => {
     movingCardId: '',
     recentBoardViews: [],
     savingCardDetail: false,
+    savingComment: false,
     savingNewCard: false,
     savingNewList: false,
     searchEnabled: false,
     searchResults: [],
     selectedCardDetail: undefined,
+    writingComment: false,
   }
 }

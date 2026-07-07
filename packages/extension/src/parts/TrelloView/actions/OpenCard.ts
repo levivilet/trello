@@ -166,7 +166,10 @@ export const openCard = async (
   state.selectedCardDetail = undefined
   state.addingCardLabelId = ''
   state.cardLabelPickerOpen = false
+  state.draftComment = ''
   state.draftLabelSearchQuery = ''
+  state.savingComment = false
+  state.writingComment = false
   state.error = ''
   requestRerender()
   try {

@@ -271,7 +271,7 @@ export const createInstance = async (
           return
         }
         if (event.type === 'keydown') {
-          handleKeyDownEvent(viewContext, event)
+          await handleKeyDownEvent(viewContext, event)
           return
         }
         if (event.type === 'click') {
