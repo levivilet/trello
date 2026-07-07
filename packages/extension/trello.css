@@ -747,6 +747,13 @@ button.TrelloSearchResult:hover {
   contain: content;
 }
 
+.TrelloCardDescriptionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  contain: content;
+}
+
 .TrelloCardDetailSectionTitle {
   margin: 0;
   contain: content;
@@ -754,6 +761,13 @@ button.TrelloSearchResult:hover {
   font-weight: 600;
   line-height: 1.3;
   color: var(--TrelloForegroundStrong);
+}
+
+.TrelloCardDescriptionEditButton {
+  min-height: 24px;
+  padding: 3px 8px;
+  font-size: 12px;
+  line-height: 16px;
 }
 
 .TrelloCardDescriptionPreview {

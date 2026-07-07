@@ -384,16 +384,26 @@ const renderCardDescriptionPreview = (description: string): Dom.TreeNode => {
   )
 }
 
+const renderCardDescriptionHeader = (): Dom.TreeNode => {
+  const title = Dom.node(
+    VirtualDomElements.H3,
+    { className: 'TrelloCardDetailSectionTitle' },
+    [Dom.textNode('Description')],
+  )
+  const editButton = Dom.button(
+    'editCardDescription',
+    'Edit',
+    'TrelloButton TrelloCardDescriptionEditButton',
+  )
+  return Dom.div('TrelloCardDescriptionHeader', [title, editButton])
+}
+
 const renderCardDescription = (
   state: Readonly<TrelloViewState>,
   description: string,
 ): Dom.TreeNode => {
   return Dom.div('TrelloCardDescriptionSection', [
-    Dom.node(
-      VirtualDomElements.H3,
-      { className: 'TrelloCardDetailSectionTitle' },
-      [Dom.textNode('Description')],
-    ),
+    renderCardDescriptionHeader(),
     state.editingCardDescription
       ? renderCardDescriptionEditor(state)
       : renderCardDescriptionPreview(description),
