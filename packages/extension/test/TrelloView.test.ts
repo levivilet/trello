@@ -16,6 +16,7 @@ import type {
   TrelloLabel,
   TrelloSearchResult,
   TrelloList,
+  TrelloListCreate,
   TrelloListUpdate,
 } from '../src/parts/TrelloTypes/TrelloTypes.ts'
 import { createMemoryCredentialStorage } from '../src/parts/CredentialStorage/CredentialStorage.ts'
@@ -365,6 +366,16 @@ const createStagedCardClient = (options: {
         id: 'created-card-1',
         idList: list.id,
         name: 'Created card',
+      }
+    },
+    async createList(
+      _board: Readonly<TrelloBoard>,
+      create: Readonly<TrelloListCreate>,
+    ): Promise<TrelloList> {
+      return {
+        cards: [],
+        id: 'created-list-1',
+        name: create.name,
       }
     },
     async getBoardDetail(): Promise<TrelloBoardDetail> {
@@ -1777,6 +1788,62 @@ test('editing list title saves on blur', async () => {
   resetTrelloViewDependencyFactory()
 })
 
+test('board detail creates another list from the trailing list control', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+
+  const initialDom = await instance.render()
+  expect(getText(initialDom)).toContain('Create New list')
+  expect(getNodeByName(initialDom, 'newListTitle')).toBeUndefined()
+
+  await instance.handleEvent?.({ name: 'startAddList', type: 'click' })
+
+  const addingDom = await instance.render()
+  expect(getNodeByName(addingDom, 'newListTitle')).toMatchObject({
+    name: 'newListTitle',
+    placeholder: 'Enter list title',
+  })
+
+  await instance.handleEvent?.({
+    key: 'Escape',
+    name: 'newListTitle',
+    type: 'keydown',
+  } as unknown as ViewEvent)
+
+  const cancelledDom = await instance.render()
+  expect(getNodeByName(cancelledDom, 'newListTitle')).toBeUndefined()
+
+  await instance.handleEvent?.({ name: 'startAddList', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'newListTitle',
+    type: 'input',
+    value: 'Done',
+  })
+  await instance.handleEvent?.({ name: 'addList', type: 'submit' })
+
+  const updatedDom = await instance.render()
+  expect(getListTitleInput(updatedDom, 'created-list-1')?.value).toBe('Done')
+  expect(getNodeByName(updatedDom, 'newListTitle')).toBeUndefined()
+  resetTrelloViewDependencyFactory()
+})
+
 test('empty list title restores old title on blur', async () => {
   const instance = await createAuthenticatedInstance(
     [{ id: 'board-1', name: 'Roadmap' }],
@@ -2534,6 +2601,13 @@ test('clicking card renders cached detail before fresh detail resolves', async (
         id: 'created-card-1',
         idList: list.id,
         name: 'Created card',
+      }
+    },
+    async createList(_board: TrelloBoard, create: TrelloListCreate) {
+      return {
+        cards: [],
+        id: 'created-list-1',
+        name: create.name,
       }
     },
     async getBoardDetail() {

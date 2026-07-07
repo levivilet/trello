@@ -9,6 +9,7 @@ import type {
   TrelloCredentials,
   TrelloLabel,
   TrelloList,
+  TrelloListCreate,
   TrelloListUpdate,
   TrelloSearchResult,
 } from '../TrelloTypes/TrelloTypes.ts'
@@ -38,6 +39,11 @@ export interface TrelloClient {
     create: TrelloCardCreate,
     credentials: TrelloCredentials,
   ) => Promise<TrelloCard>
+  readonly createList: (
+    board: TrelloBoard,
+    create: TrelloListCreate,
+    credentials: TrelloCredentials,
+  ) => Promise<TrelloList>
   readonly getBoardDetail: (
     board: TrelloBoard,
     credentials: TrelloCredentials,

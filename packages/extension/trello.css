@@ -569,6 +569,41 @@ button.TrelloSearchResult:hover {
   color: var(--TrelloForegroundMuted);
 }
 
+.TrelloAddListButton,
+.TrelloAddListForm {
+  box-sizing: border-box;
+  flex: 0 0 280px;
+  contain: content;
+}
+
+.TrelloAddListButton {
+  min-height: 40px;
+  padding: 8px;
+  text-align: left;
+  color: var(--TrelloForegroundStrong);
+  background: var(--TrelloSurface);
+  border: none;
+  border-radius: 8px;
+  box-shadow:
+    0 1px 2px var(--TrelloShadow),
+    0 8px 24px var(--TrelloShadow);
+}
+
+.TrelloAddListButton:hover {
+  background: var(--TrelloSurfaceAlt);
+}
+
+.TrelloAddListInput {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px;
+  color: var(--TrelloForegroundStrong);
+  background: var(--TrelloInputBackground);
+  border: 1px solid var(--TrelloFocus);
+  border-radius: 8px;
+}
+
 .TrelloCardCommentIcon {
   display: block;
   flex: none;

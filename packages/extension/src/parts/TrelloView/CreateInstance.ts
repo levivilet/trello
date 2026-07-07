@@ -49,6 +49,7 @@ import { dependencyState } from './state/DependencyFactory.ts'
 import {
   contextKeyCardDescriptionFocus,
   contextKeyNewCardInputFocus,
+  contextKeyNewListInputFocus,
   updateContext,
 } from './state/UpdateContext.ts'
 
@@ -348,6 +349,9 @@ export const createInstance = async (
         state.addingCardListId
       ) {
         return `[name="newCardTitle:${state.addingCardListId}"]`
+      }
+      if (becameActive(oldContext, newContext, contextKeyNewListInputFocus)) {
+        return '[name="newListTitle"]'
       }
       if (
         becameActive(oldContext, newContext, contextKeyCardDescriptionFocus)

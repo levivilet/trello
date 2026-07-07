@@ -14,6 +14,7 @@ import type {
 } from './TrelloClientTypes.ts'
 import { addCardLabel } from './operations/AddCardLabel.ts'
 import { createCard } from './operations/CreateCard.ts'
+import { createList } from './operations/CreateList.ts'
 import {
   getBoardDetail,
   readCachedBoardDetail,
@@ -56,6 +57,13 @@ export const createTrelloClient = (
       credentials,
     ): ReturnType<TrelloClient['createCard']> {
       return createCard(fetchLike, list, create, credentials, cache)
+    },
+    createList(
+      board: TrelloBoard,
+      create,
+      credentials,
+    ): ReturnType<TrelloClient['createList']> {
+      return createList(fetchLike, board, create, credentials, cache)
     },
     getBoardDetail(
       board,

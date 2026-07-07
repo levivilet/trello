@@ -1,6 +1,7 @@
 import type { ViewEvent } from '@lvce-editor/api'
 import type { TrelloViewActionContext } from '../state/TrelloViewState.ts'
 import { cancelAddCard } from './AddCard.ts'
+import { cancelAddList } from './AddList.ts'
 
 const getEventString = (event: Readonly<ViewEvent>, key: string): string => {
   const value = (event as unknown as Readonly<Record<string, unknown>>)[key]
@@ -15,8 +16,14 @@ export const handleKeyDownEvent = (
   event: Readonly<ViewEvent>,
 ): void => {
   const key = getEventString(event, 'key') || getEventString(event, 'code')
-  if (key !== 'Escape' || !event.name?.startsWith('newCardTitle:')) {
+  if (key !== 'Escape') {
     return
   }
-  cancelAddCard(context)
+  if (event.name?.startsWith('newCardTitle:')) {
+    cancelAddCard(context)
+    return
+  }
+  if (event.name === 'newListTitle') {
+    cancelAddList(context)
+  }
 }

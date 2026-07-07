@@ -33,6 +33,9 @@ export const handleInputEvent = async (
     case 'cardTitle':
       mutableState.draftCardTitle = value
       return
+    case 'newListTitle':
+      mutableState.draftNewListTitle = value
+      return
     case 'search':
       mutableState.draftSearchQuery = value
       return

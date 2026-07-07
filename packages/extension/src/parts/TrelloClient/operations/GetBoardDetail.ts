@@ -21,6 +21,19 @@ const cardsParams = {
   fields: 'name,url,idBoard,idList,badges,cover,labels',
 } as const
 
+export const deleteCachedBoardLists = async (
+  cache: TrelloApiCache | undefined,
+  boardId: string,
+  credentials: TrelloCredentials,
+): Promise<void> => {
+  await deleteCachedJson(
+    cache,
+    `/boards/${boardId}/lists`,
+    credentials,
+    listParams,
+  )
+}
+
 export const deleteCachedListCards = async (
   cache: TrelloApiCache | undefined,
   listId: string,

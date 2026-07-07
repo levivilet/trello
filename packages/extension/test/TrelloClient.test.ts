@@ -803,6 +803,48 @@ test('updateList sends title to trello', async () => {
   expect(requestInits[0]?.method).toBe('PUT')
 })
 
+test('createList sends title and board to trello', async () => {
+  const requests: string[] = []
+  const requestInits: ({ readonly method?: string } | undefined)[] = []
+  const client = createTrelloClient(async (url, init) => {
+    requests.push(url)
+    requestInits.push(init)
+    return jsonResponse({
+      id: 'list-1',
+      name: 'Done',
+    })
+  })
+
+  await expect(
+    client.createList(
+      { id: 'board-1', name: 'Roadmap' },
+      {
+        name: 'Done',
+        pos: 'bottom',
+      },
+      {
+        apiKey: validApiKey,
+        token: validToken,
+      },
+    ),
+  ).resolves.toEqual({
+    cards: [],
+    id: 'list-1',
+    name: 'Done',
+  })
+
+  expect(requests).toHaveLength(1)
+  const url = new URL(requests[0])
+  expect(url.pathname).toBe('/1/lists')
+  expect(url.searchParams.get('key')).toBe(validApiKey)
+  expect(url.searchParams.get('token')).toBe(validToken)
+  expect(url.searchParams.get('idBoard')).toBe('board-1')
+  expect(url.searchParams.get('name')).toBe('Done')
+  expect(url.searchParams.get('pos')).toBe('bottom')
+  expect(url.searchParams.get('fields')).toBe('name')
+  expect(requestInits[0]?.method).toBe('POST')
+})
+
 test('search requests trello search with card and board params', async () => {
   const requests: string[] = []
   const client = createTrelloClient(async (url) => {

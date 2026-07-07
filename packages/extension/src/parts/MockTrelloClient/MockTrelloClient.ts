@@ -11,6 +11,7 @@ import type {
   TrelloCredentials,
   TrelloLabel,
   TrelloList,
+  TrelloListCreate,
   TrelloListUpdate,
   TrelloSearchResult,
 } from '../TrelloTypes/TrelloTypes.ts'
@@ -29,6 +30,7 @@ export interface MockTrelloData {
   readonly error?: string
   readonly listBoardsError?: string
   readonly listBoardsResponses?: readonly (readonly TrelloBoard[])[]
+  readonly listCreateErrors?: Readonly<Record<string, string>>
   readonly listUpdateErrors?: Readonly<Record<string, string>>
   readonly searchError?: string
   readonly searchResults?: readonly TrelloSearchResult[]
@@ -60,6 +62,7 @@ export const createMockTrelloClient = (
 ): TrelloClient => {
   let listBoardsCallCount = 0
   let createCardCallCount = 0
+  let createListCallCount = 0
   const cardDetails: Record<string, TrelloCardDetail> = {
     ...data.cardDetails,
   }
@@ -169,6 +172,32 @@ export const createMockTrelloClient = (
         comments: [],
       }
       return createdCard
+    },
+    async createList(
+      board: TrelloBoard,
+      create: TrelloListCreate,
+    ): Promise<TrelloList> {
+      if (data.error) {
+        throw new Error(data.error)
+      }
+      const createError = data.listCreateErrors?.[board.id]
+      if (createError) {
+        throw new Error(createError)
+      }
+      createListCallCount++
+      const createdList: TrelloList = {
+        cards: [],
+        id: `created-list-${createListCallCount}`,
+        name: create.name,
+      }
+      const detail = boardDetails[board.id]
+      if (detail) {
+        boardDetails[board.id] = {
+          ...detail,
+          lists: [...detail.lists, createdList],
+        }
+      }
+      return createdList
     },
     async getBoardDetail(board: TrelloBoard): Promise<TrelloBoardDetail> {
       if (data.error) {

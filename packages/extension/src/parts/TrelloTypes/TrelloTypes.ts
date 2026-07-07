@@ -133,6 +133,11 @@ export interface TrelloList {
   readonly name: string
 }
 
+export interface TrelloListCreate {
+  readonly name: string
+  readonly pos: 'bottom'
+}
+
 export interface TrelloListUpdate {
   readonly name: string
 }
