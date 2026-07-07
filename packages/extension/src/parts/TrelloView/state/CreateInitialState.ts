@@ -1,10 +1,12 @@
 import type { TrelloViewState } from './TrelloViewState.ts'
+import { getAssetBaseUrl } from './AssetBaseUrl.ts'
 
 export const createInitialState = (): TrelloViewState => {
   return {
     activeSearchQuery: '',
     addingCardLabelId: '',
     addingCardListId: '',
+    baseUrl: getAssetBaseUrl(import.meta.url),
     boardBackgroundEnabled: false,
     boardDetail: undefined,
     boardLabels: [],

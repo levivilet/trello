@@ -41,6 +41,11 @@ const validToken =
 const validLongToken =
   'abcdefghijklmnopqrstuvwxyz123456abcdefghijklmnopqrstuvwxyz123456abcdefghijkl'
 
+const getExpectedAssetBaseUrl = (): string => {
+  const url = new URL('../', import.meta.url)
+  return `/remote${url.pathname}`
+}
+
 const getText = (dom: readonly any[]): string => {
   return dom
     .filter((node) => typeof node.text === 'string')
@@ -512,6 +517,9 @@ test('connect loads boards and clicking board loads detail', async () => {
   expect(detailClassNames).toContain('TrelloCardTitle')
   expect(detailClassNames).toContain('TrelloCardMeta')
   expect(detailClassNames).toContain('TrelloCardCommentIcon')
+  expect(getNodeByClass(detailDom, 'TrelloCardCommentIcon')).toMatchObject({
+    src: `${getExpectedAssetBaseUrl()}comments.svg`,
+  })
   expect(detailClassNames).toContain('TrelloCardCommentCount')
   expect(detailClassNames).toContain('TrelloCardCoverImage')
   expect(
