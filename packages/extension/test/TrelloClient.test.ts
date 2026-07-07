@@ -270,8 +270,13 @@ test('getBoardDetail requests lists and cards', async () => {
     '/1/boards/board-1/lists',
     '/1/lists/list-1/cards',
   ])
-  expect(new URL(requests[1]).searchParams.get('fields')).toBe(
+  const cardsUrl = new URL(requests[1])
+  expect(cardsUrl.searchParams.get('fields')).toBe(
     'name,url,idBoard,idList,badges,cover,labels',
+  )
+  expect(cardsUrl.searchParams.get('attachments')).toBe('cover')
+  expect(cardsUrl.searchParams.get('attachment_fields')).toBe(
+    'name,url,mimeType,previews',
   )
 })
 

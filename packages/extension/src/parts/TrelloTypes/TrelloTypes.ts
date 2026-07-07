@@ -63,6 +63,7 @@ export interface TrelloCardCover {
 }
 
 export interface TrelloCard {
+  readonly attachments?: readonly TrelloAttachment[]
   readonly badges?: TrelloCardBadges
   readonly cover?: TrelloCardCover | null
   readonly desc?: string
