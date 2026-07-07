@@ -2309,6 +2309,10 @@ test('card detail label picker adds an existing board label', async () => {
     'Extension Api',
   )
   expect(getSubtreeTextByNodeName(openDom, 'cardLabelPicker')).toContain('Bug')
+  expect(getNodeByName(openDom, 'cardLabelCheckbox:label-1')).toMatchObject({
+    checked: false,
+    inputType: 'checkbox',
+  })
 
   await instance.handleEvent?.({ name: 'closeCardLabelPicker', type: 'click' })
 
@@ -2335,12 +2339,16 @@ test('card detail label picker adds an existing board label', async () => {
 
   const updatedDom = await instance.render()
   expect(getText(updatedDom)).toContain('Bug')
-  expect(getNodeByName(updatedDom, 'cardLabelPicker')).toBeUndefined()
+  expect(getNodeByName(updatedDom, 'cardLabelPicker')).toBeDefined()
+  expect(getNodeByName(updatedDom, 'cardLabelCheckbox:label-2')).toMatchObject({
+    checked: true,
+    inputType: 'checkbox',
+  })
   expect(getNodeByName(updatedDom, 'openCardLabelPicker')).toBeDefined()
   resetTrelloViewDependencyFactory()
 })
 
-test('card detail label picker excludes assigned labels and keeps open on failure', async () => {
+test('card detail label picker checks assigned labels and keeps open on failure', async () => {
   const labels: readonly TrelloLabel[] = [
     {
       color: 'blue',
@@ -2419,8 +2427,12 @@ test('card detail label picker excludes assigned labels and keeps open on failur
 
   const pickerDom = await instance.render()
   const pickerText = getSubtreeTextByNodeName(pickerDom, 'cardLabelPicker')
+  expect(pickerText).toContain('Extension Api')
   expect(pickerText).toContain('Bug')
-  expect(pickerText).not.toContain('Extension Api')
+  expect(getNodeByName(pickerDom, 'cardLabelCheckbox:label-1')).toMatchObject({
+    checked: true,
+    inputType: 'checkbox',
+  })
 
   await instance.handleEvent?.({ name: 'addCardLabel:label-2', type: 'click' })
 
