@@ -49,6 +49,7 @@ export const openBoard = async (
   state.cardDetailLoadingCardId = ''
   state.addingCardListId = ''
   state.addingCardLabelId = ''
+  state.addingList = false
   state.boardLabels = []
   state.boardLabelsLoaded = false
   state.boardLabelsLoading = false
@@ -58,8 +59,10 @@ export const openBoard = async (
   state.draftListTitles = {}
   state.draftLabelSearchQuery = ''
   state.draftNewCardTitle = ''
+  state.draftNewListTitle = ''
   state.savingCardDetail = false
   state.savingNewCard = false
+  state.savingNewList = false
   state.recentBoardViews = updateRecentBoardViews(
     state.recentBoardViews,
     board.id,

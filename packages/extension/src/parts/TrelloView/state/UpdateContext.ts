@@ -5,6 +5,7 @@ export const contextKeyBoardsFocus = 'trello.boardsFocus'
 export const contextKeyCardDescriptionFocus = 'trello.cardDescriptionFocus'
 export const contextKeyCardDetailFocus = 'trello.cardDetailFocus'
 export const contextKeyNewCardInputFocus = 'trello.newCardInputFocus'
+export const contextKeyNewListInputFocus = 'trello.newListInputFocus'
 
 export const updateContext = (state: Readonly<TrelloViewState>): void => {
   const context: Record<string, boolean> = {}
@@ -29,6 +30,9 @@ export const updateContext = (state: Readonly<TrelloViewState>): void => {
     state.focusedName === `newCardTitle:${state.addingCardListId}`
   ) {
     context[contextKeyNewCardInputFocus] = true
+  }
+  if (state.addingList && state.focusedName === 'newListTitle') {
+    context[contextKeyNewListInputFocus] = true
   }
   const mutableState = state as TrelloViewState
   mutableState.context = context

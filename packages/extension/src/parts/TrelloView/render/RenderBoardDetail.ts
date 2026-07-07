@@ -80,6 +80,27 @@ const renderAddCardControl = (
   return renderAddCardButton(list)
 }
 
+const renderAddListControl = (
+  state: Readonly<TrelloViewState>,
+): Dom.TreeNode => {
+  if (state.addingList) {
+    return Dom.form('addList', 'TrelloAddListForm', [
+      Dom.node(VirtualDomElements.Input, {
+        autocomplete: 'off',
+        className: 'TrelloAddListInput',
+        disabled: state.savingNewList,
+        name: 'newListTitle',
+        onFocus: 'handleFocus',
+        onInput: 'handleInput',
+        onKeyDown: 'handleKeyDown',
+        placeholder: 'Enter list title',
+        value: state.draftNewListTitle,
+      }),
+    ])
+  }
+  return Dom.button('startAddList', 'Create New list', 'TrelloAddListButton')
+}
+
 const renderBoardDetailContent = (
   state: Readonly<TrelloViewState>,
   lists: readonly Readonly<Dom.TreeNode>[],
@@ -89,7 +110,7 @@ const renderBoardDetailContent = (
   }
   return [
     Dom.div('TrelloBoardDetailContent', [
-      Dom.div('TrelloLists', lists),
+      Dom.div('TrelloLists', [...lists, renderAddListControl(state)]),
       ...renderCardDetailPanel(state),
     ]),
   ]
