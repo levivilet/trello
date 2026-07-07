@@ -1923,6 +1923,14 @@ test('clicking card renders card detail and close dismisses it', async () => {
   const detailDom = await instance.render()
   const text = getText(detailDom)
   expect(text).toContain('Detailed card description')
+  expect(
+    hasNode(detailDom, (node) => {
+      return (
+        node.name === 'editCardDescription' &&
+        node.className === 'TrelloButton TrelloCardDescriptionEditButton'
+      )
+    }),
+  ).toBe(true)
   expect(text).toContain('Comments')
   expect(text).toContain('TU')
   expect(text).toContain('Test User')
@@ -1943,6 +1951,13 @@ test('clicking card renders card detail and close dismisses it', async () => {
     text.indexOf('Images'),
   )
   expect(getClassNames(detailDom)).toContain('TrelloCardDetailPanel')
+
+  await instance.handleEvent?.({ name: 'editCardDescription', type: 'click' })
+
+  const editingDom = await instance.render()
+  expect(getNodeByName(editingDom, 'cardDescription')?.value).toBe(
+    'Detailed card description',
+  )
   expect(getClassNames(detailDom)).toContain('TrelloCardDetailImage')
   expect(getClassNames(detailDom)).toContain('TrelloCardComments')
   expect(getClassNames(detailDom)).toContain('TrelloCardComment')
