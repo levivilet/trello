@@ -441,6 +441,7 @@ button.TrelloSearchResult:hover {
 
 .TrelloLists {
   display: flex;
+  align-items: flex-start;
   flex: 1 1 auto;
   gap: 12px;
   contain: strict;
