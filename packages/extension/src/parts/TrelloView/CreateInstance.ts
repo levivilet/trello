@@ -33,6 +33,7 @@ import {
   handleDropEvent,
 } from './actions/HandleDragEvent.ts'
 import { handleInputEvent } from './actions/HandleInputEvent.ts'
+import { handleKeyDownEvent } from './actions/HandleKeyDownEvent.ts'
 import { handleSubmitEvent } from './actions/HandleSubmitEvent.ts'
 import { loadBoards } from './actions/LoadBoards.ts'
 import { logout } from './actions/Logout.ts'
@@ -266,6 +267,10 @@ export const createInstance = async (
         }
         if (event.type === 'input') {
           await handleInputEvent(viewContext, event)
+          return
+        }
+        if (event.type === 'keydown') {
+          handleKeyDownEvent(viewContext, event)
           return
         }
         if (event.type === 'click') {
