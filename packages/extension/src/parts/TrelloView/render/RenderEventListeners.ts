@@ -28,5 +28,9 @@ export const renderEventListeners = (): readonly DomEventListener[] => {
       params: ['handleViewEvent', 'drop', 'event.target.name'],
       preventDefault: true,
     },
+    {
+      name: 'handleKeyDown',
+      params: ['handleViewEvent', 'keydown', 'event.target.name', 'event.key'],
+    },
   ]
 }

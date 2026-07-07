@@ -876,6 +876,10 @@ test('cards and lists render drag and drop attributes', async () => {
       params: ['handleViewEvent', 'drop', 'event.target.name'],
       preventDefault: true,
     },
+    {
+      name: 'handleKeyDown',
+      params: ['handleViewEvent', 'keydown', 'event.target.name', 'event.key'],
+    },
   ])
   const contextMenuInvocations: unknown[] = []
   const instance = await createAuthenticatedInstance(
@@ -1320,6 +1324,47 @@ test('active keybinding commands submit and cancel new card input', async () => 
   expect(
     getNodeByName(await instance.render(), 'newCardTitle:list-1'),
   ).toBeUndefined()
+
+  resetTrelloViewDependencyFactory()
+})
+
+test('escape closes new card input', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+    },
+  )
+
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'addCard:list-1', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'newCardTitle:list-1',
+    type: 'input',
+    value: 'Draft card',
+  })
+  await instance.handleEvent?.({
+    key: 'Escape',
+    name: 'newCardTitle:list-1',
+    type: 'keydown',
+  } as never)
+
+  expect(
+    getNodeByName(await instance.render(), 'newCardTitle:list-1'),
+  ).toBeUndefined()
+  expect(getText(await instance.render())).not.toContain('Draft card')
 
   resetTrelloViewDependencyFactory()
 })

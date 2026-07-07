@@ -63,6 +63,7 @@ const renderAddCardInput = (
       onBlur: 'handleBlur',
       onFocus: 'handleFocus',
       onInput: 'handleInput',
+      onKeyDown: 'handleKeyDown',
       placeholder: 'Enter a title for this card',
       value: state.draftNewCardTitle,
     }),
