@@ -3,6 +3,7 @@ import type {
   TrelloBoardDetail,
   TrelloCard,
   TrelloCardDetail,
+  TrelloComment,
   TrelloCredentials,
   TrelloLabel,
   TrelloSearchResult,
@@ -12,6 +13,7 @@ import type {
   TrelloCacheFirstResult,
   TrelloClient,
 } from './TrelloClientTypes.ts'
+import { addCardComment } from './operations/AddCardComment.ts'
 import { addCardLabel } from './operations/AddCardLabel.ts'
 import { createCard } from './operations/CreateCard.ts'
 import { createList } from './operations/CreateList.ts'
@@ -44,6 +46,13 @@ export const createTrelloClient = (
   cache: TrelloApiCache | undefined = createCacheStorageTrelloApiCache(),
 ): TrelloClient => {
   return {
+    addCardComment(
+      card: TrelloCard,
+      text: string,
+      credentials: TrelloCredentials,
+    ): Promise<TrelloComment> {
+      return addCardComment(fetchLike, card, text, credentials, cache)
+    },
     addCardLabel(
       card: TrelloCard,
       label: TrelloLabel,

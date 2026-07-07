@@ -1323,6 +1323,22 @@ button.TrelloSearchResult:hover {
   box-shadow: 0 1px 2px var(--TrelloShadow);
 }
 
+.TrelloCardCommentWriteButton {
+  width: 100%;
+  min-height: 34px;
+  text-align: left;
+}
+
+.TrelloCardCommentComposer {
+  display: flex;
+  flex-direction: column;
+  contain: content;
+}
+
+.TrelloCardCommentTextArea {
+  min-height: 82px;
+}
+
 .TrelloCardDetailImages {
   display: flex;
   flex-direction: column;

@@ -100,6 +100,29 @@ const renderCardDetailComments = (
   return Dom.div('TrelloCardComments', comments.map(renderCardDetailComment))
 }
 
+const renderCardCommentComposer = (
+  state: Readonly<TrelloViewState>,
+): Dom.TreeNode => {
+  if (!state.writingComment) {
+    return Dom.button(
+      'startWriteComment',
+      'Write a comment',
+      'TrelloButton TrelloCardCommentWriteButton',
+    )
+  }
+  return Dom.div('TrelloCardCommentComposer', [
+    Dom.node(VirtualDomElements.TextArea, {
+      className: 'TrelloTextArea TrelloCardCommentTextArea',
+      disabled: state.savingComment,
+      name: 'cardComment',
+      onInput: 'handleInput',
+      onKeyDown: 'handleKeyDown',
+      placeholder: 'Write a comment...',
+      value: state.draftComment,
+    }),
+  ])
+}
+
 const renderCardDetailLabel = (label: Readonly<TrelloLabel>): Dom.TreeNode => {
   return Dom.node(
     VirtualDomElements.Button,
@@ -449,6 +472,7 @@ export const renderCardDetailPanel = (
     renderCardDescription(state, card.desc || ''),
     renderListTitle('Comments'),
     renderCardDetailComments(state.cardCommentsLoading, comments),
+    renderCardCommentComposer(state),
     ...renderCardDetailImages(state.cardAttachmentsLoading, attachments),
     ...(card.url
       ? [Dom.link('TrelloCardDetailLink', card.url, 'Open in Trello')]

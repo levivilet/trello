@@ -51,6 +51,7 @@ export interface TrelloViewState {
   draftApiKey: string
   draftCardDescription: string
   draftCardTitle: string
+  draftComment: string
   draftLabelSearchQuery: string
   draftListTitles: Readonly<Record<string, string>>
   draftNewCardTitle: string
@@ -67,11 +68,13 @@ export interface TrelloViewState {
   movingCardId: string
   recentBoardViews: readonly RecentBoardView[]
   savingCardDetail: boolean
+  savingComment: boolean
   savingNewCard: boolean
   savingNewList: boolean
   searchEnabled: boolean
   searchResults: readonly TrelloSearchResult[]
   selectedCardDetail: TrelloCardDetail | undefined
+  writingComment: boolean
 }
 
 export interface TrelloViewContext {

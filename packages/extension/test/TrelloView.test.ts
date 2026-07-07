@@ -12,6 +12,7 @@ import type {
   TrelloCardDetail,
   TrelloCardMove,
   TrelloCardUpdate,
+  TrelloComment,
   TrelloCredentials,
   TrelloLabel,
   TrelloSearchResult,
@@ -358,6 +359,15 @@ const createStagedCardClient = (options: {
   readonly getCardDetailPartsCacheFirst: TrelloClient['getCardDetailPartsCacheFirst']
 }): TrelloClient => {
   return {
+    async addCardComment(
+      _card: Readonly<TrelloCard>,
+      text: string,
+    ): Promise<TrelloComment> {
+      return {
+        data: { text },
+        id: 'created-comment-1',
+      }
+    },
     async addCardLabel(card: Readonly<TrelloCard>): Promise<TrelloCard> {
       return card
     },
@@ -2098,6 +2108,79 @@ test('clicking card renders card detail and close dismisses it', async () => {
   resetTrelloViewDependencyFactory()
 })
 
+test('card detail writes a comment with ctrl enter and cancels with escape', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', name: 'Ship Trello view' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      cardDetails: {
+        'card-1': {
+          attachments: [],
+          card: {
+            desc: '',
+            id: 'card-1',
+            name: 'Ship Trello view',
+          },
+          comments: [],
+        },
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+
+  const initialDom = await instance.render()
+  expect(getText(initialDom)).toContain('Write a comment')
+  expect(getNodeByName(initialDom, 'cardComment')).toBeUndefined()
+
+  await instance.handleEvent?.({ name: 'startWriteComment', type: 'click' })
+
+  const writingDom = await instance.render()
+  expect(getNodeByName(writingDom, 'cardComment')).toMatchObject({
+    name: 'cardComment',
+    placeholder: 'Write a comment...',
+  })
+
+  await instance.handleEvent?.({
+    key: 'Escape',
+    name: 'cardComment',
+    type: 'keydown',
+  } as unknown as ViewEvent)
+
+  const cancelledDom = await instance.render()
+  expect(getNodeByName(cancelledDom, 'cardComment')).toBeUndefined()
+
+  await instance.handleEvent?.({ name: 'startWriteComment', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'cardComment',
+    type: 'input',
+    value: 'Looks good',
+  })
+  await instance.handleEvent?.({
+    ctrlKey: true,
+    key: 'Enter',
+    name: 'cardComment',
+    type: 'keydown',
+  } as unknown as ViewEvent)
+
+  const updatedDom = await instance.render()
+  expect(getText(updatedDom)).toContain('Looks good')
+  expect(getNodeByName(updatedDom, 'cardComment')).toBeUndefined()
+  resetTrelloViewDependencyFactory()
+})
+
 test('card detail omits empty images section', async () => {
   const instance = await createAuthenticatedInstance(
     [{ id: 'board-1', name: 'Roadmap' }],
@@ -2611,6 +2694,12 @@ test('clicking card renders cached detail before fresh detail resolves', async (
   const freshCardDeferred = createDeferred<TrelloCardDetail>()
   const boards = [{ id: 'board-1', name: 'Roadmap' }]
   const client: TrelloClient = {
+    async addCardComment(_card: TrelloCard, text: string) {
+      return {
+        data: { text },
+        id: 'created-comment-1',
+      }
+    },
     async addCardLabel(card: TrelloCard) {
       return card
     },

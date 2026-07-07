@@ -24,6 +24,9 @@ export const handleInputEvent = async (
     case 'apiKey':
       mutableState.draftApiKey = value
       return
+    case 'cardComment':
+      mutableState.draftComment = value
+      return
     case 'cardDescription':
       mutableState.draftCardDescription = value
       return

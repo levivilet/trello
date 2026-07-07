@@ -6,6 +6,7 @@ import type {
   TrelloCardDetail,
   TrelloCardMove,
   TrelloCardUpdate,
+  TrelloComment,
   TrelloCredentials,
   TrelloLabel,
   TrelloList,
@@ -29,6 +30,11 @@ export interface TrelloCardDetailPartsResult {
 }
 
 export interface TrelloClient {
+  readonly addCardComment: (
+    card: TrelloCard,
+    text: string,
+    credentials: TrelloCredentials,
+  ) => Promise<TrelloComment>
   readonly addCardLabel: (
     card: TrelloCard,
     label: TrelloLabel,
