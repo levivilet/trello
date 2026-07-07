@@ -434,7 +434,8 @@ button.TrelloSearchResult:hover {
   gap: 7px;
   contain: strict;
   min-height: 0;
-  padding: 1px 2px 2px;
+  margin-inline: -8px;
+  padding: 1px 10px 2px;
   overflow-y: auto;
 }
 
