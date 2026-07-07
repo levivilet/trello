@@ -587,28 +587,45 @@ button.TrelloSearchResult:hover {
 .TrelloCardDetailHeader {
   display: flex;
   gap: 8px;
-  align-items: center;
+  align-items: flex-start;
   contain: content;
 }
 
-.TrelloCardDetailTitleInput {
+.TrelloCardDetailTitleSizer {
   flex: 1 1 auto;
+  display: grid;
+  min-width: 0;
+}
+
+.TrelloCardDetailTitleInput,
+.TrelloCardDetailTitleMirror {
+  grid-area: 1 / 1;
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
   min-height: 34px;
-  contain: content;
   padding: 4px 6px;
-  overflow: hidden;
   font: inherit;
   font-size: 18px;
   font-weight: 600;
   line-height: 1.35;
-  color: var(--TrelloForegroundStrong);
-  text-overflow: ellipsis;
-  background: transparent;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   border: 1px solid transparent;
   border-radius: 4px;
+}
+
+.TrelloCardDetailTitleInput {
+  contain: content;
+  overflow: hidden;
+  color: var(--TrelloForegroundStrong);
+  resize: none;
+  background: transparent;
+}
+
+.TrelloCardDetailTitleMirror {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .TrelloCardDetailTitleInput:hover {
