@@ -488,7 +488,8 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloCardBody {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 6px;
   contain: content;
   padding: 8px 9px;
@@ -595,13 +596,14 @@ button.TrelloSearchResult:hover {
 
 .TrelloCardDetailTitleSizer {
   flex: 1 1 auto;
-  display: grid;
+  position: relative;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
 }
 
 .TrelloCardDetailTitleInput,
 .TrelloCardDetailTitleMirror {
-  grid-area: 1 / 1;
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
@@ -618,6 +620,9 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloCardDetailTitleInput {
+  position: absolute;
+  inset: 0;
+  height: 100%;
   contain: content;
   overflow: hidden;
   color: var(--TrelloForegroundStrong);
