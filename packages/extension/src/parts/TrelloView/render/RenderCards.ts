@@ -83,6 +83,7 @@ const renderCard = (card: Readonly<TrelloCard>): Dom.TreeNode => {
         : 'TrelloCard',
       draggable: true,
       name: `card:${card.id}`,
+      onContextMenu: 'handleContextMenu',
       onDragEnd: 'handleDragEnd',
       onDragStart: 'handleDragStart',
     },

@@ -22,9 +22,12 @@
     "onCommand:trello.backToBoards",
     "onCommand:trello.cancelNewCard",
     "onCommand:trello.closeCardDetail",
+    "onCommand:trello.logout",
+    "onCommand:trello.openCard",
     "onCommand:trello.refreshBoards",
     "onCommand:trello.saveCardDetail",
     "onCommand:trello.show",
+    "onCommand:trello.startAddCard",
     "onCommand:trello.submitNewCard",
     "onCommand:trello.test.useMockData",
     "onCommand:trello.test.reset"
@@ -47,12 +50,24 @@
       "label": "Trello: Close Card Detail"
     },
     {
+      "id": "trello.logout",
+      "label": "Trello: Sign Out"
+    },
+    {
+      "id": "trello.openCard",
+      "label": "Trello: Open Card"
+    },
+    {
       "id": "trello.refreshBoards",
       "label": "Trello: Refresh Boards"
     },
     {
       "id": "trello.saveCardDetail",
       "label": "Trello: Save Card Detail"
+    },
+    {
+      "id": "trello.startAddCard",
+      "label": "Trello: Add Card"
     },
     {
       "id": "trello.submitNewCard",
