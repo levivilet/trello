@@ -52,6 +52,18 @@ export const startAddCard = (
   requestRerender()
 }
 
+export const cancelAddCard = (
+  context: Readonly<TrelloViewActionContext>,
+): void => {
+  const { requestRerender } = context
+  const state = context.state as TrelloViewState
+  state.addingCardListId = ''
+  state.draftNewCardTitle = ''
+  state.savingNewCard = false
+  state.error = ''
+  requestRerender()
+}
+
 export const submitAddCard = async (
   context: Readonly<TrelloViewActionContext>,
   formName: string | undefined,

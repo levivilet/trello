@@ -30,6 +30,7 @@ export interface TrelloViewState {
   boardDetail: TrelloBoardDetail | undefined
   boards: readonly TrelloBoard[]
   cardDetailLoading: boolean
+  context: Readonly<Record<string, boolean>>
   credentials: TrelloCredentials | undefined
   draftApiKey: string
   draftCardDescription: string
@@ -43,6 +44,7 @@ export interface TrelloViewState {
   editingCardDescription: boolean
   editingCardTitle: boolean
   error: string
+  focusedName: string
   loading: boolean
   recentBoardViews: readonly RecentBoardView[]
   savingCardDetail: boolean
