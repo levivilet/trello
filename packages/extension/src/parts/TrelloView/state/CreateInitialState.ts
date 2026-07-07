@@ -21,6 +21,7 @@ export const createInitialState = (): TrelloViewState => {
     context: {},
     contextMenuCardId: '',
     contextMenuListId: '',
+    coverImageUrls: {},
     credentials: undefined,
     draftApiKey: '',
     draftCardDescription: '',

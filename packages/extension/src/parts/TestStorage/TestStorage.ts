@@ -2,12 +2,14 @@ import { testCacheName as testCredentialCacheName } from '../CredentialStorage/C
 import { testCacheName as testCurrentBoardCacheName } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
 import { testCacheName as testRecentBoardCacheName } from '../RecentBoardStorage/RecentBoardStorage.ts'
 import { testTrelloApiCacheName } from '../TrelloClient/TrelloApiCache.ts'
+import { testTrelloImageCacheName } from '../TrelloImageCache/TrelloImageCache.ts'
 
 export const testCacheNames = [
   testCredentialCacheName,
   testCurrentBoardCacheName,
   testRecentBoardCacheName,
   testTrelloApiCacheName,
+  testTrelloImageCacheName,
 ] as const
 
 export const clearTrelloTestCaches = async (

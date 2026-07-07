@@ -8,11 +8,13 @@ import type { CredentialStorage } from '../CredentialStorage/CredentialStorage.t
 import type { CurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
 import type { RecentBoardStorage } from '../RecentBoardStorage/RecentBoardStorage.ts'
 import type { TrelloClient } from '../TrelloClient/TrelloClient.ts'
+import type { TrelloImageCache } from '../TrelloImageCache/TrelloImageCache.ts'
 import type {
   TrelloViewActionContext,
   TrelloViewState,
 } from './state/TrelloViewState.ts'
 import { createMemoryCurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
+import { createTrelloImageCache } from '../TrelloImageCache/TrelloImageCache.ts'
 import {
   cancelAddCard,
   startAddCard,
@@ -71,6 +73,7 @@ interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
 interface MutableTrelloViewActionContext extends TrelloViewActionContext {
   client: TrelloClient
   currentBoardStorage: CurrentBoardStorage
+  imageCache: TrelloImageCache
   recentStorage: RecentBoardStorage
   requestRerender: () => void
   showContextMenu: (menuId: string, x: number, y: number) => Promise<void>
@@ -152,6 +155,7 @@ export const createInstance = async (
   const viewContext: MutableTrelloViewActionContext = {
     client: undefined as never,
     currentBoardStorage: createMemoryCurrentBoardStorage(),
+    imageCache: undefined as never,
     recentStorage: undefined as never,
     requestRerender: undefined as never,
     showContextMenu: undefined as never,
@@ -187,6 +191,7 @@ export const createInstance = async (
     const dependencies = dependencyState.factory()
     const {
       client,
+      imageCache,
       readBoardBackgroundEnabled,
       readSearchEnabled,
       recentStorage,
@@ -194,10 +199,12 @@ export const createInstance = async (
     } = dependencies
     const currentBoardStorage =
       dependencies.currentBoardStorage || createMemoryCurrentBoardStorage()
+    viewContext.imageCache?.dispose()
 
     Object.assign(state, createInitialState())
     viewContext.client = client
     viewContext.currentBoardStorage = currentBoardStorage
+    viewContext.imageCache = imageCache || createTrelloImageCache()
     viewContext.recentStorage = recentStorage
     viewContext.requestRerender = requestRerender
     viewContext.showContextMenu = showContextMenu
@@ -241,6 +248,7 @@ export const createInstance = async (
     },
     async dispose(): Promise<void> {
       activeInstances.delete(instance)
+      viewContext.imageCache.dispose()
     },
     getContext(): Readonly<Record<string, boolean>> {
       return state.context

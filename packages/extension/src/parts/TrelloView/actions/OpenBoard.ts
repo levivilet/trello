@@ -6,6 +6,7 @@ import type {
 import { updateRecentBoardViews } from '../../RecentBoardStorage/RecentBoardStorage.ts'
 import { getErrorMessage } from '../GetErrorMessage.ts'
 import { isSameJson } from './CacheFirstHelpers.ts'
+import { resolveBoardCoverImages } from './ResolveBoardCoverImages.ts'
 
 const findBoard = (
   context: TrelloViewActionContext,
@@ -40,6 +41,7 @@ export const openBoard = async (
   }
   state.loading = true
   state.error = ''
+  state.coverImageUrls = {}
   state.selectedCardDetail = undefined
   state.cardAttachmentsLoading = false
   state.cardCommentsLoading = false
@@ -73,6 +75,7 @@ export const openBoard = async (
       state.boardDetail = result.cached
       state.loading = false
       requestRerender()
+      void resolveBoardCoverImages(context, board.id)
     }
     const fresh = await result.fresh
     if (state.loading || state.boardDetail?.board.id === board.id) {
@@ -80,6 +83,7 @@ export const openBoard = async (
         state.boardDetail = fresh
       }
       state.loading = false
+      void resolveBoardCoverImages(context, board.id)
     }
     await currentBoardStorage.write(board.id)
   } catch (error) {

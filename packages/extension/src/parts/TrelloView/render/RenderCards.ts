@@ -79,9 +79,11 @@ const renderCardLabels = (
 
 const renderCard = (
   baseUrl: string,
+  coverImageUrls: Readonly<Record<string, string>>,
   card: Readonly<TrelloCard>,
 ): Dom.TreeNode => {
-  const coverImageUrl = getCardCoverImageUrl(card)
+  const coverSourceUrl = getCardCoverImageUrl(card)
+  const coverImageUrl = coverSourceUrl ? coverImageUrls[coverSourceUrl] : ''
   const cardBody = Dom.div('TrelloCardBody', [
     ...renderCardLabels(card),
     Dom.div('TrelloCardTitle', [Dom.textNode(card.name)]),
@@ -111,10 +113,11 @@ const renderCard = (
 
 export const renderCards = (
   baseUrl: string,
+  coverImageUrls: Readonly<Record<string, string>>,
   cards: readonly TrelloCard[],
 ): readonly Dom.TreeNode[] => {
   if (cards.length === 0) {
     return [Dom.textNode('No cards')]
   }
-  return cards.map((card) => renderCard(baseUrl, card))
+  return cards.map((card) => renderCard(baseUrl, coverImageUrls, card))
 }

@@ -4,6 +4,7 @@ import { createCacheCredentialStorage } from '../../CredentialStorage/Credential
 import { createCacheCurrentBoardStorage } from '../../CurrentBoardStorage/CurrentBoardStorage.ts'
 import { createCacheRecentBoardStorage } from '../../RecentBoardStorage/RecentBoardStorage.ts'
 import { createTrelloClient } from '../../TrelloClient/TrelloClient.ts'
+import { createTrelloImageCache } from '../../TrelloImageCache/TrelloImageCache.ts'
 import {
   boardBackgroundEnabledPreference,
   searchEnabledPreference,
@@ -28,6 +29,7 @@ const readBoardBackgroundEnabledPreference = async (): Promise<boolean> => {
 const defaultDependencyFactory = (): TrelloViewDependencies => ({
   client: createTrelloClient(),
   currentBoardStorage: createCacheCurrentBoardStorage(),
+  imageCache: createTrelloImageCache(),
   readBoardBackgroundEnabled: readBoardBackgroundEnabledPreference,
   readSearchEnabled: readSearchEnabledPreference,
   recentStorage: createCacheRecentBoardStorage(),
