@@ -287,6 +287,20 @@
   text-decoration: underline;
 }
 
+.TrelloTitle,
+.TrelloWelcome,
+.TrelloCardDescriptionPreview,
+.TrelloMarkdownParagraph,
+.TrelloMarkdownHeading,
+.TrelloMarkdownListItem,
+.TrelloCardCommentAuthor,
+.TrelloCardCommentDate,
+.TrelloCardCommentText,
+.TrelloCardDetailEmpty,
+.TrelloCardDetailLink {
+  user-select: text;
+}
+
 @media (max-width: 520px) {
   .TrelloWelcome {
     gap: 8px;
