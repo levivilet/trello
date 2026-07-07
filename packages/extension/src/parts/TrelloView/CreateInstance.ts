@@ -94,7 +94,7 @@ const becameActive = (
   newContext: Readonly<Record<string, boolean>>,
   key: string,
 ): boolean => {
-  return oldContext[key] !== true && newContext[key] === true
+  return !oldContext[key] && newContext[key]
 }
 
 export const backToBoardsActiveTrelloViewInstance = async (): Promise<void> => {
