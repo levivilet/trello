@@ -34,8 +34,12 @@ const renderImageAttachment = (
 }
 
 const renderCardDetailImages = (
+  loading: boolean,
   attachments: readonly TrelloAttachment[],
 ): Dom.TreeNode => {
+  if (loading) {
+    return Dom.div('TrelloCardDetailEmpty', [Dom.textNode('Loading images...')])
+  }
   const imageAttachments = attachments.filter(isImageAttachment)
   if (imageAttachments.length === 0) {
     return Dom.div('TrelloCardDetailEmpty', [Dom.textNode('No images')])
@@ -76,8 +80,14 @@ const renderCardDetailComment = (
 }
 
 const renderCardDetailComments = (
+  loading: boolean,
   comments: readonly TrelloComment[],
 ): Dom.TreeNode => {
+  if (loading) {
+    return Dom.div('TrelloCardDetailEmpty', [
+      Dom.textNode('Loading comments...'),
+    ])
+  }
   if (comments.length === 0) {
     return Dom.div('TrelloCardDetailEmpty', [Dom.textNode('No comments')])
   }
@@ -370,7 +380,7 @@ const renderCardDescription = (
 export const renderCardDetailPanel = (
   state: Readonly<TrelloViewState>,
 ): readonly Dom.TreeNode[] => {
-  if (state.cardDetailLoading) {
+  if (state.cardDetailLoading && !state.selectedCardDetail) {
     return [
       Dom.div('TrelloCardDetailPanel', [
         renderListTitle('Card details'),
@@ -395,9 +405,9 @@ export const renderCardDetailPanel = (
     ...renderCardListSelect(state, card),
     renderCardDescription(state, card.desc || ''),
     renderListTitle('Comments'),
-    renderCardDetailComments(comments),
+    renderCardDetailComments(state.cardCommentsLoading, comments),
     renderListTitle('Images'),
-    renderCardDetailImages(attachments),
+    renderCardDetailImages(state.cardAttachmentsLoading, attachments),
     ...(card.url
       ? [Dom.link('TrelloCardDetailLink', card.url, 'Open in Trello')]
       : []),

@@ -18,6 +18,15 @@ export interface TrelloCacheFirstResult<T> {
   readonly fresh: Promise<T>
 }
 
+export interface TrelloCardDetailPartsResult {
+  readonly cached: TrelloCardDetail | undefined
+  readonly fresh: {
+    readonly attachments: Promise<TrelloCardDetail['attachments']>
+    readonly card: Promise<TrelloCard>
+    readonly comments: Promise<TrelloCardDetail['comments']>
+  }
+}
+
 export interface TrelloClient {
   readonly addCardLabel: (
     card: TrelloCard,
@@ -45,6 +54,10 @@ export interface TrelloClient {
     card: TrelloCard,
     credentials: TrelloCredentials,
   ) => Promise<TrelloCacheFirstResult<TrelloCardDetail>>
+  readonly getCardDetailPartsCacheFirst: (
+    card: TrelloCard,
+    credentials: TrelloCredentials,
+  ) => Promise<TrelloCardDetailPartsResult>
   readonly listBoardLabels: (
     board: TrelloBoard,
     credentials: TrelloCredentials,

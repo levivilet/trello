@@ -7,7 +7,10 @@ export const closeCardDetail = (context: TrelloViewActionContext): void => {
   const { requestRerender } = context
   const state = context.state as TrelloViewState
   state.selectedCardDetail = undefined
+  state.cardAttachmentsLoading = false
+  state.cardCommentsLoading = false
   state.cardDetailLoading = false
+  state.cardDetailLoadingCardId = ''
   state.addingCardLabelId = ''
   state.cardLabelPickerOpen = false
   state.draftCardDescription = ''
