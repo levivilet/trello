@@ -4,6 +4,7 @@ import type { ViewEvent, VirtualDomViewInstance } from '@lvce-editor/api'
 import { expect, test } from '@jest/globals'
 import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import type { TrelloClient } from '../src/parts/TrelloClient/TrelloClient.ts'
+import type { TrelloImageCache } from '../src/parts/TrelloImageCache/TrelloImageCache.ts'
 import type {
   TrelloBoard,
   TrelloBoardDetail,
@@ -44,6 +45,17 @@ const validLongToken =
 const getExpectedAssetBaseUrl = (): string => {
   const url = new URL('../', import.meta.url)
   return `/remote${url.pathname}`
+}
+
+const createMockTrelloImageCache = (
+  urls: Readonly<Record<string, string>> = {},
+): TrelloImageCache => {
+  return {
+    dispose(): void {},
+    async resolveImageUrl(url: string): Promise<string> {
+      return urls[url] || ''
+    },
+  }
 }
 
 type ContextMenuViewEvent = ViewEvent & {
@@ -209,6 +221,7 @@ const createAuthenticatedInstance = async (
     readonly boardLabels?: Readonly<Record<string, readonly TrelloLabel[]>>
     readonly cardCreateErrors?: Readonly<Record<string, string>>
     readonly cardDetails?: Readonly<Record<string, TrelloCardDetail>>
+    readonly imageCache?: TrelloImageCache
     readonly cardLabelAddErrors?: Readonly<Record<string, string>>
     readonly cardMoveErrors?: Readonly<Record<string, string>>
     readonly listUpdateErrors?: Readonly<Record<string, string>>
@@ -224,6 +237,7 @@ const createAuthenticatedInstance = async (
     boardLabels,
     cardCreateErrors,
     cardDetails,
+    imageCache,
     cardLabelAddErrors,
     cardMoveErrors,
     listUpdateErrors,
@@ -239,6 +253,7 @@ const createAuthenticatedInstance = async (
       ...(cardMoveErrors && { cardMoveErrors }),
       ...(listUpdateErrors && { listUpdateErrors }),
     }),
+    ...(imageCache && { imageCache }),
     readBoardBackgroundEnabled: async (): Promise<boolean> => {
       return options.boardBackgroundEnabled === true
     },
@@ -308,6 +323,11 @@ const createSearchEnabledInstance = async (
 
 const createDeferred = <T>(): PromiseWithResolvers<T> => {
   return Promise.withResolvers<T>()
+}
+
+const waitForCoverImages = async (): Promise<void> => {
+  await Promise.resolve()
+  await Promise.resolve()
 }
 
 test('renders auth inputs when unauthenticated', async () => {
@@ -458,6 +478,10 @@ test('connect loads boards and clicking board loads detail', async () => {
       },
       boards: [{ id: 'board-1', name: 'Roadmap' }],
     }),
+    imageCache: createMockTrelloImageCache({
+      'https://example.com/quiet-card-large.png':
+        'blob:quiet-card-large-cover',
+    }),
     recentStorage: createMemoryRecentBoardStorage(),
     storage: createMemoryCredentialStorage(),
   }))
@@ -481,6 +505,7 @@ test('connect loads boards and clicking board loads detail', async () => {
   expect(boardsText).not.toContain('https://trello.com/power-ups/admin')
 
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await waitForCoverImages()
 
   const detailDom = await instance.render()
   const detailText = getText(detailDom)
@@ -553,11 +578,16 @@ test('connect loads boards and clicking board loads detail', async () => {
     hasNode(detailDom, (node) => {
       return (
         node.className === 'TrelloCardCoverImage' &&
-        node.src === 'https://example.com/quiet-card-large.png' &&
+        node.src === 'blob:quiet-card-large-cover' &&
         node.alt === 'Quiet card cover'
       )
     }),
   ).toBe(true)
+  const quietCardDom = getSubtreeByNodeName(detailDom, 'card:card-2')
+  expect(getDirectChildClassNamesByName(quietCardDom, 'card:card-2')).toEqual([
+    'TrelloCardCoverImage',
+    'TrelloCardBody',
+  ])
   const listCardCount = getNodeByClass(detailDom, 'TrelloListCardCount')
   const listCardCountIndex = detailDom.indexOf(listCardCount)
   expect(detailDom[listCardCountIndex + 1]?.text).toBe('3')
@@ -584,6 +614,49 @@ test('connect loads boards and clicking board loads detail', async () => {
       onClick: 'handleClick',
     }),
   )
+  resetTrelloViewDependencyFactory()
+})
+
+test('card cover image is not rendered when blob resolution fails', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [
+                {
+                  cover: {
+                    scaled: [
+                      {
+                        url: 'https://example.com/missing-cover.png',
+                      },
+                    ],
+                  },
+                  id: 'card-1',
+                  name: 'Card with missing cover',
+                },
+              ],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      imageCache: createMockTrelloImageCache(),
+    },
+  )
+
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await waitForCoverImages()
+
+  const dom = await instance.render()
+  expect(getText(dom)).toContain('Card with missing cover')
+  expect(getClassNames(dom)).not.toContain('TrelloCardCoverImage')
+  expect(getClassNames(dom)).not.toContain('TrelloCardWithCover')
   resetTrelloViewDependencyFactory()
 })
 

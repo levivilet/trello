@@ -5,6 +5,7 @@ import type {
   RecentBoardView,
 } from '../../RecentBoardStorage/RecentBoardStorage.ts'
 import type { TrelloClient } from '../../TrelloClient/TrelloClient.ts'
+import type { TrelloImageCache } from '../../TrelloImageCache/TrelloImageCache.ts'
 import type {
   TrelloBoard,
   TrelloBoardDetail,
@@ -17,6 +18,7 @@ import type {
 export interface TrelloViewDependencies {
   readonly client: TrelloClient
   readonly currentBoardStorage?: CurrentBoardStorage
+  readonly imageCache?: TrelloImageCache
   readonly isTest?: boolean
   readonly readBoardBackgroundEnabled?: () => Promise<boolean>
   readonly readSearchEnabled?: () => Promise<boolean>
@@ -40,6 +42,7 @@ export interface TrelloViewState {
   context: Readonly<Record<string, boolean>>
   contextMenuCardId: string
   contextMenuListId: string
+  coverImageUrls: Readonly<Record<string, string>>
   credentials: TrelloCredentials | undefined
   draftApiKey: string
   draftCardDescription: string
@@ -68,6 +71,7 @@ export interface TrelloViewState {
 export interface TrelloViewContext {
   readonly client: TrelloClient
   readonly currentBoardStorage: CurrentBoardStorage
+  readonly imageCache: TrelloImageCache
   readonly recentStorage: RecentBoardStorage
   readonly requestRerender: () => void
   readonly showContextMenu: (
@@ -82,6 +86,7 @@ export interface TrelloViewContext {
 export interface TrelloViewActionContext {
   readonly client: TrelloClient
   readonly currentBoardStorage: CurrentBoardStorage
+  readonly imageCache: TrelloImageCache
   readonly recentStorage: RecentBoardStorage
   readonly requestRerender: () => void
   readonly showContextMenu: (
