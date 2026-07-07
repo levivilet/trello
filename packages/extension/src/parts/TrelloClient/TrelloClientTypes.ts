@@ -7,6 +7,7 @@ import type {
   TrelloCardMove,
   TrelloCardUpdate,
   TrelloCredentials,
+  TrelloLabel,
   TrelloList,
   TrelloListUpdate,
   TrelloSearchResult,
@@ -18,6 +19,11 @@ export interface TrelloCacheFirstResult<T> {
 }
 
 export interface TrelloClient {
+  readonly addCardLabel: (
+    card: TrelloCard,
+    label: TrelloLabel,
+    credentials: TrelloCredentials,
+  ) => Promise<TrelloCard>
   readonly createCard: (
     list: TrelloList,
     create: TrelloCardCreate,
@@ -39,6 +45,10 @@ export interface TrelloClient {
     card: TrelloCard,
     credentials: TrelloCredentials,
   ) => Promise<TrelloCacheFirstResult<TrelloCardDetail>>
+  readonly listBoardLabels: (
+    board: TrelloBoard,
+    credentials: TrelloCredentials,
+  ) => Promise<readonly TrelloLabel[]>
   readonly listBoards: (
     credentials: TrelloCredentials,
   ) => Promise<readonly TrelloBoard[]>

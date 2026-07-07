@@ -14,16 +14,3 @@ export const editCardDescription = (context: TrelloViewActionContext): void => {
   state.editingCardDescription = true
   context.requestRerender()
 }
-
-export const cancelCardDescriptionEdit = (
-  context: TrelloViewActionContext,
-): void => {
-  const state = context.state as TrelloViewState
-  if (!state.selectedCardDetail) {
-    return
-  }
-  state.draftCardDescription = state.selectedCardDetail.card.desc || ''
-  state.editingCardDescription = false
-  state.error = ''
-  context.requestRerender()
-}

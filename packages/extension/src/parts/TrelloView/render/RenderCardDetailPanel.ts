@@ -88,13 +88,128 @@ const renderCardDetailLabel = (label: Readonly<TrelloLabel>): Dom.TreeNode => {
   ])
 }
 
+const hasCardLabel = (
+  labels: readonly TrelloLabel[] | undefined,
+  labelId: string,
+): boolean => {
+  return Boolean(
+    labels?.some((label) => {
+      return label.id === labelId
+    }),
+  )
+}
+
+const getAvailableLabels = (
+  state: Readonly<TrelloViewState>,
+  labels: readonly TrelloLabel[] | undefined,
+): readonly TrelloLabel[] => {
+  const query = state.draftLabelSearchQuery.trim().toLowerCase()
+  return state.boardLabels.filter((label) => {
+    if (hasCardLabel(labels, label.id)) {
+      return false
+    }
+    if (!query) {
+      return true
+    }
+    return getLabelText(label).toLowerCase().includes(query)
+  })
+}
+
+const renderCardLabelChoice = (
+  state: Readonly<TrelloViewState>,
+  label: Readonly<TrelloLabel>,
+): Dom.TreeNode => {
+  return Dom.node(
+    VirtualDomElements.Button,
+    {
+      className: `TrelloCardLabelChoice ${getLabelColorClassName(label.color)}`,
+      disabled: Boolean(state.addingCardLabelId),
+      name: `addCardLabel:${label.id}`,
+      onClick: 'handleClick',
+    },
+    [Dom.textNode(getLabelText(label))],
+  )
+}
+
+const renderCardLabelPickerContent = (
+  state: Readonly<TrelloViewState>,
+  labels: readonly TrelloLabel[] | undefined,
+): Dom.TreeNode => {
+  if (state.boardLabelsLoading) {
+    return Dom.div('TrelloCardLabelPickerEmpty', [
+      Dom.textNode('Loading labels...'),
+    ])
+  }
+  const availableLabels = getAvailableLabels(state, labels)
+  if (availableLabels.length === 0) {
+    const text = state.draftLabelSearchQuery.trim()
+      ? 'No matching labels'
+      : 'No labels available'
+    return Dom.div('TrelloCardLabelPickerEmpty', [Dom.textNode(text)])
+  }
+  return Dom.div(
+    'TrelloCardLabelPickerList',
+    availableLabels.map((label) => {
+      return renderCardLabelChoice(state, label)
+    }),
+  )
+}
+
+const renderCardLabelPicker = (
+  state: Readonly<TrelloViewState>,
+  labels: readonly TrelloLabel[] | undefined,
+): Dom.TreeNode => {
+  return Dom.node(
+    VirtualDomElements.Div,
+    {
+      className: 'TrelloCardLabelPicker',
+      name: 'cardLabelPicker',
+    },
+    [
+      Dom.node(VirtualDomElements.Input, {
+        autocomplete: 'off',
+        className: 'TrelloInput TrelloCardLabelSearchInput',
+        name: 'cardLabelSearch',
+        onInput: 'handleInput',
+        placeholder: 'Search labels',
+        value: state.draftLabelSearchQuery,
+      }),
+      renderCardLabelPickerContent(state, labels),
+    ],
+  )
+}
+
 const renderCardDetailLabels = (
+  state: Readonly<TrelloViewState>,
   labels: readonly TrelloLabel[] | undefined,
 ): readonly Dom.TreeNode[] => {
-  if (!labels || labels.length === 0) {
-    return []
-  }
-  return [Dom.div('TrelloCardLabels', labels.map(renderCardDetailLabel))]
+  const labelNodes =
+    labels && labels.length > 0
+      ? [
+          Dom.div('TrelloCardLabelRow', [
+            Dom.div('TrelloCardLabels', labels.map(renderCardDetailLabel)),
+            Dom.button(
+              'openCardLabelPicker',
+              '+',
+              'TrelloButton TrelloCardLabelAddIconButton',
+            ),
+          ]),
+        ]
+      : [
+          Dom.button(
+            'openCardLabelPicker',
+            'Labels',
+            'TrelloButton TrelloCardLabelAddButton',
+          ),
+        ]
+  return [
+    Dom.div('TrelloCardLabelSection', [
+      ...labelNodes,
+      ...(state.cardLabelPickerOpen
+        ? [renderCardLabelPicker(state, labels)]
+        : []),
+    ]),
+  ]
 }
 
 const renderCardDetailTitle = (
@@ -103,14 +218,26 @@ const renderCardDetailTitle = (
   const className = state.editingCardTitle
     ? 'TrelloCardDetailTitleInput TrelloCardDetailTitleInputEditing'
     : 'TrelloCardDetailTitleInput'
-  return Dom.node(VirtualDomElements.Input, {
-    className,
-    name: 'cardTitle',
-    onBlur: 'handleBlur',
-    onClick: 'handleClick',
-    onInput: 'handleInput',
-    value: state.draftCardTitle,
-  })
+  return Dom.div('TrelloCardDetailTitleSizer', [
+    Dom.node(VirtualDomElements.TextArea, {
+      className,
+      name: 'cardTitle',
+      onBlur: 'handleBlur',
+      onClick: 'handleClick',
+      onFocus: 'handleFocus',
+      onInput: 'handleInput',
+      rows: 1,
+      value: state.draftCardTitle,
+    }),
+    Dom.node(
+      VirtualDomElements.Div,
+      {
+        ariaHidden: true,
+        className: 'TrelloCardDetailTitleMirror',
+      },
+      [Dom.textNode(state.draftCardTitle || ' ')],
+    ),
+  ])
 }
 
 const renderCardDescriptionEditor = (
@@ -120,6 +247,8 @@ const renderCardDescriptionEditor = (
     Dom.node(VirtualDomElements.TextArea, {
       className: 'TrelloTextArea TrelloCardDescriptionTextArea',
       name: 'cardDescription',
+      onBlur: 'handleBlur',
+      onFocus: 'handleFocus',
       onInput: 'handleInput',
       placeholder: 'Add a more detailed description...',
       value: state.draftCardDescription,
@@ -129,11 +258,6 @@ const renderCardDescriptionEditor = (
         'saveCardDetail',
         state.savingCardDetail ? 'Saving...' : 'Save',
         'TrelloButton TrelloCardDetailSaveButton',
-      ),
-      Dom.button(
-        'cancelCardDescriptionEdit',
-        'Cancel',
-        'TrelloButton TrelloCardDetailCancelButton',
       ),
     ]),
   ])
@@ -204,7 +328,7 @@ export const renderCardDetailPanel = (
         'TrelloButton TrelloCardDetailCloseButton',
       ),
     ]),
-    ...renderCardDetailLabels(card.labels),
+    ...renderCardDetailLabels(state, card.labels),
     renderCardDescription(state, card.desc || ''),
     renderListTitle('Comments'),
     renderCardDetailComments(comments),
@@ -214,5 +338,15 @@ export const renderCardDetailPanel = (
       ? [Dom.link('TrelloCardDetailLink', card.url, 'Open in Trello')]
       : []),
   ]
-  return [Dom.div('TrelloCardDetailPanel', children)]
+  return [
+    Dom.node(
+      VirtualDomElements.Div,
+      {
+        className: 'TrelloCardDetailPanel',
+        name: 'cardDetail',
+        onContextMenu: 'handleContextMenu',
+      },
+      children,
+    ),
+  ]
 }

@@ -69,7 +69,7 @@ jobs:
         run: npm run e2e:headless
         env:
           PLAYWRIGHT_BROWSERS_PATH: 0
-      - run: node scripts/build.js
+      - run: node scripts/build.ts
       - name: Build archive
         shell: bash
         run: |

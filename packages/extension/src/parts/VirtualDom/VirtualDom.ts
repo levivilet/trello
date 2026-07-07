@@ -38,6 +38,10 @@ export const div = (
   return node(VirtualDomElements.Div, { className }, children)
 }
 
+export const label = (text: string): TreeNode => {
+  return node(VirtualDomElements.Label, {}, [textNode(text)])
+}
+
 export const form = (
   name: string,
   className: string,
@@ -80,6 +84,8 @@ export const input = (
     className: 'TrelloInput',
     ...(inputType && { inputType }),
     name,
+    onBlur: 'handleBlur',
+    onFocus: 'handleFocus',
     onInput: 'handleInput',
     placeholder,
     value,
@@ -94,6 +100,8 @@ export const textArea = (
   return node(VirtualDomElements.TextArea, {
     className: 'TrelloTextArea',
     name,
+    onBlur: 'handleBlur',
+    onFocus: 'handleFocus',
     onInput: 'handleInput',
     placeholder,
     value,

@@ -2,6 +2,7 @@
 
 import type { VirtualDomViewInstance } from '@lvce-editor/api'
 import { expect, test } from '@jest/globals'
+import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import type { TrelloClient } from '../src/parts/TrelloClient/TrelloClient.ts'
 import type {
   TrelloBoard,
@@ -10,6 +11,8 @@ import type {
   TrelloCardDetail,
   TrelloCardMove,
   TrelloCardUpdate,
+  TrelloCredentials,
+  TrelloLabel,
   TrelloSearchResult,
   TrelloList,
   TrelloListUpdate,
@@ -21,9 +24,14 @@ import {
   type RecentBoardView,
 } from '../src/parts/RecentBoardStorage/RecentBoardStorage.ts'
 import {
+  backToBoardsActiveTrelloViewInstance,
+  cancelNewCardActiveTrelloViewInstance,
+  closeCardDetailActiveTrelloViewInstance,
   reloadActiveTrelloViewInstances,
   resetTrelloViewDependencyFactory,
+  saveCardDetailActiveTrelloViewInstance,
   setTrelloViewDependencyFactory,
+  submitNewCardActiveTrelloViewInstance,
   view,
 } from '../src/parts/TrelloView/TrelloView.ts'
 
@@ -106,6 +114,14 @@ const hasNode = (
   return dom.some(predicate)
 }
 
+const hasLabelText = (dom: readonly any[], text: string): boolean => {
+  return dom.some((node, index) => {
+    return (
+      node.type === VirtualDomElements.Label && dom[index + 1]?.text === text
+    )
+  })
+}
+
 const hasClass = (node: any, className: string): boolean => {
   if (typeof node.className !== 'string') {
     return false
@@ -160,18 +176,36 @@ const createAuthenticatedInstance = async (
   options: {
     readonly boardBackgroundEnabled?: boolean
     readonly boardDetails?: Readonly<Record<string, TrelloBoardDetail>>
+    readonly boardLabels?: Readonly<Record<string, readonly TrelloLabel[]>>
     readonly cardCreateErrors?: Readonly<Record<string, string>>
+    readonly cardDetails?: Readonly<Record<string, TrelloCardDetail>>
+    readonly cardLabelAddErrors?: Readonly<Record<string, string>>
     readonly cardMoveErrors?: Readonly<Record<string, string>>
     readonly listUpdateErrors?: Readonly<Record<string, string>>
+    readonly showContextMenu?: (
+      menuId: string,
+      x: number,
+      y: number,
+    ) => Promise<void>
   } = {},
 ): Promise<VirtualDomViewInstance> => {
-  const { boardDetails, cardCreateErrors, cardMoveErrors, listUpdateErrors } =
-    options
+  const {
+    boardDetails,
+    boardLabels,
+    cardCreateErrors,
+    cardDetails,
+    cardLabelAddErrors,
+    cardMoveErrors,
+    listUpdateErrors,
+  } = options
   setTrelloViewDependencyFactory(() => ({
     client: createMockTrelloClient({
       boards,
       ...(boardDetails && { boardDetails }),
+      ...(boardLabels && { boardLabels }),
       ...(cardCreateErrors && { cardCreateErrors }),
+      ...(cardDetails && { cardDetails }),
+      ...(cardLabelAddErrors && { cardLabelAddErrors }),
       ...(cardMoveErrors && { cardMoveErrors }),
       ...(listUpdateErrors && { listUpdateErrors }),
     }),
@@ -182,7 +216,13 @@ const createAuthenticatedInstance = async (
     storage: createMemoryCredentialStorage(),
   }))
 
-  const instance = (await view.create()) as VirtualDomViewInstance
+  const instance = (await view.create(
+    options.showContextMenu
+      ? ({
+          showContextMenu: options.showContextMenu,
+        } as any)
+      : undefined,
+  )) as VirtualDomViewInstance
   await instance.handleEvent?.({
     name: 'apiKey',
     type: 'input',
@@ -256,6 +296,8 @@ test('renders auth inputs when unauthenticated', async () => {
   expect(text).toContain('Welcome to Trello')
   expect(text).toContain('https://trello.com/power-ups/admin')
   expect(text).toContain('The token grants access to your Trello account')
+  expect(hasLabelText(dom, 'API key')).toBe(true)
+  expect(hasLabelText(dom, 'Token')).toBe(true)
   const apiKeyInput = dom.find((node) => node.name === 'apiKey')
   const tokenInput = dom.find((node) => node.name === 'token')
   if (!apiKeyInput || !tokenInput) {
@@ -402,15 +444,22 @@ test('connect loads boards and clicking board loads detail', async () => {
   expect(getListTitleInput(detailDom, 'list-1')?.value).toBe('Todo')
   expect(detailText).toContain('Ship Trello view')
   expect(detailText).toContain('+ Add a card')
-  expect(detailText).toContain('3 comments')
+  expect(detailText).not.toContain('3 comments')
+  expect(getSubtreeTextByNodeName(detailDom, 'card:card-1')).toContain('3')
   expect(detailText).toContain('Quiet card')
   expect(detailText).toContain('Plain card')
   expect(detailText).not.toContain('0 comments')
+  expect(getNodeByClass(detailDom, 'TrelloCardMeta')).toMatchObject({
+    'aria-label': '3 comments',
+    title: '3 comments',
+  })
   expect(detailClassNames).toContain('TrelloLists')
   expect(detailClassNames).toContain('TrelloList')
   expect(detailClassNames).toContain('TrelloCards')
   expect(detailClassNames).toContain('TrelloCardTitle')
   expect(detailClassNames).toContain('TrelloCardMeta')
+  expect(detailClassNames).toContain('TrelloCardCommentIcon')
+  expect(detailClassNames).toContain('TrelloCardCommentCount')
   expect(detailClassNames).toContain('TrelloCardCoverImage')
   expect(
     hasNode(detailDom, (node) => {
@@ -491,6 +540,31 @@ test('list title renders as editable input', async () => {
 })
 
 test('cards and lists render drag and drop attributes', async () => {
+  expect(view.eventListeners).toEqual([
+    {
+      name: 'handleDragStart',
+      params: ['handleViewEvent', 'dragstart', 'event.target.name'],
+    },
+    {
+      name: 'handleDragEnd',
+      params: ['handleViewEvent', 'dragend', 'event.target.name'],
+    },
+    {
+      name: 'handleDragOver',
+      params: ['handleViewEvent', 'dragover', 'event.target.name'],
+      preventDefault: true,
+    },
+    {
+      name: 'handleDragLeave',
+      params: ['handleViewEvent', 'dragleave', 'event.target.name'],
+    },
+    {
+      name: 'handleDrop',
+      params: ['handleViewEvent', 'drop', 'event.target.name'],
+      preventDefault: true,
+    },
+  ])
+  const contextMenuInvocations: unknown[] = []
   const instance = await createAuthenticatedInstance(
     [{ id: 'board-1', name: 'Roadmap' }],
     [],
@@ -507,6 +581,9 @@ test('cards and lists render drag and drop attributes', async () => {
           ],
         },
       },
+      showContextMenu: async (menuId: string, x: number, y: number) => {
+        contextMenuInvocations.push([menuId, x, y])
+      },
     },
   )
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
@@ -517,6 +594,7 @@ test('cards and lists render drag and drop attributes', async () => {
       className: 'TrelloCard',
       draggable: true,
       name: 'card:card-1',
+      onContextMenu: 'handleContextMenu',
       onDragEnd: 'handleDragEnd',
       onDragStart: 'handleDragStart',
     }),
@@ -538,7 +616,31 @@ test('cards and lists render drag and drop attributes', async () => {
     }),
   )
 
-  await instance.handleEvent?.({ name: 'list:list-1', type: 'contextmenu' })
+  await instance.handleEvent?.({
+    name: 'list:list-1',
+    type: 'contextmenu',
+    x: 100,
+    y: 200,
+  } as any)
+  expect(contextMenuInvocations).toEqual([['trello.list', 100, 200]])
+  expect((instance as any).getMenuEntries('trello.list')).toEqual([
+    {
+      args: ['list-1'],
+      command: 'trello.startAddCard',
+      id: 'addCard',
+      label: 'Add Card',
+    },
+    {
+      command: 'trello.refreshBoards',
+      id: 'refreshBoards',
+      label: 'Refresh Boards',
+    },
+    {
+      command: 'trello.backToBoards',
+      id: 'backToBoards',
+      label: 'Back to Boards',
+    },
+  ])
   expect(await instance.render()).toEqual(dom)
   resetTrelloViewDependencyFactory()
 })
@@ -573,6 +675,7 @@ test('clicking add card renders input for that list only', async () => {
   const dom = await instance.render()
   expect(getNodeByName(dom, 'newCardTitle:list-1')).toEqual(
     expect.objectContaining({
+      autocomplete: 'off',
       className: 'TrelloAddCardInput',
       name: 'newCardTitle:list-1',
       onInput: 'handleInput',
@@ -588,6 +691,349 @@ test('clicking add card renders input for that list only', async () => {
       )
     }),
   ).toBe(true)
+  resetTrelloViewDependencyFactory()
+})
+
+test('board overview context menu opens board menu', async () => {
+  const contextMenuInvocations: unknown[] = []
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      showContextMenu: async (menuId: string, x: number, y: number) => {
+        contextMenuInvocations.push([menuId, x, y])
+      },
+    },
+  )
+
+  const dom = await instance.render()
+  expect(getNodeByName(dom, 'boards')).toEqual(
+    expect.objectContaining({
+      name: 'boards',
+      onContextMenu: 'handleContextMenu',
+    }),
+  )
+
+  await instance.handleEvent?.({
+    name: 'boards',
+    type: 'contextmenu',
+    x: 11,
+    y: 22,
+  } as any)
+
+  expect(contextMenuInvocations).toEqual([['trello.board', 11, 22]])
+  expect((instance as any).getMenuEntries('trello.board')).toEqual([
+    {
+      command: 'trello.refreshBoards',
+      id: 'refreshBoards',
+      label: 'Refresh Boards',
+    },
+    {
+      command: 'trello.logout',
+      id: 'signOut',
+      label: 'Sign Out',
+    },
+  ])
+  resetTrelloViewDependencyFactory()
+})
+
+test('card context menu opens card menu with target args', async () => {
+  const contextMenuInvocations: unknown[] = []
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', idList: 'list-1', name: 'Plan work' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      showContextMenu: async (menuId: string, x: number, y: number) => {
+        contextMenuInvocations.push([menuId, x, y])
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+
+  await instance.handleEvent?.({
+    name: 'card:card-1',
+    type: 'contextmenu',
+    x: 33,
+    y: 44,
+  } as any)
+
+  expect(contextMenuInvocations).toEqual([['trello.card', 33, 44]])
+  expect((instance as any).getMenuEntries('trello.card')).toEqual([
+    {
+      args: ['card-1'],
+      command: 'trello.openCard',
+      id: 'openCard',
+      label: 'Open Card',
+    },
+    {
+      args: ['list-1'],
+      command: 'trello.startAddCard',
+      id: 'addCard',
+      label: 'Add Card',
+    },
+    {
+      command: 'trello.refreshBoards',
+      id: 'refreshBoards',
+      label: 'Refresh Boards',
+    },
+    {
+      command: 'trello.backToBoards',
+      id: 'backToBoards',
+      label: 'Back to Boards',
+    },
+  ])
+  resetTrelloViewDependencyFactory()
+})
+
+test('card detail context menu opens card detail menu', async () => {
+  const contextMenuInvocations: unknown[] = []
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', idList: 'list-1', name: 'Plan work' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      showContextMenu: async (menuId: string, x: number, y: number) => {
+        contextMenuInvocations.push([menuId, x, y])
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+
+  const dom = await instance.render()
+  expect(getNodeByName(dom, 'cardDetail')).toEqual(
+    expect.objectContaining({
+      name: 'cardDetail',
+      onContextMenu: 'handleContextMenu',
+    }),
+  )
+
+  await instance.handleEvent?.({
+    name: 'cardDetail',
+    type: 'contextmenu',
+    x: 55,
+    y: 66,
+  } as any)
+
+  expect(contextMenuInvocations).toEqual([['trello.cardDetail', 55, 66]])
+  expect((instance as any).getMenuEntries('trello.cardDetail')).toEqual([
+    {
+      command: 'trello.saveCardDetail',
+      id: 'saveCard',
+      label: 'Save Card',
+    },
+    {
+      command: 'trello.closeCardDetail',
+      id: 'closeCard',
+      label: 'Close Card',
+    },
+    {
+      command: 'trello.refreshBoards',
+      id: 'refreshBoards',
+      label: 'Refresh Boards',
+    },
+    {
+      command: 'trello.backToBoards',
+      id: 'backToBoards',
+      label: 'Back to Boards',
+    },
+  ])
+  resetTrelloViewDependencyFactory()
+})
+
+test('view context tracks board and new-card input focus', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+    },
+  )
+  const withContext = instance as VirtualDomViewInstance & {
+    readonly getContext: () => Readonly<Record<string, boolean>>
+  }
+
+  expect(withContext.getContext()).toEqual({
+    'trello.boardsFocus': true,
+  })
+
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  expect(withContext.getContext()).toEqual({
+    'trello.boardDetailFocus': true,
+  })
+
+  await instance.handleEvent?.({ name: 'addCard:list-1', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'newCardTitle:list-1',
+    type: 'focus',
+  })
+  expect(withContext.getContext()).toEqual({
+    'trello.boardDetailFocus': true,
+    'trello.newCardInputFocus': true,
+  })
+
+  await instance.handleEvent?.({
+    name: 'newCardTitle:list-1',
+    type: 'blur',
+  })
+  expect(withContext.getContext()).toEqual({
+    'trello.boardDetailFocus': true,
+  })
+
+  resetTrelloViewDependencyFactory()
+})
+
+test('active keybinding commands submit and cancel new card input', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+    },
+  )
+
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'addCard:list-1', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'newCardTitle:list-1',
+    type: 'input',
+    value: 'Build shortcuts',
+  })
+  await submitNewCardActiveTrelloViewInstance()
+  expect(getText(await instance.render())).toContain('Build shortcuts')
+
+  await instance.handleEvent?.({ name: 'addCard:list-1', type: 'click' })
+  cancelNewCardActiveTrelloViewInstance()
+  expect(
+    getNodeByName(await instance.render(), 'newCardTitle:list-1'),
+  ).toBeUndefined()
+
+  resetTrelloViewDependencyFactory()
+})
+
+test('active keybinding commands navigate board and close card detail', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', idList: 'list-1', name: 'Plan work' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+    },
+  )
+
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+  expect(getText(await instance.render())).toContain('Plan work')
+
+  closeCardDetailActiveTrelloViewInstance()
+  expect(
+    getNodeByName(await instance.render(), 'closeCardDetail'),
+  ).toBeUndefined()
+
+  await backToBoardsActiveTrelloViewInstance()
+  expect(getBoardButtonLabels(await instance.render())).toContain('Roadmap')
+
+  resetTrelloViewDependencyFactory()
+})
+
+test('active keybinding command saves card description', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', idList: 'list-1', name: 'Plan work' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+    },
+  )
+  const withContext = instance as VirtualDomViewInstance & {
+    readonly getContext: () => Readonly<Record<string, boolean>>
+  }
+
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'editCardDescription', type: 'click' })
+  await instance.handleEvent?.({ name: 'cardDescription', type: 'focus' })
+  await instance.handleEvent?.({
+    name: 'cardDescription',
+    type: 'input',
+    value: 'Shortcut saved description',
+  })
+
+  expect(withContext.getContext()).toEqual({
+    'trello.boardDetailFocus': true,
+    'trello.cardDescriptionFocus': true,
+    'trello.cardDetailFocus': true,
+  })
+
+  await saveCardDetailActiveTrelloViewInstance()
+  const text = getText(await instance.render())
+  expect(text).toContain('Shortcut saved description')
+
   resetTrelloViewDependencyFactory()
 })
 
@@ -1139,6 +1585,227 @@ test('clicking card renders card detail and close dismisses it', async () => {
   resetTrelloViewDependencyFactory()
 })
 
+test('card detail label picker adds an existing board label', async () => {
+  const labels: readonly TrelloLabel[] = [
+    {
+      color: 'blue',
+      id: 'label-1',
+      idBoard: 'board-1',
+      name: 'Extension Api',
+    },
+    {
+      color: 'red',
+      id: 'label-2',
+      idBoard: 'board-1',
+      name: 'Bug',
+    },
+  ]
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', name: 'Ship Trello view' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      boardLabels: {
+        'board-1': labels,
+      },
+      cardDetails: {
+        'card-1': {
+          attachments: [],
+          card: {
+            desc: '',
+            id: 'card-1',
+            labels: [],
+            name: 'Ship Trello view',
+          },
+          comments: [],
+        },
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+
+  const initialDom = await instance.render()
+  expect(getText(initialDom)).toContain('Labels')
+  expect(getNodeByName(initialDom, 'cardLabelPicker')).toBeUndefined()
+
+  await instance.handleEvent?.({ name: 'openCardLabelPicker', type: 'click' })
+
+  const openDom = await instance.render()
+  expect(getNodeByName(openDom, 'cardLabelSearch')?.value).toBe('')
+  expect(getSubtreeTextByNodeName(openDom, 'cardLabelPicker')).toContain(
+    'Extension Api',
+  )
+  expect(getSubtreeTextByNodeName(openDom, 'cardLabelPicker')).toContain('Bug')
+
+  await instance.handleEvent?.({
+    name: 'cardLabelSearch',
+    type: 'input',
+    value: 'bug',
+  })
+
+  const filteredDom = await instance.render()
+  const filteredPickerText = getSubtreeTextByNodeName(
+    filteredDom,
+    'cardLabelPicker',
+  )
+  expect(filteredPickerText).toContain('Bug')
+  expect(filteredPickerText).not.toContain('Extension Api')
+
+  await instance.handleEvent?.({ name: 'addCardLabel:label-2', type: 'click' })
+
+  const updatedDom = await instance.render()
+  expect(getText(updatedDom)).toContain('Bug')
+  expect(getNodeByName(updatedDom, 'cardLabelPicker')).toBeUndefined()
+  expect(getNodeByName(updatedDom, 'openCardLabelPicker')).toBeDefined()
+  resetTrelloViewDependencyFactory()
+})
+
+test('card detail label picker excludes assigned labels and keeps open on failure', async () => {
+  const labels: readonly TrelloLabel[] = [
+    {
+      color: 'blue',
+      id: 'label-1',
+      idBoard: 'board-1',
+      name: 'Extension Api',
+    },
+    {
+      color: 'red',
+      id: 'label-2',
+      idBoard: 'board-1',
+      name: 'Bug',
+    },
+  ]
+  const appliedLabel = labels[0]
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [
+                {
+                  id: 'card-1',
+                  labels: [appliedLabel],
+                  name: 'Ship Trello view',
+                },
+              ],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      boardLabels: {
+        'board-1': labels,
+      },
+      cardDetails: {
+        'card-1': {
+          attachments: [],
+          card: {
+            desc: '',
+            id: 'card-1',
+            labels: [appliedLabel],
+            name: 'Ship Trello view',
+          },
+          comments: [],
+        },
+      },
+      cardLabelAddErrors: {
+        'card-1': 'Trello request failed: 500 unavailable',
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+
+  const labeledDom = await instance.render()
+  expect(getText(labeledDom)).toContain('Extension Api')
+  expect(getNodeByName(labeledDom, 'openCardLabelPicker')).toBeDefined()
+
+  await instance.handleEvent?.({ name: 'openCardLabelPicker', type: 'click' })
+
+  const pickerDom = await instance.render()
+  const pickerText = getSubtreeTextByNodeName(pickerDom, 'cardLabelPicker')
+  expect(pickerText).toContain('Bug')
+  expect(pickerText).not.toContain('Extension Api')
+
+  await instance.handleEvent?.({ name: 'addCardLabel:label-2', type: 'click' })
+
+  const failedDom = await instance.render()
+  expect(getText(failedDom)).toContain('Trello request failed: 500 unavailable')
+  expect(getNodeByName(failedDom, 'cardLabelPicker')).toBeDefined()
+  expect(getText(failedDom)).not.toContain('No labels available')
+  resetTrelloViewDependencyFactory()
+})
+
+test('card detail title renders as wrapping textarea with full long title', async () => {
+  const longTitle =
+    'trello: input fields on firefox look not so good when the card detail title needs more than one line'
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', name: longTitle }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      cardDetails: {
+        'card-1': {
+          attachments: [],
+          card: {
+            desc: '',
+            id: 'card-1',
+            name: longTitle,
+          },
+          comments: [],
+        },
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+
+  const detailDom = await instance.render()
+  expect(getClassNames(detailDom)).toContain('TrelloCardDetailTitleSizer')
+  expect(getClassNames(detailDom)).toContain('TrelloCardDetailTitleMirror')
+  expect(getText(detailDom)).toContain(longTitle)
+  expect(
+    hasNode(detailDom, (node) => {
+      return (
+        node.name === 'cardTitle' &&
+        node.type === VirtualDomElements.TextArea &&
+        node.rows === 1 &&
+        node.value === longTitle &&
+        hasClass(node, 'TrelloCardDetailTitleInput')
+      )
+    }),
+  ).toBe(true)
+  resetTrelloViewDependencyFactory()
+})
+
 test('clicking card renders cached detail before fresh detail resolves', async () => {
   const boardDetail: TrelloBoardDetail = {
     board: { id: 'board-1', name: 'Roadmap' },
@@ -1169,6 +1836,9 @@ test('clicking card renders cached detail before fresh detail resolves', async (
   const freshCardDeferred = createDeferred<TrelloCardDetail>()
   const boards = [{ id: 'board-1', name: 'Roadmap' }]
   const client: TrelloClient = {
+    async addCardLabel(card: TrelloCard) {
+      return card
+    },
     async createCard(list: TrelloList) {
       return {
         id: 'created-card-1',
@@ -1193,6 +1863,9 @@ test('clicking card renders cached detail before fresh detail resolves', async (
         cached: cachedCardDetail,
         fresh: freshCardDeferred.promise,
       }
+    },
+    async listBoardLabels() {
+      return []
     },
     async listBoards() {
       return boards
@@ -1349,16 +2022,21 @@ test('editing card title and description saves card detail', async () => {
   ).toBe(true)
   expect(
     hasNode(editingDom, (node) => {
-      return node.name === 'cancelCardDescriptionEdit'
+      return node.name === 'saveCardDetail'
     }),
   ).toBe(true)
+  expect(
+    hasNode(editingDom, (node) => {
+      return node.name === 'cancelCardDescriptionEdit'
+    }),
+  ).toBe(false)
 
   await instance.handleEvent?.({
     name: 'cardDescription',
     type: 'input',
     value: 'Updated description',
   })
-  await instance.handleEvent?.({ name: 'saveCardDetail', type: 'click' })
+  await instance.handleEvent?.({ name: 'cardDescription', type: 'blur' })
 
   const detailDom = await instance.render()
   const text = getText(detailDom)
@@ -1378,34 +2056,46 @@ test('editing card title and description saves card detail', async () => {
   resetTrelloViewDependencyFactory()
 })
 
-test('canceling card description edit restores saved preview', async () => {
-  setTrelloViewDependencyFactory(() => ({
-    client: createMockTrelloClient({
-      boardDetails: {
-        'board-1': {
-          board: { id: 'board-1', name: 'Roadmap' },
-          lists: [
-            {
-              cards: [{ id: 'card-1', name: 'Ship Trello view' }],
-              id: 'list-1',
-              name: 'Todo',
-            },
-          ],
-        },
-      },
-      boards: [{ id: 'board-1', name: 'Roadmap' }],
-      cardDetails: {
-        'card-1': {
-          attachments: [],
-          card: {
-            desc: 'Original description',
-            id: 'card-1',
-            name: 'Ship Trello view',
+test('unchanged card description blur closes editor without saving', async () => {
+  let updateCardCallCount = 0
+  const client = createMockTrelloClient({
+    boardDetails: {
+      'board-1': {
+        board: { id: 'board-1', name: 'Roadmap' },
+        lists: [
+          {
+            cards: [{ id: 'card-1', name: 'Ship Trello view' }],
+            id: 'list-1',
+            name: 'Todo',
           },
-          comments: [],
-        },
+        ],
       },
-    }),
+    },
+    boards: [{ id: 'board-1', name: 'Roadmap' }],
+    cardDetails: {
+      'card-1': {
+        attachments: [],
+        card: {
+          desc: 'Original description',
+          id: 'card-1',
+          name: 'Ship Trello view',
+        },
+        comments: [],
+      },
+    },
+  })
+  setTrelloViewDependencyFactory(() => ({
+    client: {
+      ...client,
+      async updateCard(
+        card: TrelloCard,
+        update: TrelloCardUpdate,
+        credentials: TrelloCredentials,
+      ): Promise<TrelloCard> {
+        updateCardCallCount++
+        return client.updateCard(card, update, credentials)
+      },
+    },
     recentStorage: createMemoryRecentBoardStorage(),
     storage: createMemoryCredentialStorage(),
   }))
@@ -1425,20 +2115,12 @@ test('canceling card description edit restores saved preview', async () => {
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
   await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
   await instance.handleEvent?.({ name: 'editCardDescription', type: 'click' })
-  await instance.handleEvent?.({
-    name: 'cardDescription',
-    type: 'input',
-    value: 'Unsaved description',
-  })
-  await instance.handleEvent?.({
-    name: 'cancelCardDescriptionEdit',
-    type: 'click',
-  })
+  await instance.handleEvent?.({ name: 'cardDescription', type: 'blur' })
 
   const detailDom = await instance.render()
   const text = getText(detailDom)
   expect(text).toContain('Original description')
-  expect(text).not.toContain('Unsaved description')
+  expect(updateCardCallCount).toBe(0)
   expect(
     hasNode(detailDom, (node) => {
       return node.name === 'cardDescription'

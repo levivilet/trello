@@ -41,6 +41,60 @@ export const activate = async (): Promise<void> => {
     id: 'trello.show',
   })
   registerCommand({
+    execute() {
+      return TrelloView.backToBoardsActiveTrelloViewInstance()
+    },
+    id: 'trello.backToBoards',
+  })
+  registerCommand({
+    execute() {
+      return TrelloView.cancelNewCardActiveTrelloViewInstance()
+    },
+    id: 'trello.cancelNewCard',
+  })
+  registerCommand({
+    execute() {
+      return TrelloView.closeCardDetailActiveTrelloViewInstance()
+    },
+    id: 'trello.closeCardDetail',
+  })
+  registerCommand({
+    execute() {
+      return TrelloView.logoutActiveTrelloViewInstance()
+    },
+    id: 'trello.logout',
+  })
+  registerCommand({
+    execute(cardId: string) {
+      return TrelloView.openCardActiveTrelloViewInstance(cardId)
+    },
+    id: 'trello.openCard',
+  })
+  registerCommand({
+    execute() {
+      return TrelloView.refreshBoardsActiveTrelloViewInstance()
+    },
+    id: 'trello.refreshBoards',
+  })
+  registerCommand({
+    execute() {
+      return TrelloView.saveCardDetailActiveTrelloViewInstance()
+    },
+    id: 'trello.saveCardDetail',
+  })
+  registerCommand({
+    execute(listId: string) {
+      return TrelloView.startAddCardActiveTrelloViewInstance(listId)
+    },
+    id: 'trello.startAddCard',
+  })
+  registerCommand({
+    execute() {
+      return TrelloView.submitNewCardActiveTrelloViewInstance()
+    },
+    id: 'trello.submitNewCard',
+  })
+  registerCommand({
     async execute(data: Readonly<MockTrelloData>) {
       await clearTrelloTestCaches()
       TrelloView.setTrelloViewDependencyFactory(() => ({

@@ -24,6 +24,7 @@ const renderListTitleInput = (
     className: 'TrelloListTitleInput',
     name: `listTitle:${list.id}`,
     onBlur: 'handleBlur',
+    onFocus: 'handleFocus',
     onInput: 'handleInput',
     value: state.draftListTitles[list.id] ?? list.name,
   })
@@ -39,9 +40,12 @@ const renderAddCardInput = (
 ): Dom.TreeNode => {
   return Dom.form(`addCard:${list.id}`, 'TrelloAddCardForm', [
     Dom.node(VirtualDomElements.Input, {
+      autocomplete: 'off',
       className: 'TrelloAddCardInput',
       disabled: state.savingNewCard,
       name: `newCardTitle:${list.id}`,
+      onBlur: 'handleBlur',
+      onFocus: 'handleFocus',
       onInput: 'handleInput',
       placeholder: 'Enter a title for this card',
       value: state.draftNewCardTitle,
