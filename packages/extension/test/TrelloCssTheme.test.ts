@@ -63,3 +63,12 @@ test('trello component styles use local tokens instead of dark theme fallbacks',
   expect(css).not.toMatch(oldDarkFallbackPattern)
   expect(css).not.toMatch(hardcodedDarkOverlayPattern)
 })
+
+test('trello readable content allows text selection', async () => {
+  const css = await readTrelloCss()
+
+  expect(css).toContain('.TrelloTitle,\n.TrelloWelcome,')
+  expect(css).toContain('.TrelloCardDescriptionPreview,')
+  expect(css).toContain('.TrelloCardCommentText,')
+  expect(css).toContain('user-select: text;')
+})
