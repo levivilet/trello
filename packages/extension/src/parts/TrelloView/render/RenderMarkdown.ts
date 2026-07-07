@@ -10,6 +10,8 @@ const headingTypes = [
   VirtualDomElements.H6,
 ] as const
 
+const escapedMarkdownTextPattern = /\\([\\`*_{}()[\]#+\-.!])/g
+
 const allowedLinkProtocols = ['http:', 'https:', 'mailto:']
 
 interface InlineMatch {
@@ -163,13 +165,17 @@ const getFirstInlineMatch = (text: string): InlineMatch | undefined => {
   return first
 }
 
+const unescapeMarkdownText = (text: string): string => {
+  return text.replaceAll(escapedMarkdownTextPattern, '$1')
+}
+
 const parseInline = (text: string): readonly Dom.TreeNode[] => {
   if (!text) {
     return []
   }
   const match = getFirstInlineMatch(text)
   if (!match) {
-    return [Dom.textNode(text)]
+    return [Dom.textNode(unescapeMarkdownText(text))]
   }
   return [
     ...parseInline(text.slice(0, match.start)),
