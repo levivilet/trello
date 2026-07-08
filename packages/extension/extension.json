@@ -30,12 +30,17 @@
     "onCommand:trello.startAddCard",
     "onCommand:trello.submitNewCard",
     "onCommand:trello.test.useMockData",
-    "onCommand:trello.test.reset"
+    "onCommand:trello.test.reset",
+    "onCommand:trello.addList"
   ],
   "commands": [
     {
       "id": "trello.show",
       "label": "Trello: Show"
+    },
+    {
+      "id": "trello.addList",
+      "label": "Trello: Add List"
     },
     {
       "id": "trello.backToBoards",
