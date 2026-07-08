@@ -66,6 +66,7 @@ interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly getMenuEntries: (menuId: string) => readonly MenuEntry[]
   readonly logout: () => Promise<void>
   readonly openCard: (cardId: string) => Promise<void>
+  readonly addList: (options: any) => Promise<void>
   readonly refreshBoards: () => Promise<void>
   readonly reload: () => Promise<void>
   readonly renderFocus: (
@@ -131,6 +132,10 @@ export const backToBoardsActiveTrelloViewInstance = async (): Promise<void> => {
 
 export const cancelNewCardActiveTrelloViewInstance = (): void => {
   getActiveInstance()?.cancelNewCard()
+}
+
+export const addList = (options: any): void => {
+  getActiveInstance()?.addList(options)
 }
 
 export const closeCardDetailActiveTrelloViewInstance = (): void => {
@@ -281,6 +286,22 @@ export const createInstance = async (
     },
     getMenuEntries(menuId: string): readonly MenuEntry[] {
       return getMenuEntries(state, menuId)
+    },
+    async addList({ name }: { name: string }): Promise<void> {
+      await instance?.handleEvent?.({
+        type: 'click',
+        name: 'startAddList',
+      })
+      await instance?.handleEvent?.({
+        type: 'input',
+        name: 'newListTitle',
+        value: 'test',
+      })
+      await instance?.handleEvent?.({
+        type: 'submit',
+        name: 'addList',
+        value: 'test',
+      })
     },
     async handleEvent(event: Readonly<ViewEvent>): Promise<void> {
       activeInstances.delete(instance)

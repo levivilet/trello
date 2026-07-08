@@ -95,6 +95,13 @@ export const activate = async (): Promise<void> => {
     id: 'trello.submitNewCard',
   })
   registerCommand({
+    execute(options: any) {
+      return TrelloView.addList(options)
+    },
+    id: 'trello.addList',
+  })
+  console.log('did register')
+  registerCommand({
     async execute(data: Readonly<MockTrelloData>) {
       await clearTrelloTestCaches()
       TrelloView.setTrelloViewDependencyFactory(() => ({
