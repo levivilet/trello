@@ -459,7 +459,7 @@ button.TrelloSearchResult:hover {
   gap: 8px;
   max-height: 100%;
   min-height: 0;
-  contain: strict;
+  /* contain: strict; */
   overflow: hidden;
   padding: 8px;
   background: var(--TrelloSurface);
