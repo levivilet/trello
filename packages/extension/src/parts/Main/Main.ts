@@ -102,6 +102,12 @@ export const activate = async (): Promise<void> => {
   })
   registerCommand({
     execute(options: any) {
+      return TrelloView.openMockBoard(options)
+    },
+    id: 'trello.openMockBoard',
+  })
+  registerCommand({
+    execute(options: any) {
       return TrelloView.addCard(options)
     },
     id: 'trello.addCard',

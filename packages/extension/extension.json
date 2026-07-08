@@ -32,6 +32,7 @@
     "onCommand:trello.test.useMockData",
     "onCommand:trello.test.reset",
     "onCommand:trello.addList",
+    "onCommand:trello.openMockBoard",
     "onCommand:trello.addCard"
   ],
   "commands": [
@@ -42,6 +43,10 @@
     {
       "id": "trello.addList",
       "label": "Trello: Add List"
+    },
+    {
+      "id": "trello.openMockBoard",
+      "label": "Trello: Open Mock Board"
     },
     {
       "id": "trello.addCard",
