@@ -68,6 +68,7 @@ interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly getMenuEntries: (menuId: string) => readonly MenuEntry[]
   readonly logout: () => Promise<void>
   readonly openCard: (cardId: string) => Promise<void>
+  readonly openMockBoard: (options: any) => Promise<void>
   readonly refreshBoards: () => Promise<void>
   readonly reload: () => Promise<void>
   readonly renderFocus: (
@@ -140,6 +141,9 @@ export const addList = async (options: any): Promise<void> => {
 }
 export const addCard = async (options: any): Promise<void> => {
   await getActiveInstance()?.addCard(options)
+}
+export const openMockBoard = async (options: any): Promise<void> => {
+  await getActiveInstance()?.openMockBoard(options)
 }
 
 export const closeCardDetailActiveTrelloViewInstance = (): void => {
@@ -397,6 +401,15 @@ export const createInstance = async (
     async openCard(cardId: string): Promise<void> {
       await openCard(viewContext, cardId)
       updateContext(state)
+    },
+    async openMockBoard({
+      id,
+      name,
+    }: {
+      readonly name: string
+      readonly id: string
+    }): Promise<void> {
+      // TODO
     },
     async refreshBoards(): Promise<void> {
       await loadBoards(viewContext)
