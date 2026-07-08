@@ -265,7 +265,7 @@ export const createInstance = async (
   await initialize(false)
 
   const instance: ActiveTrelloViewInstance = {
-    async addList({ name }: { name: string }): Promise<void> {
+    async addList({ name }: { readonly name: string }): Promise<void> {
       await instance?.handleEvent?.({
         name: 'startAddList',
         type: 'click',
@@ -273,12 +273,11 @@ export const createInstance = async (
       await instance?.handleEvent?.({
         name: 'newListTitle',
         type: 'input',
-        value: 'test',
+        value: name,
       })
       await instance?.handleEvent?.({
         name: 'addList',
         type: 'submit',
-        value: 'test',
       })
     },
     async backToBoards(): Promise<void> {
