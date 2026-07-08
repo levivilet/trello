@@ -59,6 +59,7 @@ import {
 } from './state/UpdateContext.ts'
 
 interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
+  readonly addList: (options: any) => Promise<void>
   readonly backToBoards: () => Promise<void>
   readonly cancelNewCard: () => void
   readonly closeCardDetail: () => void
@@ -66,7 +67,6 @@ interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly getMenuEntries: (menuId: string) => readonly MenuEntry[]
   readonly logout: () => Promise<void>
   readonly openCard: (cardId: string) => Promise<void>
-  readonly addList: (options: any) => Promise<void>
   readonly refreshBoards: () => Promise<void>
   readonly reload: () => Promise<void>
   readonly renderFocus: (
@@ -265,6 +265,22 @@ export const createInstance = async (
   await initialize(false)
 
   const instance: ActiveTrelloViewInstance = {
+    async addList({ name }: { name: string }): Promise<void> {
+      await instance?.handleEvent?.({
+        name: 'startAddList',
+        type: 'click',
+      })
+      await instance?.handleEvent?.({
+        name: 'newListTitle',
+        type: 'input',
+        value: 'test',
+      })
+      await instance?.handleEvent?.({
+        name: 'addList',
+        type: 'submit',
+        value: 'test',
+      })
+    },
     async backToBoards(): Promise<void> {
       await goBackToBoards(viewContext)
       updateContext(state)
@@ -286,22 +302,6 @@ export const createInstance = async (
     },
     getMenuEntries(menuId: string): readonly MenuEntry[] {
       return getMenuEntries(state, menuId)
-    },
-    async addList({ name }: { name: string }): Promise<void> {
-      await instance?.handleEvent?.({
-        type: 'click',
-        name: 'startAddList',
-      })
-      await instance?.handleEvent?.({
-        type: 'input',
-        name: 'newListTitle',
-        value: 'test',
-      })
-      await instance?.handleEvent?.({
-        type: 'submit',
-        name: 'addList',
-        value: 'test',
-      })
     },
     async handleEvent(event: Readonly<ViewEvent>): Promise<void> {
       activeInstances.delete(instance)
