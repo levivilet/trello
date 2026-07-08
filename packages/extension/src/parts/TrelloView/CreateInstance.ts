@@ -45,7 +45,7 @@ import {
 } from './actions/ResizeCardDetail.ts'
 import { restoreCurrentBoard } from './actions/RestoreCurrentBoard.ts'
 import { saveCardDetail as saveCardDetailAction } from './actions/SaveCardDetail.ts'
-import { getMenuEntries, type MenuEntry } from './MenuEntries.ts'
+import { type MenuEntry, getMenuEntries } from './MenuEntries.ts'
 import { renderAuth } from './render/RenderAuth.ts'
 import { renderBoardDetail } from './render/RenderBoardDetail.ts'
 import { renderBoards } from './render/RenderBoards.ts'
@@ -409,7 +409,20 @@ export const createInstance = async (
       readonly name: string
       readonly id: string
     }): Promise<void> {
-      // TODO
+      await instance.handleEvent?.({
+        name: 'apiKey',
+        type: 'input',
+        value: 'abcdefghijklmnopqrstuvwxyz123456',
+      })
+      await instance.handleEvent?.({
+        name: 'token',
+        type: 'input',
+        value: 'abcdefghijklmnopqrstuvwxyz123456',
+      })
+      await instance.handleEvent?.({
+        name: 'connect',
+        type: 'click',
+      })
     },
     async refreshBoards(): Promise<void> {
       await loadBoards(viewContext)
