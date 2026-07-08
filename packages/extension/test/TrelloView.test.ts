@@ -1105,6 +1105,114 @@ test('board overview context menu opens board menu', async () => {
   resetTrelloViewDependencyFactory()
 })
 
+test('renderActions returns no actions before authentication', async () => {
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({ boards: [] }),
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage(),
+  }))
+  const instance = (await view.create()) as VirtualDomViewInstance & {
+    readonly renderActions: () => readonly unknown[]
+  }
+
+  expect(instance.renderActions()).toEqual([])
+  resetTrelloViewDependencyFactory()
+})
+
+test('renderActions returns board list actions', async () => {
+  const instance = (await createAuthenticatedInstance([
+    { id: 'board-1', name: 'Roadmap' },
+  ])) as VirtualDomViewInstance & {
+    readonly renderActions: () => readonly unknown[]
+  }
+
+  expect(instance.renderActions()).toEqual([
+    {
+      command: 'trello.refreshBoards',
+      icon: 'Refresh',
+      title: 'Refresh Boards',
+    },
+    {
+      command: 'trello.logout',
+      icon: 'Account',
+      title: 'Sign Out',
+    },
+  ])
+  resetTrelloViewDependencyFactory()
+})
+
+test('renderActions returns board detail actions', async () => {
+  const instance = (await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [],
+        },
+      },
+    },
+  )) as VirtualDomViewInstance & {
+    readonly renderActions: () => readonly unknown[]
+  }
+
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+
+  expect(instance.renderActions()).toEqual([
+    {
+      command: 'trello.backToBoards',
+      icon: 'ArrowLeft',
+      title: 'Back to Boards',
+    },
+    {
+      command: 'trello.refreshBoards',
+      icon: 'Refresh',
+      title: 'Refresh Boards',
+    },
+    {
+      command: 'trello.logout',
+      icon: 'Account',
+      title: 'Sign Out',
+    },
+  ])
+  resetTrelloViewDependencyFactory()
+})
+
+test('boards view does not render sidebar actions inside content', async () => {
+  const instance = await createAuthenticatedInstance([
+    { id: 'board-1', name: 'Roadmap' },
+  ])
+
+  const dom = await instance.render()
+
+  expect(getNodeByName(dom, 'refreshBoards')).toBeUndefined()
+  expect(getNodeByName(dom, 'logout')).toBeUndefined()
+  resetTrelloViewDependencyFactory()
+})
+
+test('board detail view does not render sidebar actions inside content', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [],
+        },
+      },
+    },
+  )
+
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  const dom = await instance.render()
+
+  expect(getNodeByName(dom, 'backToBoards')).toBeUndefined()
+  expect(getNodeByName(dom, 'logout')).toBeUndefined()
+  resetTrelloViewDependencyFactory()
+})
+
 test('card context menu opens card menu with target args', async () => {
   const contextMenuInvocations: unknown[] = []
   const instance = await createAuthenticatedInstance(

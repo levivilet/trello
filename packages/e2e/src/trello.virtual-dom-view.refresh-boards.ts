@@ -25,7 +25,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   const firstBoard = Locator('button[name="board:board-1"]')
   await expect(firstBoard).toBeVisible()
 
-  const refresh = Locator('button[name="refreshBoards"]')
+  const refresh = Locator('button[title="Refresh Boards"]')
   await expect(refresh).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await refresh.click()

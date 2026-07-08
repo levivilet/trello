@@ -38,6 +38,7 @@ export {
   openMockBoard,
 } from './CreateInstance.ts'
 export { getMenuEntries } from './MenuEntries.ts'
+export { renderActions } from './render/RenderActions.ts'
 export {
   boardBackgroundEnabledPreference,
   searchEnabledPreference,

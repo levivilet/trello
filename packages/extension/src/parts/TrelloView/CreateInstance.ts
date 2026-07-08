@@ -46,6 +46,7 @@ import {
 import { restoreCurrentBoard } from './actions/RestoreCurrentBoard.ts'
 import { saveCardDetail as saveCardDetailAction } from './actions/SaveCardDetail.ts'
 import { type MenuEntry, getMenuEntries } from './MenuEntries.ts'
+import { renderActions, type ViewAction } from './render/RenderActions.ts'
 import { renderAuth } from './render/RenderAuth.ts'
 import { renderBoardDetail } from './render/RenderBoardDetail.ts'
 import { renderBoards } from './render/RenderBoards.ts'
@@ -71,6 +72,7 @@ interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly openMockBoard: (options: any) => Promise<void>
   readonly refreshBoards: () => Promise<void>
   readonly reload: () => Promise<void>
+  readonly renderActions: () => readonly ViewAction[]
   readonly renderFocus: (
     oldContext: Readonly<Record<string, boolean>>,
     newContext: Readonly<Record<string, boolean>>,
@@ -439,6 +441,9 @@ export const createInstance = async (
         return renderBoardDetail(state, state.boardDetail)
       }
       return renderBoards(state)
+    },
+    renderActions(): readonly ViewAction[] {
+      return renderActions(state)
     },
     renderFocus(
       oldContext: Readonly<Record<string, boolean>>,

@@ -16,7 +16,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await connectWithCredentials({ expect, Locator })
   await openBoard(Locator, expect)
 
-  const back = Locator('button[name="backToBoards"]')
+  const back = Locator('button[title="Back to Boards"]')
   await expect(back).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await back.click()
