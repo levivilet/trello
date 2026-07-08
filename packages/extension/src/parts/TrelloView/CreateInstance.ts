@@ -59,8 +59,8 @@ import {
 } from './state/UpdateContext.ts'
 
 interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
-  readonly addList: (options: any) => Promise<void>
   readonly addCard: (options: any) => Promise<void>
+  readonly addList: (options: any) => Promise<void>
   readonly backToBoards: () => Promise<void>
   readonly cancelNewCard: () => void
   readonly closeCardDetail: () => void
@@ -269,7 +269,13 @@ export const createInstance = async (
   await initialize(false)
 
   const instance: ActiveTrelloViewInstance = {
-    async addList({ name }: { readonly name: string }): Promise<void> {
+    async addCard({
+      listId,
+      name,
+    }: {
+      readonly name: string
+      readonly listId: string
+    }): Promise<void> {
       // TODO make this one function
       await instance?.handleEvent?.({
         name: 'startAddList',
@@ -285,13 +291,7 @@ export const createInstance = async (
         type: 'submit',
       })
     },
-    async addCard({
-      name,
-      listId,
-    }: {
-      readonly name: string
-      readonly listId: string
-    }): Promise<void> {
+    async addList({ name }: { readonly name: string }): Promise<void> {
       // TODO make this one function
       await instance?.handleEvent?.({
         name: 'startAddList',
