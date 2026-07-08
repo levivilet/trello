@@ -5,14 +5,6 @@ import type { Test } from '@lvce-editor/test-with-playwright'
 export const name = 'trello.virtual-dom-view.card-create'
 export const skip = true
 
-const createList = (id, name, cards) => {
-  return {
-    cards,
-    id,
-    name,
-  }
-}
-
 const createBoardDetail = (board, lists) => {
   return {
     board,
@@ -58,10 +50,6 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   const board = {
     id: 'board-1',
     name: 'Roadmap',
-  }
-  const card = {
-    id: 'card-1',
-    name: 'Card 1',
   }
   await useMockDataAndShowTrello(Command, {
     boardDetails: {
