@@ -266,6 +266,7 @@ export const createInstance = async (
 
   const instance: ActiveTrelloViewInstance = {
     async addList({ name }: { readonly name: string }): Promise<void> {
+      // TODO make this one function
       await instance?.handleEvent?.({
         name: 'startAddList',
         type: 'click',
