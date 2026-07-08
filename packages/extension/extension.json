@@ -31,7 +31,7 @@
     "onCommand:trello.submitNewCard",
     "onCommand:trello.test.useMockData",
     "onCommand:trello.test.reset",
-    "onCommand:trello.addList"
+    "onCommand:trello.addList",
     "onCommand:trello.addCard"
   ],
   "commands": [
