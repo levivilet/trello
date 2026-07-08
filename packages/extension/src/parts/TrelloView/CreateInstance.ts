@@ -1,15 +1,19 @@
-import {
-  type ViewContext,
-  type ViewEvent,
-  type VirtualDomViewInstance,
+import type {
+  ViewContext,
+  ViewEvent,
+  VirtualDomViewInstance,
 } from '@lvce-editor/api'
 import type { VirtualDomNode } from '@lvce-editor/virtual-dom-worker'
 import type { CredentialStorage } from '../CredentialStorage/CredentialStorage.ts'
 import type { CurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
-import { createMemoryCurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
 import type { RecentBoardStorage } from '../RecentBoardStorage/RecentBoardStorage.ts'
 import type { TrelloClient } from '../TrelloClient/TrelloClient.ts'
 import type { TrelloImageCache } from '../TrelloImageCache/TrelloImageCache.ts'
+import type {
+  TrelloViewActionContext,
+  TrelloViewState,
+} from './state/TrelloViewState.ts'
+import { createMemoryCurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
 import { createTrelloImageCache } from '../TrelloImageCache/TrelloImageCache.ts'
 import {
   cancelAddCard,
@@ -47,10 +51,6 @@ import { renderBoardDetail } from './render/RenderBoardDetail.ts'
 import { renderBoards } from './render/RenderBoards.ts'
 import { createInitialState } from './state/CreateInitialState.ts'
 import { dependencyState } from './state/DependencyFactory.ts'
-import type {
-  TrelloViewActionContext,
-  TrelloViewState,
-} from './state/TrelloViewState.ts'
 import {
   contextKeyCardDescriptionFocus,
   contextKeyNewCardInputFocus,
