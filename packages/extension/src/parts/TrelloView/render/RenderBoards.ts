@@ -119,14 +119,8 @@ const renderBoardContent = (
 export const renderBoards = (
   state: Readonly<TrelloViewState>,
 ): readonly VirtualDomNode[] => {
-  const toolbarChildren = [
-    ...(state.searchEnabled ? [renderSearchForm(state)] : []),
-    Dom.button('refreshBoards', 'Refresh'),
-    Dom.button('logout', 'Sign out'),
-  ]
-  const toolbar = renderToolbar(toolbarChildren)
   const children = [
-    toolbar,
+    ...(state.searchEnabled ? [renderToolbar([renderSearchForm(state)])] : []),
     renderTitle('Boards'),
     ...renderBoardContent(state),
     ...renderError(state.error),

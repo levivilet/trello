@@ -14,7 +14,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await useMockDataAndShowTrello(Command, createMockData(boards))
   await connectWithCredentials({ expect, Locator })
 
-  const logout = Locator('button[name="logout"]')
+  const logout = Locator('button[title="Sign Out"]')
   await expect(logout).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await logout.click()
