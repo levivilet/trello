@@ -60,6 +60,7 @@ import {
 
 interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly addList: (options: any) => Promise<void>
+  readonly addCard: (options: any) => Promise<void>
   readonly backToBoards: () => Promise<void>
   readonly cancelNewCard: () => void
   readonly closeCardDetail: () => void
@@ -136,6 +137,9 @@ export const cancelNewCardActiveTrelloViewInstance = (): void => {
 
 export const addList = async (options: any): Promise<void> => {
   await getActiveInstance()?.addList(options)
+}
+export const addCard = async (options: any): Promise<void> => {
+  await getActiveInstance()?.addCard(options)
 }
 
 export const closeCardDetailActiveTrelloViewInstance = (): void => {
@@ -266,6 +270,28 @@ export const createInstance = async (
 
   const instance: ActiveTrelloViewInstance = {
     async addList({ name }: { readonly name: string }): Promise<void> {
+      // TODO make this one function
+      await instance?.handleEvent?.({
+        name: 'startAddList',
+        type: 'click',
+      })
+      await instance?.handleEvent?.({
+        name: 'newListTitle',
+        type: 'input',
+        value: name,
+      })
+      await instance?.handleEvent?.({
+        name: 'addList',
+        type: 'submit',
+      })
+    },
+    async addCard({
+      name,
+      listId,
+    }: {
+      readonly name: string
+      readonly listId: string
+    }): Promise<void> {
       // TODO make this one function
       await instance?.handleEvent?.({
         name: 'startAddList',
