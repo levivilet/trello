@@ -73,12 +73,13 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await connectWithCredentials({ expect, Locator })
   await openBoard(Locator, expect)
 
-  await Command.executeExtensionCommand('trello.handleClickEvent', {
-    name: 'startAddList',
+  const r = await Command.executeExtensionCommand('trello.addList', {
+    name: 'abc',
   })
-  await Command.executeExtensionCommand('trello.handleInputEvent', {
-    name: 'newListTitle:abc',
-  })
+  console.log({ r })
+  // await Command.executeExtensionCommand('trello.handleInputEvent', {
+  //   name: 'newListTitle:abc',
+  // })
   // await Command.executeExtensionCommand('trello.handleSubmitEvent', {
   //   name: 'addList',
   // })
