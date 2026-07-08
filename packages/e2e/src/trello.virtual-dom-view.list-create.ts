@@ -3,7 +3,7 @@
 import type { Test } from '@lvce-editor/test-with-playwright'
 
 export const name = 'trello.virtual-dom-view.list-create'
-export const skip = true
+// export const skip = true
 
 const createList = (id, name, cards) => {
   return {
@@ -55,10 +55,13 @@ const openCard = async (Locator, expect, cardId = 'card-1') => {
 }
 
 export const test: Test = async ({ Command, expect, Locator }) => {
+  // arrange
   const board = {
     id: 'board-1',
     name: 'Roadmap',
   }
+
+  // TODO use createBoard function
 
   await useMockDataAndShowTrello(Command, {
     boardDetails: {
@@ -70,39 +73,12 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await connectWithCredentials({ expect, Locator })
   await openBoard(Locator, expect)
 
+  // act
   await Command.executeExtensionCommand('trello.addList', {
     name: 'abc',
   })
-  // await Command.executeExtensionCommand('trello.handleInputEvent', {
-  //   name: 'newListTitle:abc',
-  // })
-  // await Command.executeExtensionCommand('trello.handleSubmitEvent', {
-  //   name: 'addList',
-  // })
-  // TODO create list, then create card
 
-  // await openCard(Locator, expect)
-
-  // const title = Locator('textarea[name="cardTitle"]')
-  // await expect(title).toBeVisible()
-  // await title.type(' edited')
-
-  // const descriptionPreview = Locator('.TrelloCardDescriptionPreview')
-  // await expect(descriptionPreview).toBeVisible()
-  // // eslint-disable-next-line e2e/no-direct-click
-  // await descriptionPreview.click()
-
-  // const description = Locator('textarea[name="cardDescription"]')
-  // await expect(description).toBeVisible()
-  // await description.type(' edited')
-
-  // const save = Locator('button[name="saveCardDetail"]')
-  // await expect(save).toBeVisible()
-  // // eslint-disable-next-line e2e/no-direct-click
-  // await save.click()
-
-  // const updatedTitle = Locator('text=Card 1 edited')
-  // const updatedDescription = Locator('text=Original description edited')
-  // await expect(updatedTitle).toBeVisible()
-  // await expect(updatedDescription).toBeVisible()
+  // assert
+  // const list = Locator('[name="listTitle:created-list-1"]')
+  // await expect(list).toBeVisible()
 }
