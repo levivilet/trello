@@ -1,25 +1,15 @@
-import type { VirtualDomNode } from '@lvce-editor/virtual-dom-worker'
 import {
   type ViewContext,
   type ViewEvent,
   type VirtualDomViewInstance,
-  executeCommand,
 } from '@lvce-editor/api'
+import type { VirtualDomNode } from '@lvce-editor/virtual-dom-worker'
 import type { CredentialStorage } from '../CredentialStorage/CredentialStorage.ts'
 import type { CurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
+import { createMemoryCurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
 import type { RecentBoardStorage } from '../RecentBoardStorage/RecentBoardStorage.ts'
 import type { TrelloClient } from '../TrelloClient/TrelloClient.ts'
 import type { TrelloImageCache } from '../TrelloImageCache/TrelloImageCache.ts'
-import type {
-  TrelloViewActionContext,
-  TrelloViewState,
-} from './state/TrelloViewState.ts'
-import {
-  createCacheCurrentBoardStorage,
-  createMemoryCurrentBoardStorage,
-} from '../CurrentBoardStorage/CurrentBoardStorage.ts'
-import { createMockTrelloClient } from '../MockTrelloClient/MockTrelloClient.ts'
-import { clearTrelloTestCaches } from '../TestStorage/TestStorage.ts'
 import { createTrelloImageCache } from '../TrelloImageCache/TrelloImageCache.ts'
 import {
   cancelAddCard,
@@ -51,12 +41,16 @@ import {
 } from './actions/ResizeCardDetail.ts'
 import { restoreCurrentBoard } from './actions/RestoreCurrentBoard.ts'
 import { saveCardDetail as saveCardDetailAction } from './actions/SaveCardDetail.ts'
-import { getMenuEntries, type MenuEntry } from './MenuEntries.ts'
+import { type MenuEntry, getMenuEntries } from './MenuEntries.ts'
 import { renderAuth } from './render/RenderAuth.ts'
 import { renderBoardDetail } from './render/RenderBoardDetail.ts'
 import { renderBoards } from './render/RenderBoards.ts'
 import { createInitialState } from './state/CreateInitialState.ts'
 import { dependencyState } from './state/DependencyFactory.ts'
+import type {
+  TrelloViewActionContext,
+  TrelloViewState,
+} from './state/TrelloViewState.ts'
 import {
   contextKeyCardDescriptionFocus,
   contextKeyNewCardInputFocus,
@@ -415,17 +409,17 @@ export const createInstance = async (
       readonly name: string
       readonly id: string
     }): Promise<void> {
-      await this.handleEvent?.({
+      await instance.handleEvent?.({
         name: 'apiKey',
         type: 'input',
         value: 'abcdefghijklmnopqrstuvwxyz123456',
       })
-      await this.handleEvent?.({
+      await instance.handleEvent?.({
         name: 'token',
         type: 'input',
         value: 'abcdefghijklmnopqrstuvwxyz123456',
       })
-      await this.handleEvent?.({
+      await instance.handleEvent?.({
         name: 'connect',
         type: 'click',
       })
