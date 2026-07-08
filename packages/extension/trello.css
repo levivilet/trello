@@ -108,7 +108,7 @@
   flex-direction: column;
   gap: 12px;
   height: 100%;
-  contain: strict;
+  /* contain: strict; */
   padding: 16px;
   color: var(--TrelloForeground);
   background: var(--TrelloBackground);
@@ -481,7 +481,7 @@ button.TrelloSearchResult:hover {
   flex: 1 1 auto;
   flex-direction: column;
   gap: 7px;
-  contain: strict;
+  /* contain: strict; */
   min-height: 0;
   margin-inline: -8px;
   padding: 1px 10px 2px;
