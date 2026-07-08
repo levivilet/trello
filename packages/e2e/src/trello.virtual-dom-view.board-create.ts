@@ -7,6 +7,11 @@ export const skip = true
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   // arrange
+  await Command.executeExtensionCommand('trello.test.useMockData', {
+    boardDetails: {},
+    boards: [],
+    cardDetails: {},
+  })
 
   // act
   await Command.executeExtensionCommand('trello.openMockBoard', {
