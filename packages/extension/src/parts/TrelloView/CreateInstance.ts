@@ -51,17 +51,12 @@ import {
 } from './actions/ResizeCardDetail.ts'
 import { restoreCurrentBoard } from './actions/RestoreCurrentBoard.ts'
 import { saveCardDetail as saveCardDetailAction } from './actions/SaveCardDetail.ts'
-import { viewId } from './Constants.ts'
 import { getMenuEntries, type MenuEntry } from './MenuEntries.ts'
 import { renderAuth } from './render/RenderAuth.ts'
 import { renderBoardDetail } from './render/RenderBoardDetail.ts'
 import { renderBoards } from './render/RenderBoards.ts'
 import { createInitialState } from './state/CreateInitialState.ts'
-import {
-  dependencyState,
-  resetTrelloViewDependencyFactory,
-  setTrelloViewDependencyFactory,
-} from './state/DependencyFactory.ts'
+import { dependencyState } from './state/DependencyFactory.ts'
 import {
   contextKeyCardDescriptionFocus,
   contextKeyNewCardInputFocus,
