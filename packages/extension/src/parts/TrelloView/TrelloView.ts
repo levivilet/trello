@@ -34,6 +34,7 @@ export {
   startAddCardActiveTrelloViewInstance,
   submitNewCardActiveTrelloViewInstance,
   addList,
+  addCard,
 } from './CreateInstance.ts'
 export { getMenuEntries } from './MenuEntries.ts'
 export {
