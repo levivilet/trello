@@ -59,10 +59,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
     id: 'board-1',
     name: 'Roadmap',
   }
-  const card = {
-    id: 'card-1',
-    name: 'Card 1',
-  }
+
   await useMockDataAndShowTrello(Command, {
     boardDetails: {
       'board-1': createBoardDetail(board, []),
@@ -73,10 +70,9 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await connectWithCredentials({ expect, Locator })
   await openBoard(Locator, expect)
 
-  const r = await Command.executeExtensionCommand('trello.addList', {
+  await Command.executeExtensionCommand('trello.addList', {
     name: 'abc',
   })
-  console.log({ r })
   // await Command.executeExtensionCommand('trello.handleInputEvent', {
   //   name: 'newListTitle:abc',
   // })
