@@ -100,7 +100,6 @@ export const activate = async (): Promise<void> => {
     },
     id: 'trello.addList',
   })
-  console.log('did register')
   registerCommand({
     async execute(data: Readonly<MockTrelloData>) {
       await clearTrelloTestCaches()
