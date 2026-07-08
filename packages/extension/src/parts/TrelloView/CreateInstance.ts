@@ -134,8 +134,8 @@ export const cancelNewCardActiveTrelloViewInstance = (): void => {
   getActiveInstance()?.cancelNewCard()
 }
 
-export const addList = (options: any): void => {
-  getActiveInstance()?.addList(options)
+export const addList = async (options: any): Promise<void> => {
+  await getActiveInstance()?.addList(options)
 }
 
 export const closeCardDetailActiveTrelloViewInstance = (): void => {
