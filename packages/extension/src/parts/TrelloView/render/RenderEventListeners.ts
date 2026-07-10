@@ -51,6 +51,11 @@ export const renderEventListeners = (): readonly DomEventListener[] => {
       preventDefault: true,
     },
     {
+      name: 'handleAddCardActionPointerDown',
+      params: ['handleViewEvent', 'pointerdown', 'event.currentTarget.name'],
+      preventDefault: true,
+    },
+    {
       name: 'handleCardDescriptionCancelPointerDown',
       params: ['handleViewEvent', 'pointerdown', 'event.currentTarget.name'],
       preventDefault: true,

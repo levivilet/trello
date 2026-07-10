@@ -41,11 +41,23 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await expect(title).toHaveCSS('field-sizing', 'content')
   await expect(title).toHaveCSS('height', '56px')
 
-  await title.type('W'.repeat(50))
-
-  await expect(title).toHaveCSS('height', '76px')
-
+  await title.type('abc')
   // eslint-disable-next-line e2e/no-direct-click
   await close.click()
   await expect(title).toHaveCount(0)
+
+  const addCardInOtherList = Locator('button[name="addCard:list-2"]')
+  await expect(addCardInOtherList).toBeVisible()
+  // eslint-disable-next-line e2e/no-direct-click
+  await addCardInOtherList.click()
+  const titleInOtherList = Locator('textarea[name="newCardTitle:list-2"]')
+  await expect(titleInOtherList).toHaveValue('abc')
+
+  await titleInOtherList.type('W'.repeat(47))
+
+  await expect(titleInOtherList).toHaveCSS('height', '76px')
+
+  // eslint-disable-next-line e2e/no-direct-click
+  await close.click()
+  await expect(titleInOtherList).toHaveCount(0)
 }

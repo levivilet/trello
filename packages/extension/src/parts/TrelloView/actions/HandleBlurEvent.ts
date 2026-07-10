@@ -4,6 +4,7 @@ import type {
   TrelloViewState,
 } from '../state/TrelloViewState.ts'
 import { getErrorMessage } from '../GetErrorMessage.ts'
+import { cancelAddCard } from './AddCard.ts'
 import { closeCardLabelPicker } from './AddCardLabel.ts'
 import { cancelAddList } from './AddList.ts'
 import { saveCardDetail } from './SaveCardDetail.ts'
@@ -127,6 +128,10 @@ export const handleBlurEvent = async (
   context: Readonly<TrelloViewActionContext>,
   event: Readonly<ViewEvent>,
 ): Promise<void> => {
+  if (event.name?.startsWith('newCardTitle:')) {
+    cancelAddCard(context)
+    return
+  }
   if (event.name === 'newListTitle') {
     cancelAddList(context)
     return

@@ -46,7 +46,6 @@ export const startAddCard = (
   const { requestRerender } = context
   const state = context.state as TrelloViewState
   state.addingCardListId = listId
-  state.draftNewCardTitle = ''
   state.focusedName = `newCardTitle:${listId}`
   state.savingNewCard = false
   state.error = ''
@@ -59,7 +58,6 @@ export const cancelAddCard = (
   const { requestRerender } = context
   const state = context.state as TrelloViewState
   state.addingCardListId = ''
-  state.draftNewCardTitle = ''
   state.savingNewCard = false
   state.error = ''
   requestRerender()
