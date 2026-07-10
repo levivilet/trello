@@ -20,6 +20,7 @@ import type {
   TrelloListCreate,
   TrelloListUpdate,
 } from '../src/parts/TrelloTypes/TrelloTypes.ts'
+import type { ActiveTrelloViewInstance } from '../src/parts/TrelloView/CreateInstance.ts'
 import { createMemoryCredentialStorage } from '../src/parts/CredentialStorage/CredentialStorage.ts'
 import { createMockTrelloClient } from '../src/parts/MockTrelloClient/MockTrelloClient.ts'
 import {
@@ -233,7 +234,7 @@ const createAuthenticatedInstance = async (
       y: number,
     ) => Promise<void>
   } = {},
-): Promise<VirtualDomViewInstance> => {
+): Promise<ActiveTrelloViewInstance> => {
   const {
     boardDetails,
     boardLabels,
@@ -263,13 +264,13 @@ const createAuthenticatedInstance = async (
     storage: createMemoryCredentialStorage(),
   }))
 
-  const instance = (await view.create(
+  const instance = await view.create(
     options.showContextMenu
       ? ({
           showContextMenu: options.showContextMenu,
         } as any)
       : undefined,
-  )) as VirtualDomViewInstance
+  )
   await instance.handleEvent?.({
     name: 'apiKey',
     type: 'input',
@@ -1211,6 +1212,31 @@ test('renderTitle moves the current board name into the sidebar title', async ()
 
   await backToBoardsActiveTrelloViewInstance()
   expect(instance.renderTitle()).toBe('Trello')
+  resetTrelloViewDependencyFactory()
+})
+
+test('back sidebar action returns to the boards view', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [],
+        },
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+
+  const command = view.commands['trello.backToBoards']
+  const newInstance = await command(instance)
+  const dom = await newInstance.render()
+
+  expect(newInstance).toBe(instance)
+  expect(getNodeByName(dom, 'board:board-1')).toBeDefined()
+  expect(getClassNames(dom)).not.toContain('TrelloBoardDetail')
   resetTrelloViewDependencyFactory()
 })
 
