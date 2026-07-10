@@ -1,5 +1,4 @@
 // @ts-nocheck
-/* eslint-disable @typescript-eslint/explicit-function-return-type, @typescript-eslint/prefer-readonly-parameter-types */
 import type { Test } from '@lvce-editor/test-with-playwright'
 
 export const name = 'trello.virtual-dom-view.list-create'
