@@ -90,6 +90,7 @@ export const submitAddCard = async (
     return
   }
   state.savingNewCard = true
+  state.focusedName = ''
   state.error = ''
   requestRerender()
   try {
@@ -102,10 +103,12 @@ export const submitAddCard = async (
       state.credentials,
     )
     appendCardToList(state, listId, card)
-    state.addingCardListId = ''
+    state.addingCardListId = listId
     state.draftNewCardTitle = ''
+    state.focusedName = `newCardTitle:${listId}`
     state.error = ''
   } catch (error) {
+    state.focusedName = `newCardTitle:${listId}`
     state.error = getErrorMessage(error)
   }
   state.savingNewCard = false

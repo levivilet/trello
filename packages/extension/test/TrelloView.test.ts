@@ -1619,7 +1619,7 @@ test('active keybinding command saves card description', async () => {
   resetTrelloViewDependencyFactory()
 })
 
-test('submitting add card appends card and hides input', async () => {
+test('submitting add card appends card and focuses an empty input for the next card', async () => {
   const instance = await createAuthenticatedInstance(
     [{ id: 'board-1', name: 'Roadmap' }],
     [],
@@ -1661,15 +1661,49 @@ test('submitting add card appends card and hides input', async () => {
     todoText.indexOf('Build add card'),
   )
   expect(doingText).not.toContain('Build add card')
-  expect(getNodeByName(dom, 'newCardTitle:list-1')).toBeUndefined()
-  expect(
-    hasNode(dom, (node) => {
-      return (
-        node.name === 'addCard:list-1' &&
-        node.className === 'TrelloAddCardButton'
-      )
+  expect(getNodeByName(dom, 'newCardTitle:list-1')).toEqual(
+    expect.objectContaining({
+      disabled: false,
+      value: '',
     }),
-  ).toBe(true)
+  )
+  await instance.handleEvent?.({
+    name: 'newCardTitle:list-1',
+    type: 'input',
+    value: 'Write tests',
+  })
+  await instance.handleEvent?.({ name: 'addCard:list-1', type: 'submit' })
+
+  const nextDom = await instance.render()
+  expect(getSubtreeTextByNodeName(nextDom, 'list:list-1')).toContain(
+    'Write tests',
+  )
+  expect(getNodeByName(nextDom, 'newCardTitle:list-1')).toEqual(
+    expect.objectContaining({
+      disabled: false,
+      value: '',
+    }),
+  )
+  const withContext = instance as VirtualDomViewInstance & {
+    readonly getContext: () => Readonly<Record<string, boolean>>
+    readonly renderFocus: (
+      oldContext: Readonly<Record<string, boolean>>,
+      newContext: Readonly<Record<string, boolean>>,
+    ) => string
+  }
+  const nextCardContext = withContext.getContext()
+  expect(nextCardContext).toEqual({
+    'trello.boardDetailFocus': true,
+    'trello.newCardInputFocus': true,
+  })
+  expect(
+    withContext.renderFocus(
+      {
+        'trello.boardDetailFocus': true,
+      },
+      nextCardContext,
+    ),
+  ).toBe('[name="newCardTitle:list-1"]')
   resetTrelloViewDependencyFactory()
 })
 
