@@ -1,6 +1,6 @@
 import type { ViewEvent } from '@lvce-editor/api'
 import type { TrelloViewActionContext } from '../state/TrelloViewState.ts'
-import { startAddCard } from './AddCard.ts'
+import { cancelAddCard, startAddCard, submitAddCard } from './AddCard.ts'
 import {
   addCardLabel,
   closeCardLabelPicker,
@@ -34,6 +34,13 @@ export const handleClickEvent = async (
     startAddCard(context, event.name.slice('addCard:'.length))
     return
   }
+  if (event.name?.startsWith('submitAddCard:')) {
+    await submitAddCard(
+      context,
+      `addCard:${event.name.slice('submitAddCard:'.length)}`,
+    )
+    return
+  }
   if (event.name?.startsWith('addCardLabel:')) {
     await addCardLabel(context, event.name.slice('addCardLabel:'.length))
     return
@@ -41,6 +48,9 @@ export const handleClickEvent = async (
   switch (event.name) {
     case 'backToBoards':
       await goBackToBoards(context)
+      return
+    case 'cancelAddCard':
+      cancelAddCard(context)
       return
     case 'cancelWriteComment':
       cancelWriteComment(context)

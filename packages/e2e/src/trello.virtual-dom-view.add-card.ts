@@ -32,7 +32,11 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await addCard.click()
 
   const title = Locator('textarea[name="newCardTitle:list-1"]')
+  const submit = Locator('button[name="submitAddCard:list-1"]')
+  const close = Locator('button[name="cancelAddCard"]')
   await expect(title).toBeVisible()
+  await expect(submit).toBeVisible()
+  await expect(close).toBeVisible()
   await expect(title).toHaveAttribute('rows', '2')
   await expect(title).toHaveCSS('field-sizing', 'content')
   await expect(title).toHaveCSS('height', '56px')
@@ -40,4 +44,8 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await title.type('W'.repeat(50))
 
   await expect(title).toHaveCSS('height', '76px')
+
+  // eslint-disable-next-line e2e/no-direct-click
+  await close.click()
+  await expect(title).toHaveCount(0)
 }

@@ -1028,7 +1028,7 @@ test('cards and lists render drag and drop attributes', async () => {
   resetTrelloViewDependencyFactory()
 })
 
-test('clicking add card renders input for that list only', async () => {
+test('clicking add card renders action controls that submit or close the form', async () => {
   const instance = await createAuthenticatedInstance(
     [{ id: 'board-1', name: 'Roadmap' }],
     [],
@@ -1068,6 +1068,25 @@ test('clicking add card renders input for that list only', async () => {
     }),
   )
   expect(getNodeByName(dom, 'newCardTitle:list-2')).toBeUndefined()
+  expect(getNodeByName(dom, 'submitAddCard:list-1')).toEqual(
+    expect.objectContaining({
+      className: 'TrelloButton TrelloAddCardSubmitButton',
+      disabled: false,
+      inputType: 'button',
+      name: 'submitAddCard:list-1',
+      onClick: 'handleClick',
+    }),
+  )
+  expect(getNodeByName(dom, 'cancelAddCard')).toEqual(
+    expect.objectContaining({
+      'aria-label': 'Close',
+      className: 'TrelloAddCardCloseButton',
+      inputType: 'button',
+      name: 'cancelAddCard',
+      onClick: 'handleClick',
+      title: 'Close',
+    }),
+  )
   expect(
     hasNode(dom, (node) => {
       return (
@@ -1076,6 +1095,23 @@ test('clicking add card renders input for that list only', async () => {
       )
     }),
   ).toBe(true)
+
+  await instance.handleEvent?.({ name: 'cancelAddCard', type: 'click' })
+  expect(
+    getNodeByName(await instance.render(), 'newCardTitle:list-1'),
+  ).toBeUndefined()
+
+  await instance.handleEvent?.({ name: 'addCard:list-1', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'newCardTitle:list-1',
+    type: 'input',
+    value: 'Build add card',
+  })
+  await instance.handleEvent?.({
+    name: 'submitAddCard:list-1',
+    type: 'click',
+  })
+  expect(getText(await instance.render())).toContain('Build add card')
   resetTrelloViewDependencyFactory()
 })
 
