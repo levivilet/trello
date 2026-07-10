@@ -445,8 +445,24 @@ const renderCardDescriptionEditor = (
         state.savingCardDetail ? 'Saving...' : 'Save',
         'TrelloButton TrelloCardDetailSaveButton',
       ),
+      renderCardDescriptionCancelButton(state.savingCardDetail),
     ]),
   ])
+}
+
+const renderCardDescriptionCancelButton = (disabled: boolean): Dom.TreeNode => {
+  const text = Dom.textNode('Cancel')
+  return Dom.node(
+    VirtualDomElements.Button,
+    {
+      className: 'TrelloButton TrelloCardDetailCancelButton',
+      disabled,
+      name: 'cancelCardDescriptionEdit',
+      onClick: 'handleClick',
+      onPointerDown: 'handleCardDescriptionCancelPointerDown',
+    },
+    [text],
+  )
 }
 
 const renderCardDescriptionPreview = (description: string): Dom.TreeNode => {

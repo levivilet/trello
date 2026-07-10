@@ -943,6 +943,11 @@ test('cards and lists render drag and drop attributes', async () => {
       preventDefault: true,
     },
     {
+      name: 'handleCardDescriptionCancelPointerDown',
+      params: ['handleViewEvent', 'pointerdown', 'event.currentTarget.name'],
+      preventDefault: true,
+    },
+    {
       name: 'handlePointerMove',
       params: [
         'handleViewEvent',
@@ -3720,7 +3725,28 @@ test('editing card title and description saves card detail', async () => {
     hasNode(editingDom, (node) => {
       return node.name === 'cancelCardDescriptionEdit'
     }),
+  ).toBe(true)
+
+  await instance.handleEvent?.({
+    name: 'cardDescription',
+    type: 'input',
+    value: 'Discarded description',
+  })
+  await instance.handleEvent?.({
+    name: 'cancelCardDescriptionEdit',
+    type: 'click',
+  })
+
+  const cancelledDom = await instance.render()
+  expect(getText(cancelledDom)).toContain('Original description')
+  expect(getText(cancelledDom)).not.toContain('Discarded description')
+  expect(
+    hasNode(cancelledDom, (node) => {
+      return node.name === 'cardDescription'
+    }),
   ).toBe(false)
+
+  await instance.handleEvent?.({ name: 'editCardDescription', type: 'click' })
 
   await instance.handleEvent?.({
     name: 'cardDescription',

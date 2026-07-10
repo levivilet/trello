@@ -12,6 +12,7 @@ import {
   submitComment,
 } from './AddComment.ts'
 import { startAddList } from './AddList.ts'
+import { cancelCardDescriptionEdit } from './CancelCardDescriptionEdit.ts'
 import { closeCardDetail } from './CloseCardDetail.ts'
 import { connect } from './Connect.ts'
 import { editCardDescription, editCardTitle } from './EditCardDetail.ts'
@@ -51,6 +52,9 @@ export const handleClickEvent = async (
       return
     case 'cancelAddCard':
       cancelAddCard(context)
+      return
+    case 'cancelCardDescriptionEdit':
+      cancelCardDescriptionEdit(context)
       return
     case 'cancelWriteComment':
       cancelWriteComment(context)
