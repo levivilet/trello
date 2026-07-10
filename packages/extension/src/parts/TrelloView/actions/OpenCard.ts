@@ -30,6 +30,16 @@ const getCurrentDetailForCard = (
   return undefined
 }
 
+const isCardAlreadyOpen = (
+  state: Readonly<TrelloViewState>,
+  cardId: string,
+): boolean => {
+  return (
+    state.selectedCardDetail?.card.id === cardId ||
+    (state.cardDetailLoading && state.cardDetailLoadingCardId === cardId)
+  )
+}
+
 const applyFreshCard = (
   state: Readonly<TrelloViewState>,
   freshCard: Readonly<TrelloCard>,
@@ -151,6 +161,9 @@ export const openCard = async (
   const { client, requestRerender } = context
   const state = context.state as TrelloViewState
   if (!state.credentials || !state.boardDetail) {
+    return
+  }
+  if (isCardAlreadyOpen(state, cardId)) {
     return
   }
   const card = findBoardCard(state, cardId)

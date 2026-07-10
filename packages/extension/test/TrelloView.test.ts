@@ -2389,6 +2389,74 @@ test('clicking card renders card detail and close dismisses it', async () => {
   resetTrelloViewDependencyFactory()
 })
 
+test('clicking already opened card does nothing', async () => {
+  const boards = [{ id: 'board-1', name: 'Roadmap' }]
+  const boardDetail = {
+    board: boards[0],
+    lists: [
+      {
+        cards: [{ id: 'card-1', name: 'Ship Trello view' }],
+        id: 'list-1',
+        name: 'Todo',
+      },
+    ],
+  }
+  const cardDetail: TrelloCardDetail = {
+    attachments: [],
+    card: {
+      desc: 'Detailed card description',
+      id: 'card-1',
+      name: 'Ship Trello view',
+    },
+    comments: [],
+  }
+  let getCardDetailCallCount = 0
+  setTrelloViewDependencyFactory(() => ({
+    client: createStagedCardClient({
+      boardDetail,
+      boards,
+      async getCardDetailPartsCacheFirst() {
+        getCardDetailCallCount++
+        return {
+          cached: undefined,
+          fresh: {
+            attachments: Promise.resolve(cardDetail.attachments),
+            card: Promise.resolve(cardDetail.card),
+            comments: Promise.resolve(cardDetail.comments),
+          },
+        }
+      },
+    }),
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage(),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: validApiKey,
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: validToken,
+  })
+  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+
+  expect(getCardDetailCallCount).toBe(1)
+  expect(getText(await instance.render())).toContain(
+    'Detailed card description',
+  )
+
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+
+  expect(getCardDetailCallCount).toBe(1)
+  resetTrelloViewDependencyFactory()
+})
+
 test('card detail panel resizes from the left sash', async () => {
   const instance = await createAuthenticatedInstance(
     [{ id: 'board-1', name: 'Roadmap' }],
