@@ -7,6 +7,7 @@ export const createInitialState = (): TrelloViewState => {
     addingCardLabelId: '',
     addingCardListId: '',
     addingList: false,
+    attachmentImageUrls: {},
     baseUrl: getAssetBaseUrl(import.meta.url),
     boardBackgroundEnabled: false,
     boardDetail: undefined,

@@ -8,6 +8,10 @@ import type {
   TrelloViewActionContext,
   TrelloViewState,
 } from '../state/TrelloViewState.ts'
+import {
+  getAttachmentImageUrl,
+  isImageAttachment,
+} from '../AttachmentHelpers.ts'
 import { getErrorMessage } from '../GetErrorMessage.ts'
 import { applyCardDetail, isSameJson } from './CacheFirstHelpers.ts'
 import { findBoardCard } from './FindBoardCard.ts'
@@ -98,6 +102,50 @@ const applyFreshAttachments = (
   }
 }
 
+const resolveCardAttachmentImages = async (
+  context: TrelloViewActionContext,
+  cardId: string,
+  attachments: readonly TrelloAttachment[],
+): Promise<void> => {
+  const state = context.state as TrelloViewState
+  const { credentials } = state
+  if (!credentials) {
+    return
+  }
+  const sourceUrls = attachments
+    .filter(isImageAttachment)
+    .map(getAttachmentImageUrl)
+    .filter(Boolean)
+  const resolvedUrls = await Promise.all(
+    sourceUrls.map(async (sourceUrl) => {
+      try {
+        const imageUrl = await context.imageCache.resolveImageUrl(
+          sourceUrl,
+          credentials,
+        )
+        return [sourceUrl, imageUrl] as const
+      } catch {
+        return [sourceUrl, ''] as const
+      }
+    }),
+  )
+  if (
+    !isCurrentCardLoad(state, cardId) ||
+    state.credentials?.apiKey !== credentials.apiKey ||
+    state.credentials?.token !== credentials.token
+  ) {
+    return
+  }
+  const attachmentImageUrls = { ...state.attachmentImageUrls }
+  for (const [sourceUrl, imageUrl] of resolvedUrls) {
+    if (imageUrl) {
+      attachmentImageUrls[sourceUrl] = imageUrl
+    }
+  }
+  state.attachmentImageUrls = attachmentImageUrls
+  context.requestRerender()
+}
+
 const loadCardComments = async (
   context: TrelloViewActionContext,
   cardId: string,
@@ -141,6 +189,7 @@ const loadCardAttachments = async (
     }
     if (isCurrentCardLoad(state, cardId)) {
       applyFreshAttachments(state, cardId, attachments)
+      await resolveCardAttachmentImages(context, cardId, attachments)
     }
   } catch (error) {
     if (isCurrentCardLoad(state, cardId)) {
@@ -176,6 +225,7 @@ export const openCard = async (
   state.cardDetailLoadingCardId = card.id
   state.cardCommentsLoading = true
   state.cardAttachmentsLoading = true
+  state.attachmentImageUrls = {}
   state.selectedCardDetail = undefined
   state.addingCardLabelId = ''
   state.cardLabelPickerOpen = false
@@ -193,6 +243,11 @@ export const openCard = async (
     )
     if (result.cached) {
       applyCardDetail(state, result.cached)
+      void resolveCardAttachmentImages(
+        context,
+        card.id,
+        result.cached.attachments,
+      )
       state.cardDetailLoading = false
       requestRerender()
     }
