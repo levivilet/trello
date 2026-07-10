@@ -1,3 +1,4 @@
+import type { ViewSelection } from '@lvce-editor/api'
 import type { CredentialStorage } from '../../CredentialStorage/CredentialStorage.ts'
 import type { CurrentBoardStorage } from '../../CurrentBoardStorage/CurrentBoardStorage.ts'
 import type {
@@ -69,6 +70,7 @@ export interface TrelloViewState {
   focusedName: string
   loading: boolean
   movingCardId: string
+  pendingSelections: readonly ViewSelection[]
   recentBoardViews: readonly RecentBoardView[]
   resizingCardDetail: boolean
   savingCardDetail: boolean
