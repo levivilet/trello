@@ -1347,11 +1347,34 @@ button.TrelloSearchResult:hover {
 .TrelloCardCommentComposer {
   display: flex;
   flex-direction: column;
+  gap: 8px;
   contain: content;
 }
 
 .TrelloCardCommentTextArea {
   min-height: 82px;
+}
+
+.TrelloCardCommentActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  contain: content;
+}
+
+.TrelloCardCommentSaveButton,
+.TrelloCardCommentCancelButton {
+  min-width: 72px;
+}
+
+.TrelloCardCommentCancelButton {
+  color: var(--TrelloForegroundStrong);
+  background: transparent;
+  border-color: transparent;
+}
+
+.TrelloCardCommentCancelButton:hover {
+  background: var(--TrelloHoverBackground);
 }
 
 .TrelloCardDetailImages {
