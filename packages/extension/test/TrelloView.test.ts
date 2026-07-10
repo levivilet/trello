@@ -1179,6 +1179,34 @@ test('renderActions returns board detail actions', async () => {
   resetTrelloViewDependencyFactory()
 })
 
+test('renderTitle moves the current board name into the sidebar title', async () => {
+  const instance = (await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [],
+        },
+      },
+    },
+  )) as VirtualDomViewInstance & {
+    readonly renderTitle: () => string
+  }
+
+  expect(instance.renderTitle()).toBe('Trello')
+
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+
+  expect(instance.renderTitle()).toBe('Trello: Roadmap')
+  expect(getClassNames(await instance.render())).not.toContain('TrelloTitle')
+
+  await backToBoardsActiveTrelloViewInstance()
+  expect(instance.renderTitle()).toBe('Trello')
+  resetTrelloViewDependencyFactory()
+})
+
 test('boards view does not render sidebar actions inside content', async () => {
   const instance = await createAuthenticatedInstance([
     { id: 'board-1', name: 'Roadmap' },
