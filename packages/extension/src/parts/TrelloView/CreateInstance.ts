@@ -50,6 +50,7 @@ import { renderActions, type ViewAction } from './render/RenderActions.ts'
 import { renderAuth } from './render/RenderAuth.ts'
 import { renderBoardDetail } from './render/RenderBoardDetail.ts'
 import { renderBoards } from './render/RenderBoards.ts'
+import { renderTitle as renderTrelloTitle } from './render/RenderTitle.ts'
 import { createInitialState } from './state/CreateInitialState.ts'
 import { dependencyState } from './state/DependencyFactory.ts'
 import {
@@ -78,6 +79,7 @@ interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
     oldContext: Readonly<Record<string, boolean>>,
     newContext: Readonly<Record<string, boolean>>,
   ) => string
+  readonly renderTitle: () => string
   readonly saveCardDetail: () => Promise<void>
   readonly startAddCard: (listId: string) => void
   readonly submitNewCard: () => Promise<void>
@@ -470,6 +472,9 @@ export const createInstance = async (
         return '[name="cardDescription"]'
       }
       return ''
+    },
+    renderTitle(): string {
+      return renderTrelloTitle(state)
     },
     async saveCardDetail(): Promise<void> {
       await saveCardDetailAction(viewContext)

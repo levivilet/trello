@@ -14,7 +14,7 @@ import {
 } from './BoardBackground.ts'
 import { renderCardDetailPanel } from './RenderCardDetailPanel.ts'
 import { renderCards } from './RenderCards.ts'
-import { renderError, renderTitle } from './RenderShared.ts'
+import { renderError } from './RenderShared.ts'
 
 const renderListTitleInput = (
   state: Readonly<TrelloViewState>,
@@ -151,7 +151,6 @@ export const renderBoardDetail = (
     )
   })
   const children = [
-    renderTitle(detail.board.name),
     ...renderBoardDetailContent(state, lists),
     ...renderError(state.error),
   ]
