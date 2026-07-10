@@ -1,13 +1,33 @@
 import type { View } from '@lvce-editor/api'
 import { viewId } from './Constants.ts'
-import { createInstance } from './CreateInstance.ts'
+import {
+  type ActiveTrelloViewInstance,
+  createInstance,
+} from './CreateInstance.ts'
 import { renderEventListeners } from './render/RenderEventListeners.ts'
 
-type TrelloView = View & {
+type TrelloView = Omit<View<ActiveTrelloViewInstance>, 'commands'> & {
+  readonly commands: NonNullable<View<ActiveTrelloViewInstance>['commands']>
   readonly eventListeners?: ReturnType<typeof renderEventListeners>
 }
 
+const runViewAction =
+  (action: (instance: ActiveTrelloViewInstance) => Promise<void>) =>
+  async (
+    instance: ActiveTrelloViewInstance,
+  ): Promise<ActiveTrelloViewInstance> => {
+    await action(instance)
+    return instance
+  }
+
 export const view: TrelloView = {
+  commands: {
+    'trello.backToBoards': runViewAction((instance) => instance.backToBoards()),
+    'trello.logout': runViewAction((instance) => instance.logout()),
+    'trello.refreshBoards': runViewAction((instance) =>
+      instance.refreshBoards(),
+    ),
+  },
   create: createInstance,
   // @ts-ignore
   displayName: 'Trello',

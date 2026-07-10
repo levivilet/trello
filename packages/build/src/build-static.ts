@@ -1,4 +1,4 @@
-import { access, cp, readFile, writeFile } from 'node:fs/promises'
+import { access, cp, readFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import path, { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -28,96 +28,6 @@ const assertTrelloExtensionEntry = (
     throw new Error(`Expected ${file} to include ${extensionId}`)
   }
   return entry
-}
-
-const replaceRequired = (
-  source: string,
-  search: string,
-  replacement: string,
-  file: string,
-  label: string,
-): string => {
-  const replaced = source.replace(search, replacement)
-  if (replaced === source) {
-    throw new Error(`Failed to patch ${label} in ${file}`)
-  }
-  return replaced
-}
-
-const patchExtensionManagementWorker = async (
-  commitHash: string,
-): Promise<void> => {
-  const workerPath = path.join(
-    root,
-    'dist',
-    commitHash,
-    'packages',
-    'extension-management-worker',
-    'dist',
-    'extensionManagementWorkerMain.js',
-  )
-  const before = await readFile(workerPath, 'utf8')
-  let after = replaceRequired(
-    before,
-    `if (typeof assetDir !== 'string') {
-    assetDir = await invoke$3('Layout.getAssetDir');
-  }
-  if (!platform) {
-    platform = await invoke$3('Layout.getPlatform');
-  }`,
-    `if (typeof assetDir !== 'string' || assetDir.length === 0) {
-    assetDir = await invoke$3('Layout.getAssetDir');
-  }
-  if (!platform) {
-    platform = await invoke$3('Layout.getPlatform');
-  }
-  if (typeof globalThis.location !== 'undefined' && globalThis.location.protocol.startsWith('http') && (assetDir.startsWith('/') || assetDir.startsWith('http'))) {
-    platform = Web;
-  }`,
-    workerPath,
-    'extension list assetDir resolution',
-  )
-  after = replaceRequired(
-    after,
-    `const getRpcForView = async (viewId, assetDir, platform) => {
-  const extension = await getExtensionForView(viewId, assetDir, platform);`,
-    `const getRpcForView = async (viewId, assetDir, platform) => {
-  if (typeof assetDir !== 'string' || assetDir.length === 0) {
-    assetDir = await invoke$3('Layout.getAssetDir');
-  }
-  if (!platform) {
-    platform = await invoke$3('Layout.getPlatform');
-  }
-  if (typeof globalThis.location !== 'undefined' && globalThis.location.protocol.startsWith('http') && (assetDir.startsWith('/') || assetDir.startsWith('http'))) {
-    platform = Web;
-  }
-  const extension = await getExtensionForView(viewId, assetDir, platform);`,
-    workerPath,
-    'view rpc assetDir resolution',
-  )
-  after = replaceRequired(
-    after,
-    `const getViews = async (assetDir, platform) => {
-  const extensions = await getAllExtensions(assetDir, platform);
-  return getViewsFromExtensionWorkers(extensions, assetDir, platform);
-};`,
-    `const getViews = async (assetDir, platform) => {
-  if (typeof assetDir !== 'string' || assetDir.length === 0) {
-    assetDir = await invoke$3('Layout.getAssetDir');
-  }
-  if (!platform) {
-    platform = await invoke$3('Layout.getPlatform');
-  }
-  if (typeof globalThis.location !== 'undefined' && globalThis.location.protocol.startsWith('http') && (assetDir.startsWith('/') || assetDir.startsWith('http'))) {
-    platform = Web;
-  }
-  const extensions = await getAllExtensions(assetDir, platform);
-  return getViewsFromExtensionWorkers(extensions, assetDir, platform);
-};`,
-    workerPath,
-    'contributed views assetDir resolution',
-  )
-  await writeFile(workerPath, after)
 }
 
 const assertStaticTrelloExtension = async (
@@ -171,13 +81,15 @@ const assertStaticTrelloExtension = async (
     'extensionManagementWorkerMain.js',
   )
   const worker = await readFile(workerPath, 'utf8')
-  if (
-    !worker.includes(
-      `if (typeof assetDir !== 'string' || assetDir.length === 0)`,
-    )
-  ) {
+  const requiredRuntimeContext = [
+    `return typeof assetDir !== 'string' || assetDir.length === 0;`,
+    `const getRuntimeContext = async (assetDir, platform) => {`,
+    `isHttpLocation() && isStaticHttpAssetDir(resolvedAssetDir)`,
+    `platform: Web`,
+  ]
+  if (requiredRuntimeContext.some((snippet) => !worker.includes(snippet))) {
     throw new Error(
-      `Expected ${workerPath} to resolve an empty assetDir before reading extensions.json`,
+      `Expected ${workerPath} to include static web runtime context resolution`,
     )
   }
 }
@@ -211,5 +123,4 @@ await cp(
   { recursive: true, force: true },
 )
 
-await patchExtensionManagementWorker(commitHash)
 await assertStaticTrelloExtension(commitHash)

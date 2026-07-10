@@ -669,10 +669,17 @@ button.TrelloSearchResult:hover {
 .TrelloAddCardInput {
   box-sizing: border-box;
   width: 100%;
-  min-height: 34px;
+  min-height: calc(2lh + 16px);
+  field-sizing: content;
   contain: content;
   padding: 7px 8px;
+  overflow-y: hidden;
+  font: inherit;
+  line-height: 20px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   color: var(--TrelloInputForeground);
+  resize: none;
   background: var(--TrelloInputBackground);
   border: 1px solid var(--TrelloFocus);
   border-radius: 6px;
@@ -1105,10 +1112,11 @@ button.TrelloSearchResult:hover {
   font-size: 12px;
   font-weight: 500;
   line-height: 18px;
-  color: #ffffff;
+  color: var(--TrelloForeground);
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
+  background: transparent;
   border: 1px solid transparent;
   border-radius: 4px;
 }
@@ -1121,10 +1129,15 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloCardLabelChoiceText {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  min-width: 0;
   contain: content;
+  padding: 4px 8px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  border-radius: 4px;
 }
 
 .TrelloCardLabelChoice:disabled {

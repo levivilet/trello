@@ -45,6 +45,7 @@ export const createInitialState = (): TrelloViewState => {
     focusedName: '',
     loading: false,
     movingCardId: '',
+    pendingSelections: [],
     recentBoardViews: [],
     resizingCardDetail: false,
     savingCardDetail: false,

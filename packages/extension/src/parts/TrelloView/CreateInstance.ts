@@ -1,6 +1,7 @@
 import type {
   ViewContext,
   ViewEvent,
+  ViewSelection,
   VirtualDomViewInstance,
 } from '@lvce-editor/api'
 import type { VirtualDomNode } from '@lvce-editor/virtual-dom-worker'
@@ -32,6 +33,7 @@ import {
   handleDragStartEvent,
   handleDropEvent,
 } from './actions/HandleDragEvent.ts'
+import { handleFocusEvent } from './actions/HandleFocusEvent.ts'
 import { handleInputEvent } from './actions/HandleInputEvent.ts'
 import { handleKeyDownEvent } from './actions/HandleKeyDownEvent.ts'
 import { handleSubmitEvent } from './actions/HandleSubmitEvent.ts'
@@ -61,7 +63,7 @@ import {
   updateContext,
 } from './state/UpdateContext.ts'
 
-interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
+export interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly addCard: (options: any) => Promise<void>
   readonly addList: (options: any) => Promise<void>
   readonly backToBoards: () => Promise<void>
@@ -79,6 +81,7 @@ interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
     oldContext: Readonly<Record<string, boolean>>,
     newContext: Readonly<Record<string, boolean>>,
   ) => string
+  readonly renderSelections: () => readonly ViewSelection[]
   readonly renderTitle: () => string
   readonly saveCardDetail: () => Promise<void>
   readonly startAddCard: (listId: string) => void
@@ -194,7 +197,7 @@ export const reloadActiveTrelloViewInstances = async (): Promise<void> => {
 
 export const createInstance = async (
   context?: ViewContext,
-): Promise<VirtualDomViewInstance> => {
+): Promise<ActiveTrelloViewInstance> => {
   const state = createInitialState()
   const viewContext: MutableTrelloViewActionContext = {
     client: undefined as never,
@@ -341,9 +344,10 @@ export const createInstance = async (
     async handleEvent(event: Readonly<ViewEvent>): Promise<void> {
       activeInstances.delete(instance)
       activeInstances.add(instance)
+      state.pendingSelections = []
       try {
         if (event.type === 'focus') {
-          state.focusedName = event.name || ''
+          handleFocusEvent(viewContext, event)
           return
         }
         if (event.type === 'input') {
@@ -472,6 +476,11 @@ export const createInstance = async (
         return '[name="cardDescription"]'
       }
       return ''
+    },
+    renderSelections(): readonly ViewSelection[] {
+      const selections = state.pendingSelections
+      state.pendingSelections = []
+      return selections
     },
     renderTitle(): string {
       return renderTrelloTitle(state)
