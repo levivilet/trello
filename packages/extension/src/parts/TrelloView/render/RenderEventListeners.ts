@@ -42,6 +42,11 @@ export const renderEventListeners = (): readonly DomEventListener[] => {
       ],
     },
     {
+      name: 'handleCardLabelPickerPointerDown',
+      params: ['handleViewEvent', 'pointerdown', 'event.currentTarget.name'],
+      preventDefault: true,
+    },
+    {
       name: 'handlePointerMove',
       params: [
         'handleViewEvent',

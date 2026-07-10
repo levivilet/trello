@@ -40,6 +40,7 @@ export const openCardLabelPicker = async (
     return
   }
   state.cardLabelPickerOpen = true
+  state.focusedName = 'cardLabelSearch'
   state.error = ''
   if (state.boardLabelsLoaded || state.boardLabelsLoading) {
     requestRerender()
@@ -62,12 +63,15 @@ export const openCardLabelPicker = async (
 }
 
 export const closeCardLabelPicker = (
-  context: TrelloViewActionContext,
+  context: Readonly<TrelloViewActionContext>,
 ): void => {
   const { requestRerender } = context
   const state = context.state as TrelloViewState
   state.cardLabelPickerOpen = false
   state.draftLabelSearchQuery = ''
+  if (state.focusedName === 'cardLabelSearch') {
+    state.focusedName = ''
+  }
   requestRerender()
 }
 

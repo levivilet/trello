@@ -929,6 +929,11 @@ test('cards and lists render drag and drop attributes', async () => {
       ],
     },
     {
+      name: 'handleCardLabelPickerPointerDown',
+      params: ['handleViewEvent', 'pointerdown', 'event.currentTarget.name'],
+      preventDefault: true,
+    },
+    {
       name: 'handlePointerMove',
       params: [
         'handleViewEvent',
@@ -2662,15 +2667,37 @@ test('card detail label picker adds an existing board label', async () => {
   )
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
   await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+  const withFocus = instance as VirtualDomViewInstance & {
+    readonly getContext: () => Readonly<Record<string, boolean>>
+    readonly renderFocus: (
+      oldContext: Readonly<Record<string, boolean>>,
+      newContext: Readonly<Record<string, boolean>>,
+    ) => string
+  }
 
   const initialDom = await instance.render()
   expect(getText(initialDom)).toContain('Labels')
   expect(getNodeByName(initialDom, 'cardLabelPicker')).toBeUndefined()
+  const cardContext = withFocus.getContext()
 
   await instance.handleEvent?.({ name: 'openCardLabelPicker', type: 'click' })
 
   const openDom = await instance.render()
-  expect(getNodeByName(openDom, 'cardLabelSearch')?.value).toBe('')
+  expect(getNodeByName(openDom, 'cardLabelPicker')).toMatchObject({
+    onPointerDown: 'handleCardLabelPickerPointerDown',
+  })
+  expect(getNodeByName(openDom, 'cardLabelSearch')).toMatchObject({
+    onBlur: 'handleBlur',
+    onFocus: 'handleFocus',
+    value: '',
+  })
+  const labelPickerContext = withFocus.getContext()
+  expect(labelPickerContext).toMatchObject({
+    'trello.cardLabelPickerFocus': true,
+  })
+  expect(withFocus.renderFocus(cardContext, labelPickerContext)).toBe(
+    '[name="cardLabelSearch"]',
+  )
   expect(getSubtreeTextByNodeName(openDom, 'cardLabelPicker')).toContain(
     'Labels',
   )
@@ -2705,6 +2732,10 @@ test('card detail label picker adds an existing board label', async () => {
   expect(filteredPickerText).toContain('Bug')
   expect(filteredPickerText).not.toContain('Extension Api')
 
+  await instance.handleEvent?.({
+    name: 'cardLabelPicker',
+    type: 'pointerdown',
+  })
   await instance.handleEvent?.({ name: 'addCardLabel:label-2', type: 'click' })
 
   const updatedDom = await instance.render()
@@ -2715,6 +2746,11 @@ test('card detail label picker adds an existing board label', async () => {
     inputType: 'checkbox',
   })
   expect(getNodeByName(updatedDom, 'openCardLabelPicker')).toBeDefined()
+
+  await instance.handleEvent?.({ name: 'cardLabelSearch', type: 'blur' })
+
+  const blurredDom = await instance.render()
+  expect(getNodeByName(blurredDom, 'cardLabelPicker')).toBeUndefined()
   resetTrelloViewDependencyFactory()
 })
 
