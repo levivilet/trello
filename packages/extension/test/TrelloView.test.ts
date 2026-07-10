@@ -2317,6 +2317,9 @@ test('clicking card renders card detail and close dismisses it', async () => {
         },
       },
     }),
+    imageCache: createMockTrelloImageCache({
+      'https://example.com/screenshot.png': 'blob:private-screenshot',
+    }),
     recentStorage: createMemoryRecentBoardStorage(),
     storage: createMemoryCredentialStorage(),
   }))
@@ -2390,7 +2393,7 @@ test('clicking card renders card detail and close dismisses it', async () => {
         node.className === 'TrelloCardDetailImage' &&
         node.name === 'attachment-1' &&
         node.onError === 'handleImageError' &&
-        node.src === 'https://example.com/screenshot.png'
+        node.src === 'blob:private-screenshot'
       )
     }),
   ).toBe(true)

@@ -32,6 +32,7 @@ export interface TrelloViewState {
   addingCardLabelId: string
   addingCardListId: string
   addingList: boolean
+  attachmentImageUrls: Readonly<Record<string, string>>
   baseUrl: string
   boardBackgroundEnabled: boolean
   boardDetail: TrelloBoardDetail | undefined

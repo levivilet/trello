@@ -24,8 +24,15 @@ const resolveCoverImageUrl = async (
   context: TrelloViewActionContext,
   url: string,
 ): Promise<readonly [string, string]> => {
+  const state = context.state as TrelloViewState
+  if (!state.credentials) {
+    return [url, '']
+  }
   try {
-    return [url, await context.imageCache.resolveImageUrl(url)]
+    return [
+      url,
+      await context.imageCache.resolveImageUrl(url, state.credentials),
+    ]
   } catch {
     return [url, '']
   }

@@ -25,9 +25,12 @@ import { renderListTitle } from './RenderShared.ts'
 
 const renderImageAttachment = (
   attachment: Readonly<TrelloAttachment>,
+  attachmentImageUrls: Readonly<Record<string, string>>,
   failed: boolean,
 ): Dom.TreeNode => {
-  if (failed) {
+  const sourceUrl = getAttachmentImageUrl(attachment)
+  const imageUrl = attachmentImageUrls[sourceUrl]
+  if (failed || !imageUrl) {
     return Dom.div('TrelloCardDetailImageError', [
       Dom.textNode('Image could not be loaded.'),
     ])
@@ -37,13 +40,14 @@ const renderImageAttachment = (
     className: 'TrelloCardDetailImage',
     name: attachment.id,
     onError: 'handleImageError',
-    src: getAttachmentImageUrl(attachment),
+    src: imageUrl,
   })
 }
 
 const renderCardDetailImages = (
   loading: boolean,
   attachments: readonly TrelloAttachment[],
+  attachmentImageUrls: Readonly<Record<string, string>>,
   failedImageIds: readonly string[],
 ): readonly Dom.TreeNode[] => {
   if (loading) {
@@ -63,6 +67,7 @@ const renderCardDetailImages = (
       imageAttachments.map((attachment) =>
         renderImageAttachment(
           attachment,
+          attachmentImageUrls,
           failedImageIds.includes(attachment.id),
         ),
       ),
@@ -533,6 +538,7 @@ export const renderCardDetailPanel = (
     ...renderCardDetailImages(
       state.cardAttachmentsLoading,
       attachments,
+      state.attachmentImageUrls,
       state.failedCardAttachmentImageIds,
     ),
     ...(card.url
