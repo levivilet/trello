@@ -106,9 +106,6 @@ export const handleDropEvent = async (
     requestRerender()
     return
   }
-  state.dragTargetListId = ''
-  requestRerender()
-  await moveCardToList(context, card.id, targetListId, 'top')
   clearDragState(state)
-  requestRerender()
+  await moveCardToList(context, card.id, targetListId, 'top')
 }
