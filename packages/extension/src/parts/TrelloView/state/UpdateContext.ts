@@ -4,6 +4,7 @@ export const contextKeyBoardDetailFocus = 'trello.boardDetailFocus'
 export const contextKeyBoardsFocus = 'trello.boardsFocus'
 export const contextKeyCardDescriptionFocus = 'trello.cardDescriptionFocus'
 export const contextKeyCardDetailFocus = 'trello.cardDetailFocus'
+export const contextKeyCardLabelPickerFocus = 'trello.cardLabelPickerFocus'
 export const contextKeyNewCardInputFocus = 'trello.newCardInputFocus'
 export const contextKeyNewListInputFocus = 'trello.newListInputFocus'
 
@@ -17,6 +18,9 @@ export const updateContext = (state: Readonly<TrelloViewState>): void => {
   }
   if (state.selectedCardDetail) {
     context[contextKeyCardDetailFocus] = true
+  }
+  if (state.cardLabelPickerOpen && state.focusedName === 'cardLabelSearch') {
+    context[contextKeyCardLabelPickerFocus] = true
   }
   if (
     state.focusedName === 'cardDescription' &&

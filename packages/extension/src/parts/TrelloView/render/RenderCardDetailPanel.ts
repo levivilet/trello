@@ -231,6 +231,7 @@ const renderCardLabelPicker = (
     {
       className: 'TrelloCardLabelPicker',
       name: 'cardLabelPicker',
+      onPointerDown: 'handleCardLabelPickerPointerDown',
     },
     [
       renderCardLabelPickerHeader(),
@@ -238,6 +239,8 @@ const renderCardLabelPicker = (
         autocomplete: 'off',
         className: 'TrelloInput TrelloCardLabelSearchInput',
         name: 'cardLabelSearch',
+        onBlur: 'handleBlur',
+        onFocus: 'handleFocus',
         onInput: 'handleInput',
         placeholder: 'Search labels',
         value: state.draftLabelSearchQuery,

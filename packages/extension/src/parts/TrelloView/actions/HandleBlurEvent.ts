@@ -4,6 +4,7 @@ import type {
   TrelloViewState,
 } from '../state/TrelloViewState.ts'
 import { getErrorMessage } from '../GetErrorMessage.ts'
+import { closeCardLabelPicker } from './AddCardLabel.ts'
 import { saveCardDetail } from './SaveCardDetail.ts'
 import { updateBoardDetailCard } from './UpdateBoardDetailCard.ts'
 import { updateBoardDetailList } from './UpdateBoardDetailList.ts'
@@ -131,6 +132,10 @@ export const handleBlurEvent = async (
   }
   if (event.name === 'cardDescription') {
     await saveCardDetail(context)
+    return
+  }
+  if (event.name === 'cardLabelSearch') {
+    closeCardLabelPicker(context)
     return
   }
   await handleListTitleBlur(context, event)
