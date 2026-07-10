@@ -41,7 +41,7 @@ const server = spawn(
     cwd: root,
     env: {
       ...process.env,
-      PORT: process.env.PORT || '3002',
+      PORT: process.env.PORT || '3000',
     },
     stdio: 'inherit',
   },
