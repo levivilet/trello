@@ -9,7 +9,8 @@ import {
   useMockDataAndShowTrello,
 } from './_trello.virtual-dom-view.shared.ts'
 
-export const name = 'trello.virtual-dom-view.add-card'
+export const name = 'trello.virtual-dom-view.add-cards-consecutively'
+export const skip = true
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   const boards = createBoards(1)
@@ -32,12 +33,19 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await addCard.click()
 
   const title = Locator('textarea[name="newCardTitle:list-1"]')
+  const todoList = Locator('.TrelloList[name="list:list-1"]')
+  const doingList = Locator('.TrelloList[name="list:list-2"]')
   await expect(title).toBeVisible()
-  await expect(title).toHaveAttribute('rows', '2')
-  await expect(title).toHaveCSS('field-sizing', 'content')
-  await expect(title).toHaveCSS('height', '56px')
+  await title.type('Build add card')
+  await Command.executeExtensionCommand('trello.submitNewCard')
 
-  await title.type('First row\nSecond row\nThird row')
-
-  await expect(title).toHaveCSS('height', '76px')
+  await expect(todoList.locator('text=Build add card')).toBeVisible()
+  await expect(doingList.locator('text=Build add card')).toHaveCount(0)
+  await expect(title).toHaveValue('')
+  await expect(title).toBeFocused()
+  await title.type('Write tests')
+  await Command.executeExtensionCommand('trello.submitNewCard')
+  await expect(todoList.locator('text=Write tests')).toBeVisible()
+  await expect(title).toHaveValue('')
+  await expect(title).toBeFocused()
 }

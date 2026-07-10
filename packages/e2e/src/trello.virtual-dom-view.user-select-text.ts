@@ -1,9 +1,7 @@
 import type { Test } from '@lvce-editor/test-with-playwright'
 import {
-  connectWithCredentials,
   createBoards,
   createMockData,
-  openBoard,
   useMockDataAndShowTrello,
 } from './_trello.virtual-dom-view.shared.ts'
 
@@ -16,11 +14,4 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   const welcomeText = Locator('.TrelloWelcomeText')
   await expect(welcomeText).toBeVisible()
   await expect(welcomeText).toHaveCSS('user-select', 'text')
-
-  await connectWithCredentials({ expect, Locator })
-  await openBoard(Locator, expect)
-
-  const boardTitle = Locator('.TrelloTitle')
-  await expect(boardTitle).toBeVisible()
-  await expect(boardTitle).toHaveCSS('user-select', 'text')
 }

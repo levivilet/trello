@@ -14,7 +14,7 @@ import {
 } from './BoardBackground.ts'
 import { renderCardDetailPanel } from './RenderCardDetailPanel.ts'
 import { renderCards } from './RenderCards.ts'
-import { renderError, renderTitle } from './RenderShared.ts'
+import { renderError } from './RenderShared.ts'
 
 const renderListTitleInput = (
   state: Readonly<TrelloViewState>,
@@ -55,7 +55,7 @@ const renderAddCardInput = (
   list: Readonly<TrelloList>,
 ): Dom.TreeNode => {
   return Dom.form(`addCard:${list.id}`, 'TrelloAddCardForm', [
-    Dom.node(VirtualDomElements.Input, {
+    Dom.node(VirtualDomElements.TextArea, {
       autocomplete: 'off',
       className: 'TrelloAddCardInput',
       disabled: state.savingNewCard,
@@ -65,6 +65,7 @@ const renderAddCardInput = (
       onInput: 'handleInput',
       onKeyDown: 'handleKeyDown',
       placeholder: 'Enter a title for this card',
+      rows: 2,
       value: state.draftNewCardTitle,
     }),
   ])
@@ -151,7 +152,6 @@ export const renderBoardDetail = (
     )
   })
   const children = [
-    renderTitle(detail.board.name),
     ...renderBoardDetailContent(state, lists),
     ...renderError(state.error),
   ]

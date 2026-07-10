@@ -100,6 +100,25 @@ const renderCardDetailComments = (
   return Dom.div('TrelloCardComments', comments.map(renderCardDetailComment))
 }
 
+const renderCardCommentButton = (
+  name: string,
+  label: string,
+  className: string,
+  disabled: boolean,
+): Dom.TreeNode => {
+  const text = Dom.textNode(label)
+  return Dom.node(
+    VirtualDomElements.Button,
+    {
+      className,
+      disabled,
+      name,
+      onClick: 'handleClick',
+    },
+    [text],
+  )
+}
+
 const renderCardCommentComposer = (
   state: Readonly<TrelloViewState>,
 ): Dom.TreeNode => {
@@ -120,6 +139,20 @@ const renderCardCommentComposer = (
       placeholder: 'Write a comment...',
       value: state.draftComment,
     }),
+    Dom.div('TrelloCardCommentActions', [
+      renderCardCommentButton(
+        'submitComment',
+        state.savingComment ? 'Saving...' : 'Save',
+        'TrelloButton TrelloCardCommentSaveButton',
+        state.savingComment,
+      ),
+      renderCardCommentButton(
+        'cancelWriteComment',
+        'Cancel',
+        'TrelloButton TrelloCardCommentCancelButton',
+        state.savingComment,
+      ),
+    ]),
   ])
 }
 
@@ -231,6 +264,7 @@ const renderCardLabelPicker = (
     {
       className: 'TrelloCardLabelPicker',
       name: 'cardLabelPicker',
+      onPointerDown: 'handleCardLabelPickerPointerDown',
     },
     [
       renderCardLabelPickerHeader(),
@@ -238,6 +272,8 @@ const renderCardLabelPicker = (
         autocomplete: 'off',
         className: 'TrelloInput TrelloCardLabelSearchInput',
         name: 'cardLabelSearch',
+        onBlur: 'handleBlur',
+        onFocus: 'handleFocus',
         onInput: 'handleInput',
         placeholder: 'Search labels',
         value: state.draftLabelSearchQuery,
