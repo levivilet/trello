@@ -50,6 +50,37 @@ const renderAddCardButton = (list: Readonly<TrelloList>): Dom.TreeNode => {
   return Dom.button(`addCard:${list.id}`, '+ Add a card', 'TrelloAddCardButton')
 }
 
+const renderAddCardActions = (
+  state: Readonly<TrelloViewState>,
+  list: Readonly<TrelloList>,
+): Dom.TreeNode => {
+  return Dom.div('TrelloAddCardActions', [
+    Dom.node(
+      VirtualDomElements.Button,
+      {
+        className: 'TrelloButton TrelloAddCardSubmitButton',
+        disabled: state.savingNewCard,
+        inputType: 'button',
+        name: `submitAddCard:${list.id}`,
+        onClick: 'handleClick',
+      },
+      [Dom.textNode('Add card')],
+    ),
+    Dom.node(
+      VirtualDomElements.Button,
+      {
+        'aria-label': 'Close',
+        className: 'TrelloAddCardCloseButton',
+        inputType: 'button',
+        name: 'cancelAddCard',
+        onClick: 'handleClick',
+        title: 'Close',
+      },
+      [Dom.textNode('X')],
+    ),
+  ])
+}
+
 const renderAddCardInput = (
   state: Readonly<TrelloViewState>,
   list: Readonly<TrelloList>,
@@ -67,6 +98,7 @@ const renderAddCardInput = (
       placeholder: 'Enter a title for this card',
       value: state.draftNewCardTitle,
     }),
+    renderAddCardActions(state, list),
   ])
 }
 

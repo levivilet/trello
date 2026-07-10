@@ -10,7 +10,6 @@ import {
 } from './_trello.virtual-dom-view.shared.ts'
 
 export const name = 'trello.virtual-dom-view.add-card'
-export const skip = true
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   const boards = createBoards(1)
@@ -33,8 +32,21 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await addCard.click()
 
   const title = Locator('input[name="newCardTitle:list-1"]')
+  const submit = Locator('button[name="submitAddCard:list-1"]')
+  const close = Locator('button[name="cancelAddCard"]')
   await expect(title).toBeVisible()
-  await title.type('Build add card\n')
+  await expect(submit).toBeVisible()
+  await expect(close).toBeVisible()
+
+  // eslint-disable-next-line e2e/no-direct-click
+  await close.click()
+  await expect(title).toHaveCount(0)
+
+  // eslint-disable-next-line e2e/no-direct-click
+  await addCard.click()
+  await title.type('Build add card')
+  // eslint-disable-next-line e2e/no-direct-click
+  await submit.click()
 
   const todoList = Locator('.TrelloList[name="list:list-1"]')
   const doingList = Locator('.TrelloList[name="list:list-2"]')

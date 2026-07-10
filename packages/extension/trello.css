@@ -637,7 +637,33 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloAddCardForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   contain: content;
+}
+
+.TrelloAddCardActions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  contain: content;
+}
+
+.TrelloAddCardCloseButton {
+  min-width: 32px;
+  min-height: 28px;
+  contain: content;
+  padding: 4px 8px;
+  color: var(--TrelloForegroundMuted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+}
+
+.TrelloAddCardCloseButton:hover {
+  color: var(--TrelloForegroundStrong);
+  background: var(--TrelloButtonHoverBackground);
 }
 
 .TrelloAddCardInput {
