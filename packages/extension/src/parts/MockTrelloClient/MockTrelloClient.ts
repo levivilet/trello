@@ -376,7 +376,10 @@ export const createMockTrelloClient = (
             }
             return {
               ...list,
-              cards: [...cardsWithoutMoved, movedCard],
+              cards:
+                move.pos === 'top'
+                  ? [movedCard, ...cardsWithoutMoved]
+                  : [...cardsWithoutMoved, movedCard],
             }
           }),
         }

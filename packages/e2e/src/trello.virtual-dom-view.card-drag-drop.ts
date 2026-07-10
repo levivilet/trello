@@ -30,14 +30,18 @@ export const test: Test = async ({ Command, expect, Locator }) => {
 
   const planWork = Locator('button[name="card:card-1"]')
   const doingList = Locator('.TrelloList[name="list:list-2"]')
+  const buildWork = doingList.locator('button[name="card:card-2"]')
   await expect(planWork).toBeVisible()
   await expect(doingList).toBeVisible()
+  await expect(buildWork).toBeVisible()
 
   await planWork.dispatchEvent('dragstart', '{}')
-  await doingList.dispatchEvent('dragover', '{}')
+  await buildWork.dispatchEvent('dragover', '{}')
   await expect(doingList).toHaveClass('TrelloList TrelloListDragTarget')
-  await doingList.dispatchEvent('drop', '{"value":"card-1"}')
+  await buildWork.dispatchEvent('drop', '{"value":"card-1"}')
 
-  const movedCard = doingList.locator('button[name="card:card-1"]')
+  const cards = doingList.locator('button.TrelloCard')
+  const movedCard = cards.nth(0)
   await expect(movedCard).toBeVisible()
+  await expect(movedCard).toHaveText('Plan work')
 }

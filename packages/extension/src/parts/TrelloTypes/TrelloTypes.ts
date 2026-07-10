@@ -125,7 +125,7 @@ export interface TrelloCardCreate {
 
 export interface TrelloCardMove {
   readonly idList: string
-  readonly pos: 'bottom'
+  readonly pos: 'bottom' | 'top'
 }
 
 export interface TrelloList {
