@@ -6,6 +6,7 @@ import type {
 import { getErrorMessage } from '../GetErrorMessage.ts'
 import { cancelAddCard } from './AddCard.ts'
 import { closeCardLabelPicker } from './AddCardLabel.ts'
+import { cancelAddList } from './AddList.ts'
 import { saveCardDetail } from './SaveCardDetail.ts'
 import { updateBoardDetailCard } from './UpdateBoardDetailCard.ts'
 import { updateBoardDetailList } from './UpdateBoardDetailList.ts'
@@ -129,6 +130,10 @@ export const handleBlurEvent = async (
 ): Promise<void> => {
   if (event.name?.startsWith('newCardTitle:')) {
     cancelAddCard(context)
+    return
+  }
+  if (event.name === 'newListTitle') {
+    cancelAddList(context)
     return
   }
   if (event.name === 'cardTitle') {
