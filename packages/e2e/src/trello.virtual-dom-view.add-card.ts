@@ -11,7 +11,7 @@ import {
 
 export const name = 'trello.virtual-dom-view.add-card'
 
-export const test: Test = async ({ Command, expect, KeyBoard, Locator }) => {
+export const test: Test = async ({ Command, expect, Locator }) => {
   const boards = createBoards(1)
   const listsData = [
     createList('list-1', 'Todo', [{ id: 'card-1', name: 'Plan work' }]),
@@ -43,7 +43,7 @@ export const test: Test = async ({ Command, expect, KeyBoard, Locator }) => {
 
   await title.type('abc')
   await expect(title).toBeFocused()
-  await KeyBoard.press('Escape')
+  await Command.executeExtensionCommand('trello.test.escapeNewCard', 'list-1')
   await expect(title).toHaveCount(0)
 
   const addCardInOtherList = Locator('button[name="addCard:list-2"]')

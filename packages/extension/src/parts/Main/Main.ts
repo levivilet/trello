@@ -126,6 +126,13 @@ export const activate = async (): Promise<void> => {
     },
     id: 'trello.test.blurNewCard',
   })
+  registerCommand({
+    async execute(listId: string) {
+      await TrelloView.escapeNewCardActiveTrelloViewInstance(listId)
+      return { ok: true }
+    },
+    id: 'trello.test.escapeNewCard',
+  })
 }
 
 export const deactivate = (): void => {}

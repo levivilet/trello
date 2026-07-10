@@ -47,6 +47,7 @@ export {
   blurNewCardActiveTrelloViewInstance,
   cancelNewCardActiveTrelloViewInstance,
   closeCardDetailActiveTrelloViewInstance,
+  escapeNewCardActiveTrelloViewInstance,
   logoutActiveTrelloViewInstance,
   openCardActiveTrelloViewInstance,
   refreshBoardsActiveTrelloViewInstance,

@@ -153,6 +153,16 @@ export const blurNewCardActiveTrelloViewInstance = async (
   })
 }
 
+export const escapeNewCardActiveTrelloViewInstance = async (
+  listId: string,
+): Promise<void> => {
+  await getActiveInstance()?.handleEvent?.({
+    key: 'Escape',
+    name: `newCardTitle:${listId}`,
+    type: 'keydown',
+  } as never)
+}
+
 export const addList = async (options: any): Promise<void> => {
   await getActiveInstance()?.addList(options)
 }
