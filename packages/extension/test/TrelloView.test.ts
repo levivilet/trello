@@ -1,6 +1,10 @@
 // cspell:ignore prefs
 
-import type { ViewEvent, VirtualDomViewInstance } from '@lvce-editor/api'
+import type {
+  ViewEvent,
+  ViewSelection,
+  VirtualDomViewInstance,
+} from '@lvce-editor/api'
 import { expect, test } from '@jest/globals'
 import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import type { TrelloClient } from '../src/parts/TrelloClient/TrelloClient.ts'
@@ -1458,6 +1462,58 @@ test('view context tracks board and new-card input focus', async () => {
   expect(withContext.getContext()).toEqual({
     'trello.boardDetailFocus': true,
   })
+
+  resetTrelloViewDependencyFactory()
+})
+
+test('renderSelections selects the whole list title once on focus', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+    },
+  )
+  const withSelections = instance as VirtualDomViewInstance & {
+    readonly renderSelections: () => readonly ViewSelection[]
+  }
+
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'listTitle:list-1', type: 'focus' })
+
+  expect(withSelections.renderSelections()).toEqual([
+    {
+      end: 4,
+      name: 'listTitle:list-1',
+      start: 0,
+    },
+  ])
+  expect(withSelections.renderSelections()).toEqual([])
+
+  await instance.handleEvent?.({
+    name: 'listTitle:list-1',
+    type: 'input',
+    value: 'Planning',
+  })
+  await instance.handleEvent?.({ name: 'listTitle:list-1', type: 'focus' })
+  expect(withSelections.renderSelections()).toEqual([
+    {
+      end: 8,
+      name: 'listTitle:list-1',
+      start: 0,
+    },
+  ])
 
   resetTrelloViewDependencyFactory()
 })
