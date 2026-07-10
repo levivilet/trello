@@ -32,7 +32,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await expect(newListTitle).toBeVisible()
   await expect(newListTitle).toBeFocused()
 
-  await newListTitle.dispatchEvent('blur', '{}')
+  await newListTitle.dispatchEvent('blur', undefined as unknown as string)
 
   await expect(newListTitle).toHaveCount(0)
   await expect(addList).toBeVisible()
