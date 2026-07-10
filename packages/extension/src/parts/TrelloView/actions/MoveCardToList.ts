@@ -1,4 +1,7 @@
-import type { TrelloCard } from '../../TrelloTypes/TrelloTypes.ts'
+import type {
+  TrelloCard,
+  TrelloCardMove,
+} from '../../TrelloTypes/TrelloTypes.ts'
 import type {
   TrelloViewActionContext,
   TrelloViewState,
@@ -26,6 +29,7 @@ const moveBoardDetailCard = (
   state: Readonly<TrelloViewState>,
   card: Readonly<TrelloCard>,
   targetListId: string,
+  position: TrelloCardMove['pos'],
 ): void => {
   const mutableState = state as TrelloViewState
   if (!mutableState.boardDetail) {
@@ -45,7 +49,10 @@ const moveBoardDetailCard = (
       }
       return {
         ...list,
-        cards: [...cardsWithoutMoved, card],
+        cards:
+          position === 'top'
+            ? [card, ...cardsWithoutMoved]
+            : [...cardsWithoutMoved, card],
       }
     }),
   }
@@ -55,6 +62,7 @@ export const moveCardToList = async (
   context: TrelloViewActionContext,
   cardId: string,
   targetListId: string,
+  position: TrelloCardMove['pos'] = 'bottom',
 ): Promise<void> => {
   const { client, requestRerender } = context
   const state = context.state as TrelloViewState
@@ -80,7 +88,7 @@ export const moveCardToList = async (
       sourceCard,
       {
         idList: targetListId,
-        pos: 'bottom',
+        pos: position,
       },
       state.credentials,
     )
@@ -89,7 +97,7 @@ export const moveCardToList = async (
       ...movedCard,
       idList: targetListId,
     }
-    moveBoardDetailCard(state, mergedCard, targetListId)
+    moveBoardDetailCard(state, mergedCard, targetListId, position)
     if (state.selectedCardDetail?.card.id === mergedCard.id) {
       state.selectedCardDetail = {
         ...state.selectedCardDetail,

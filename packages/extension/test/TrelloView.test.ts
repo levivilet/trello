@@ -903,16 +903,16 @@ test('cards and lists render drag and drop attributes', async () => {
     },
     {
       name: 'handleDragOver',
-      params: ['handleViewEvent', 'dragover', 'event.target.name'],
+      params: ['handleViewEvent', 'dragover', 'event.currentTarget.name'],
       preventDefault: true,
     },
     {
       name: 'handleDragLeave',
-      params: ['handleViewEvent', 'dragleave', 'event.target.name'],
+      params: ['handleViewEvent', 'dragleave', 'event.currentTarget.name'],
     },
     {
       name: 'handleDrop',
-      params: ['handleViewEvent', 'drop', 'event.target.name'],
+      params: ['handleViewEvent', 'drop', 'event.currentTarget.name'],
       preventDefault: true,
     },
     {
@@ -1791,7 +1791,7 @@ test('drag over marks list as drag target', async () => {
   resetTrelloViewDependencyFactory()
 })
 
-test('dropping card on another list moves card to bottom', async () => {
+test('dropping card on another list moves card to top', async () => {
   const instance = await createAuthenticatedInstance(
     [{ id: 'board-1', name: 'Roadmap' }],
     [],
@@ -1825,8 +1825,8 @@ test('dropping card on another list moves card to bottom', async () => {
   expect(todoText).not.toContain('Plan work')
   expect(doingText).toContain('Build work')
   expect(doingText).toContain('Plan work')
-  expect(doingText.indexOf('Build work')).toBeLessThan(
-    doingText.indexOf('Plan work'),
+  expect(doingText.indexOf('Plan work')).toBeLessThan(
+    doingText.indexOf('Build work'),
   )
   resetTrelloViewDependencyFactory()
 })
