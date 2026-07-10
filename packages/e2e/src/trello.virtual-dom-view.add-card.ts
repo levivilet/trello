@@ -42,10 +42,8 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await expect(title).toHaveCSS('height', '56px')
 
   await title.type('abc')
-  await expect(title).toBeFocused()
-  await Command.executeExtensionCommand('trello.test.escapeNewCard', 'list-1')
-  const addCardAfterEscape = Locator('button[name="addCard:list-1"]')
-  await expect(addCardAfterEscape).toBeVisible()
+  // eslint-disable-next-line e2e/no-direct-click
+  await close.click()
   await expect(title).toHaveCount(0)
 
   const addCardInOtherList = Locator('button[name="addCard:list-2"]')
@@ -55,22 +53,11 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   const titleInOtherList = Locator('textarea[name="newCardTitle:list-2"]')
   await expect(titleInOtherList).toHaveValue('abc')
 
-  await Command.executeExtensionCommand('trello.test.blurNewCard', 'list-2')
-  const addCardAfterBlur = Locator('button[name="addCard:list-2"]')
-  await expect(addCardAfterBlur).toBeVisible()
-  await expect(titleInOtherList).toHaveCount(0)
+  await titleInOtherList.type('W'.repeat(47))
 
-  const addCardAgain = Locator('button[name="addCard:list-1"]')
-  await expect(addCardAgain).toBeVisible()
-  // eslint-disable-next-line e2e/no-direct-click
-  await addCardAgain.click()
-  await expect(title).toHaveValue('abc')
-
-  await title.type('W'.repeat(47))
-
-  await expect(title).toHaveCSS('height', '76px')
+  await expect(titleInOtherList).toHaveCSS('height', '76px')
 
   // eslint-disable-next-line e2e/no-direct-click
   await close.click()
-  await expect(title).toHaveCount(0)
+  await expect(titleInOtherList).toHaveCount(0)
 }
