@@ -1057,6 +1057,8 @@ test('clicking add card renders input for that list only', async () => {
       className: 'TrelloAddCardInput',
       name: 'newCardTitle:list-1',
       onInput: 'handleInput',
+      rows: 2,
+      type: VirtualDomElements.TextArea,
       value: '',
     }),
   )
