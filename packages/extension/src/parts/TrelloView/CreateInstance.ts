@@ -61,7 +61,7 @@ import {
   updateContext,
 } from './state/UpdateContext.ts'
 
-interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
+export interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly addCard: (options: any) => Promise<void>
   readonly addList: (options: any) => Promise<void>
   readonly backToBoards: () => Promise<void>
@@ -194,7 +194,7 @@ export const reloadActiveTrelloViewInstances = async (): Promise<void> => {
 
 export const createInstance = async (
   context?: ViewContext,
-): Promise<VirtualDomViewInstance> => {
+): Promise<ActiveTrelloViewInstance> => {
   const state = createInitialState()
   const viewContext: MutableTrelloViewActionContext = {
     client: undefined as never,
