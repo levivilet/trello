@@ -44,6 +44,7 @@ export {
 } from './state/DependencyFactory.ts'
 export {
   backToBoardsActiveTrelloViewInstance,
+  blurNewCardActiveTrelloViewInstance,
   cancelNewCardActiveTrelloViewInstance,
   closeCardDetailActiveTrelloViewInstance,
   logoutActiveTrelloViewInstance,

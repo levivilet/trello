@@ -119,6 +119,13 @@ export const activate = async (): Promise<void> => {
     },
     id: 'trello.test.reset',
   })
+  registerCommand({
+    async execute(listId: string) {
+      await TrelloView.blurNewCardActiveTrelloViewInstance(listId)
+      return { ok: true }
+    },
+    id: 'trello.test.blurNewCard',
+  })
 }
 
 export const deactivate = (): void => {}

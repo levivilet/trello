@@ -11,7 +11,7 @@ import {
 
 export const name = 'trello.virtual-dom-view.add-card'
 
-export const test: Test = async ({ Command, expect, Locator }) => {
+export const test: Test = async ({ Command, expect, KeyBoard, Locator }) => {
   const boards = createBoards(1)
   const listsData = [
     createList('list-1', 'Todo', [{ id: 'card-1', name: 'Plan work' }]),
@@ -41,7 +41,28 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await expect(title).toHaveCSS('field-sizing', 'content')
   await expect(title).toHaveCSS('height', '56px')
 
-  await title.type('W'.repeat(50))
+  await title.type('abc')
+  await expect(title).toBeFocused()
+  await KeyBoard.press('Escape')
+  await expect(title).toHaveCount(0)
+
+  const addCardInOtherList = Locator('button[name="addCard:list-2"]')
+  await expect(addCardInOtherList).toBeVisible()
+  // eslint-disable-next-line e2e/no-direct-click
+  await addCardInOtherList.click()
+  const titleInOtherList = Locator('textarea[name="newCardTitle:list-2"]')
+  await expect(titleInOtherList).toHaveValue('abc')
+
+  await Command.executeExtensionCommand('trello.test.blurNewCard', 'list-2')
+  await expect(titleInOtherList).toHaveCount(0)
+
+  const addCardAgain = Locator('button[name="addCard:list-1"]')
+  await expect(addCardAgain).toBeVisible()
+  // eslint-disable-next-line e2e/no-direct-click
+  await addCardAgain.click()
+  await expect(title).toHaveValue('abc')
+
+  await title.type('W'.repeat(47))
 
   await expect(title).toHaveCSS('height', '76px')
 
