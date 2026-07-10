@@ -2315,7 +2315,7 @@ test('card detail panel resizes from the left sash', async () => {
   resetTrelloViewDependencyFactory()
 })
 
-test('card detail writes a comment with ctrl enter and cancels with escape', async () => {
+test('card detail comment controls and shortcuts save and cancel comments', async () => {
   const instance = await createAuthenticatedInstance(
     [{ id: 'board-1', name: 'Roadmap' }],
     [],
@@ -2359,12 +2359,16 @@ test('card detail writes a comment with ctrl enter and cancels with escape', asy
     name: 'cardComment',
     placeholder: 'Write a comment...',
   })
+  expect(getNodeByName(writingDom, 'submitComment')).toMatchObject({
+    name: 'submitComment',
+    onClick: 'handleClick',
+  })
+  expect(getNodeByName(writingDom, 'cancelWriteComment')).toMatchObject({
+    name: 'cancelWriteComment',
+    onClick: 'handleClick',
+  })
 
-  await instance.handleEvent?.({
-    key: 'Escape',
-    name: 'cardComment',
-    type: 'keydown',
-  } as unknown as ViewEvent)
+  await instance.handleEvent?.({ name: 'cancelWriteComment', type: 'click' })
 
   const cancelledDom = await instance.render()
   expect(getNodeByName(cancelledDom, 'cardComment')).toBeUndefined()
@@ -2375,16 +2379,33 @@ test('card detail writes a comment with ctrl enter and cancels with escape', asy
     type: 'input',
     value: 'Looks good',
   })
+  await instance.handleEvent?.({ name: 'submitComment', type: 'click' })
+
+  const updatedDom = await instance.render()
+  expect(getText(updatedDom)).toContain('Looks good')
+  expect(getNodeByName(updatedDom, 'cardComment')).toBeUndefined()
+
+  await instance.handleEvent?.({ name: 'startWriteComment', type: 'click' })
+  await instance.handleEvent?.({
+    key: 'Escape',
+    name: 'cardComment',
+    type: 'keydown',
+  } as unknown as ViewEvent)
+  expect(getNodeByName(await instance.render(), 'cardComment')).toBeUndefined()
+
+  await instance.handleEvent?.({ name: 'startWriteComment', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'cardComment',
+    type: 'input',
+    value: 'Saved with the keyboard',
+  })
   await instance.handleEvent?.({
     ctrlKey: true,
     key: 'Enter',
     name: 'cardComment',
     type: 'keydown',
   } as unknown as ViewEvent)
-
-  const updatedDom = await instance.render()
-  expect(getText(updatedDom)).toContain('Looks good')
-  expect(getNodeByName(updatedDom, 'cardComment')).toBeUndefined()
+  expect(getText(await instance.render())).toContain('Saved with the keyboard')
   resetTrelloViewDependencyFactory()
 })
 

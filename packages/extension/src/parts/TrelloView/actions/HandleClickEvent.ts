@@ -6,7 +6,11 @@ import {
   closeCardLabelPicker,
   openCardLabelPicker,
 } from './AddCardLabel.ts'
-import { startWriteComment } from './AddComment.ts'
+import {
+  cancelWriteComment,
+  startWriteComment,
+  submitComment,
+} from './AddComment.ts'
 import { startAddList } from './AddList.ts'
 import { closeCardDetail } from './CloseCardDetail.ts'
 import { connect } from './Connect.ts'
@@ -38,6 +42,9 @@ export const handleClickEvent = async (
     case 'backToBoards':
       await goBackToBoards(context)
       return
+    case 'cancelWriteComment':
+      cancelWriteComment(context)
+      return
     case 'closeCardDetail':
       closeCardDetail(context)
       return
@@ -67,6 +74,9 @@ export const handleClickEvent = async (
       return
     case 'startWriteComment':
       startWriteComment(context)
+      return
+    case 'submitComment':
+      await submitComment(context)
       return
     default:
       if (event.name?.startsWith('board:')) {
