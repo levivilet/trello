@@ -10,7 +10,6 @@ import {
 } from './_trello.virtual-dom-view.shared.ts'
 
 export const name = 'trello.virtual-dom-view.add-card'
-export const skip = true
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   const boards = createBoards(1)
@@ -32,13 +31,13 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   // eslint-disable-next-line e2e/no-direct-click
   await addCard.click()
 
-  const title = Locator('input[name="newCardTitle:list-1"]')
+  const title = Locator('textarea[name="newCardTitle:list-1"]')
   await expect(title).toBeVisible()
-  await title.type('Build add card\n')
+  await expect(title).toHaveAttribute('rows', '2')
+  await expect(title).toHaveCSS('field-sizing', 'content')
+  await expect(title).toHaveCSS('height', '56px')
 
-  const todoList = Locator('.TrelloList[name="list:list-1"]')
-  const doingList = Locator('.TrelloList[name="list:list-2"]')
-  await expect(todoList.locator('text=Build add card')).toBeVisible()
-  await expect(doingList.locator('text=Build add card')).toHaveCount(0)
-  await expect(title).toHaveCount(0)
+  await title.type('First row\nSecond row\nThird row')
+
+  await expect(title).toHaveCSS('height', '76px')
 }

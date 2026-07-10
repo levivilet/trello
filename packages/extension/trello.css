@@ -643,10 +643,17 @@ button.TrelloSearchResult:hover {
 .TrelloAddCardInput {
   box-sizing: border-box;
   width: 100%;
-  min-height: 34px;
+  min-height: calc(2lh + 16px);
+  field-sizing: content;
   contain: content;
   padding: 7px 8px;
+  overflow-y: hidden;
+  font: inherit;
+  line-height: 20px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   color: var(--TrelloInputForeground);
+  resize: none;
   background: var(--TrelloInputBackground);
   border: 1px solid var(--TrelloFocus);
   border-radius: 6px;
