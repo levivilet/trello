@@ -123,6 +123,7 @@ const renderAddListControl = (
         className: 'TrelloAddListInput',
         disabled: state.savingNewList,
         name: 'newListTitle',
+        onBlur: 'handleBlur',
         onFocus: 'handleFocus',
         onInput: 'handleInput',
         onKeyDown: 'handleKeyDown',

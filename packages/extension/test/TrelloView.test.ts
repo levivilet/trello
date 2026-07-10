@@ -2167,8 +2167,18 @@ test('board detail creates another list from the trailing list control', async (
   const addingDom = await instance.render()
   expect(getNodeByName(addingDom, 'newListTitle')).toMatchObject({
     name: 'newListTitle',
+    onBlur: 'handleBlur',
     placeholder: 'Enter list title',
   })
+
+  await instance.handleEvent?.({ name: 'newListTitle', type: 'blur' })
+
+  const blurredDom = await instance.render()
+  expect(getNodeByName(blurredDom, 'newListTitle')).toBeUndefined()
+  expect(getText(blurredDom)).toContain('Create New list')
+
+  await instance.handleEvent?.({ name: 'startAddList', type: 'click' })
+  expect(getNodeByName(await instance.render(), 'newListTitle')).toBeDefined()
 
   await instance.handleEvent?.({
     key: 'Escape',
