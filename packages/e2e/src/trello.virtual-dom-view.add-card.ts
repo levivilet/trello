@@ -44,6 +44,8 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await title.type('abc')
   await expect(title).toBeFocused()
   await Command.executeExtensionCommand('trello.test.escapeNewCard', 'list-1')
+  const addCardAfterEscape = Locator('button[name="addCard:list-1"]')
+  await expect(addCardAfterEscape).toBeVisible()
   await expect(title).toHaveCount(0)
 
   const addCardInOtherList = Locator('button[name="addCard:list-2"]')
@@ -54,6 +56,8 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await expect(titleInOtherList).toHaveValue('abc')
 
   await Command.executeExtensionCommand('trello.test.blurNewCard', 'list-2')
+  const addCardAfterBlur = Locator('button[name="addCard:list-2"]')
+  await expect(addCardAfterBlur).toBeVisible()
   await expect(titleInOtherList).toHaveCount(0)
 
   const addCardAgain = Locator('button[name="addCard:list-1"]')
