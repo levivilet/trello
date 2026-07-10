@@ -899,6 +899,10 @@ test('list title renders as editable input', async () => {
 test('cards and lists render drag and drop attributes', async () => {
   expect(view.eventListeners).toEqual([
     {
+      name: 'handleImageError',
+      params: ['handleViewEvent', 'error', 'event.target.name'],
+    },
+    {
       name: 'handleDragStart',
       params: ['handleViewEvent', 'dragstart', 'event.target.name'],
     },
@@ -2384,10 +2388,19 @@ test('clicking card renders card detail and close dismisses it', async () => {
     hasNode(detailDom, (node) => {
       return (
         node.className === 'TrelloCardDetailImage' &&
+        node.name === 'attachment-1' &&
+        node.onError === 'handleImageError' &&
         node.src === 'https://example.com/screenshot.png'
       )
     }),
   ).toBe(true)
+
+  await instance.handleEvent?.({ name: 'attachment-1', type: 'error' })
+
+  const imageErrorDom = await instance.render()
+  expect(getClassNames(imageErrorDom)).not.toContain('TrelloCardDetailImage')
+  expect(getClassNames(imageErrorDom)).toContain('TrelloCardDetailImageError')
+  expect(getText(imageErrorDom)).toContain('Image could not be loaded.')
   expect(
     hasNode(detailDom, (node) => {
       return (

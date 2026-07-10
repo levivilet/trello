@@ -184,6 +184,7 @@ export const openCard = async (
   state.savingComment = false
   state.writingComment = false
   state.error = ''
+  state.failedCardAttachmentImageIds = []
   requestRerender()
   try {
     const result = await client.getCardDetailPartsCacheFirst(
