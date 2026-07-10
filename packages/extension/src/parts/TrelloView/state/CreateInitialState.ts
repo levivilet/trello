@@ -42,6 +42,7 @@ export const createInitialState = (): TrelloViewState => {
     editingCardDescription: false,
     editingCardTitle: false,
     error: '',
+    failedCardAttachmentImageIds: [],
     focusedName: '',
     loading: false,
     movingCardId: '',

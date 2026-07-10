@@ -67,6 +67,7 @@ export interface TrelloViewState {
   editingCardDescription: boolean
   editingCardTitle: boolean
   error: string
+  failedCardAttachmentImageIds: readonly string[]
   focusedName: string
   loading: boolean
   movingCardId: string

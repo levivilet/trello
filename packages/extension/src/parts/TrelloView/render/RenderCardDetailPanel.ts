@@ -25,17 +25,26 @@ import { renderListTitle } from './RenderShared.ts'
 
 const renderImageAttachment = (
   attachment: Readonly<TrelloAttachment>,
+  failed: boolean,
 ): Dom.TreeNode => {
-  return Dom.image(
-    'TrelloCardDetailImage',
-    getAttachmentImageUrl(attachment),
-    attachment.name || 'Card attachment',
-  )
+  if (failed) {
+    return Dom.div('TrelloCardDetailImageError', [
+      Dom.textNode('Image could not be loaded.'),
+    ])
+  }
+  return Dom.node(VirtualDomElements.Img, {
+    alt: attachment.name || 'Card attachment',
+    className: 'TrelloCardDetailImage',
+    name: attachment.id,
+    onError: 'handleImageError',
+    src: getAttachmentImageUrl(attachment),
+  })
 }
 
 const renderCardDetailImages = (
   loading: boolean,
   attachments: readonly TrelloAttachment[],
+  failedImageIds: readonly string[],
 ): readonly Dom.TreeNode[] => {
   if (loading) {
     return [
@@ -51,7 +60,12 @@ const renderCardDetailImages = (
     renderListTitle('Images'),
     Dom.div(
       'TrelloCardDetailImages',
-      imageAttachments.map(renderImageAttachment),
+      imageAttachments.map((attachment) =>
+        renderImageAttachment(
+          attachment,
+          failedImageIds.includes(attachment.id),
+        ),
+      ),
     ),
   ]
 }
@@ -516,7 +530,11 @@ export const renderCardDetailPanel = (
     renderListTitle('Comments'),
     renderCardDetailComments(state.cardCommentsLoading, comments),
     renderCardCommentComposer(state),
-    ...renderCardDetailImages(state.cardAttachmentsLoading, attachments),
+    ...renderCardDetailImages(
+      state.cardAttachmentsLoading,
+      attachments,
+      state.failedCardAttachmentImageIds,
+    ),
     ...(card.url
       ? [Dom.link('TrelloCardDetailLink', card.url, 'Open in Trello')]
       : []),

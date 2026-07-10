@@ -1435,6 +1435,21 @@ button.TrelloSearchResult:hover {
   border-radius: 6px;
 }
 
+.TrelloCardDetailImageError {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 104px;
+  padding: 20px;
+  contain: content;
+  color: var(--TrelloForegroundMuted);
+  text-align: center;
+  background: var(--TrelloSurfaceAlt);
+  border: 1px dashed var(--TrelloBorder);
+  border-radius: 6px;
+}
+
 .TrelloCardDetailEmpty {
   contain: content;
   color: var(--TrelloForegroundMuted);

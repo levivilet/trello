@@ -7,6 +7,7 @@ export const clearBoardSpecificState = (
   mutableState.boardDetail = undefined
   mutableState.selectedCardDetail = undefined
   mutableState.cardAttachmentsLoading = false
+  mutableState.failedCardAttachmentImageIds = []
   mutableState.cardCommentsLoading = false
   mutableState.cardDetailLoading = false
   mutableState.cardDetailLoadingCardId = ''

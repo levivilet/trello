@@ -7,6 +7,10 @@ interface DomEventListener {
 export const renderEventListeners = (): readonly DomEventListener[] => {
   return [
     {
+      name: 'handleImageError',
+      params: ['handleViewEvent', 'error', 'event.target.name'],
+    },
+    {
       name: 'handleDragStart',
       params: ['handleViewEvent', 'dragstart', 'event.target.name'],
     },
