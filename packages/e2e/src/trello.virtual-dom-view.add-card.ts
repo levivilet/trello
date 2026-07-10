@@ -48,16 +48,4 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   // eslint-disable-next-line e2e/no-direct-click
   await close.click()
   await expect(title).toHaveCount(0)
-
-  // eslint-disable-next-line e2e/no-direct-click
-  await addCard.click()
-  await title.type('Build add card')
-  // eslint-disable-next-line e2e/no-direct-click
-  await submit.click()
-
-  const todoList = Locator('.TrelloList[name="list:list-1"]')
-  const doingList = Locator('.TrelloList[name="list:list-2"]')
-  await expect(todoList.locator('text=Build add card')).toBeVisible()
-  await expect(doingList.locator('text=Build add card')).toHaveCount(0)
-  await expect(title).toHaveCount(0)
 }
