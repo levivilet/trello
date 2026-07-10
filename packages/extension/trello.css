@@ -1086,10 +1086,11 @@ button.TrelloSearchResult:hover {
   font-size: 12px;
   font-weight: 500;
   line-height: 18px;
-  color: #ffffff;
+  color: var(--TrelloForeground);
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
+  background: transparent;
   border: 1px solid transparent;
   border-radius: 4px;
 }
@@ -1102,10 +1103,15 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloCardLabelChoiceText {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  min-width: 0;
   contain: content;
+  padding: 4px 8px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  border-radius: 4px;
 }
 
 .TrelloCardLabelChoice:disabled {

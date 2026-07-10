@@ -2877,6 +2877,15 @@ test('card detail label picker adds an existing board label', async () => {
     checked: false,
     inputType: 'checkbox',
   })
+  expect(getNodeByName(openDom, 'addCardLabel:label-1')).toMatchObject({
+    className: 'TrelloCardLabelChoice',
+  })
+  expect(
+    getDirectChildClassNamesByName(openDom, 'addCardLabel:label-1'),
+  ).toEqual([
+    'TrelloCardLabelChoiceCheckbox',
+    'TrelloCardLabelChoiceText TrelloCardLabelColorBlue',
+  ])
 
   await instance.handleEvent?.({ name: 'closeCardLabelPicker', type: 'click' })
 

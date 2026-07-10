@@ -206,13 +206,15 @@ const renderCardLabelChoice = (
   })
   const text = Dom.node(
     VirtualDomElements.Span,
-    { className: 'TrelloCardLabelChoiceText' },
+    {
+      className: `TrelloCardLabelChoiceText ${getLabelColorClassName(label.color)}`,
+    },
     [Dom.textNode(getLabelText(label))],
   )
   return Dom.node(
     VirtualDomElements.Button,
     {
-      className: `TrelloCardLabelChoice ${getLabelColorClassName(label.color)}`,
+      className: 'TrelloCardLabelChoice',
       disabled: Boolean(state.addingCardLabelId),
       name: `addCardLabel:${label.id}`,
       onClick: 'handleClick',
