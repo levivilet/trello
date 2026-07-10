@@ -124,7 +124,7 @@
       "when": "trello.cardDetailFocus"
     },
     {
-      "key": "Ctrl+Enter",
+      "key": "Enter",
       "command": "trello.submitNewCard",
       "when": "trello.newCardInputFocus"
     },

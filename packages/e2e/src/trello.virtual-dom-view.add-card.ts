@@ -37,7 +37,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await expect(title).toHaveCSS('field-sizing', 'content')
   await expect(title).toHaveCSS('height', '56px')
 
-  await title.type('First row\nSecond row\nThird row')
+  await title.type('W'.repeat(50))
 
   await expect(title).toHaveCSS('height', '76px')
 }
