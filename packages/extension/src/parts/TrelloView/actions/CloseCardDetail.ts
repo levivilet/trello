@@ -19,6 +19,7 @@ export const closeCardDetail = (context: TrelloViewActionContext): void => {
   state.draftLabelSearchQuery = ''
   state.editingCardDescription = false
   state.editingCardTitle = false
+  state.failedCardAttachmentImageIds = []
   state.savingComment = false
   state.writingComment = false
   state.error = ''

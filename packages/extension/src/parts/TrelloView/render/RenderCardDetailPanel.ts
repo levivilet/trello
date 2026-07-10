@@ -25,17 +25,30 @@ import { renderListTitle } from './RenderShared.ts'
 
 const renderImageAttachment = (
   attachment: Readonly<TrelloAttachment>,
+  attachmentImageUrls: Readonly<Record<string, string>>,
+  failed: boolean,
 ): Dom.TreeNode => {
-  return Dom.image(
-    'TrelloCardDetailImage',
-    getAttachmentImageUrl(attachment),
-    attachment.name || 'Card attachment',
-  )
+  const sourceUrl = getAttachmentImageUrl(attachment)
+  const imageUrl = attachmentImageUrls[sourceUrl]
+  if (failed || !imageUrl) {
+    return Dom.div('TrelloCardDetailImageError', [
+      Dom.textNode('Image could not be loaded.'),
+    ])
+  }
+  return Dom.node(VirtualDomElements.Img, {
+    alt: attachment.name || 'Card attachment',
+    className: 'TrelloCardDetailImage',
+    name: attachment.id,
+    onError: 'handleImageError',
+    src: imageUrl,
+  })
 }
 
 const renderCardDetailImages = (
   loading: boolean,
   attachments: readonly TrelloAttachment[],
+  attachmentImageUrls: Readonly<Record<string, string>>,
+  failedImageIds: readonly string[],
 ): readonly Dom.TreeNode[] => {
   if (loading) {
     return [
@@ -51,7 +64,13 @@ const renderCardDetailImages = (
     renderListTitle('Images'),
     Dom.div(
       'TrelloCardDetailImages',
-      imageAttachments.map(renderImageAttachment),
+      imageAttachments.map((attachment) =>
+        renderImageAttachment(
+          attachment,
+          attachmentImageUrls,
+          failedImageIds.includes(attachment.id),
+        ),
+      ),
     ),
   ]
 }
@@ -426,8 +445,24 @@ const renderCardDescriptionEditor = (
         state.savingCardDetail ? 'Saving...' : 'Save',
         'TrelloButton TrelloCardDetailSaveButton',
       ),
+      renderCardDescriptionCancelButton(state.savingCardDetail),
     ]),
   ])
+}
+
+const renderCardDescriptionCancelButton = (disabled: boolean): Dom.TreeNode => {
+  const text = Dom.textNode('Cancel')
+  return Dom.node(
+    VirtualDomElements.Button,
+    {
+      className: 'TrelloButton TrelloCardDetailCancelButton',
+      disabled,
+      name: 'cancelCardDescriptionEdit',
+      onClick: 'handleClick',
+      onPointerDown: 'handleCardDescriptionCancelPointerDown',
+    },
+    [text],
+  )
 }
 
 const renderCardDescriptionPreview = (description: string): Dom.TreeNode => {
@@ -516,7 +551,12 @@ export const renderCardDetailPanel = (
     renderListTitle('Comments'),
     renderCardDetailComments(state.cardCommentsLoading, comments),
     renderCardCommentComposer(state),
-    ...renderCardDetailImages(state.cardAttachmentsLoading, attachments),
+    ...renderCardDetailImages(
+      state.cardAttachmentsLoading,
+      attachments,
+      state.attachmentImageUrls,
+      state.failedCardAttachmentImageIds,
+    ),
     ...(card.url
       ? [Dom.link('TrelloCardDetailLink', card.url, 'Open in Trello')]
       : []),

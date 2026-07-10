@@ -99,6 +99,21 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await expect(description).toBeVisible()
   await description.type(' edited')
 
+  const cancel = Locator('button[name="cancelCardDescriptionEdit"]')
+  await expect(cancel).toBeVisible()
+  // eslint-disable-next-line e2e/no-direct-click
+  await cancel.click()
+
+  const originalDescription = Locator('text=Original description')
+  await expect(originalDescription).toBeVisible()
+  const discardedDescription = Locator('text=Original description edited')
+  await expect(discardedDescription).not.toBeVisible()
+
+  // eslint-disable-next-line e2e/no-direct-click
+  await descriptionPreview.click()
+  await expect(description).toBeVisible()
+  await description.type(' edited')
+
   const save = Locator('button[name="saveCardDetail"]')
   await expect(save).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click

@@ -32,6 +32,7 @@ export interface TrelloViewState {
   addingCardLabelId: string
   addingCardListId: string
   addingList: boolean
+  attachmentImageUrls: Readonly<Record<string, string>>
   baseUrl: string
   boardBackgroundEnabled: boolean
   boardDetail: TrelloBoardDetail | undefined
@@ -67,6 +68,7 @@ export interface TrelloViewState {
   editingCardDescription: boolean
   editingCardTitle: boolean
   error: string
+  failedCardAttachmentImageIds: readonly string[]
   focusedName: string
   loading: boolean
   movingCardId: string

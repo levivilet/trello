@@ -26,7 +26,7 @@ export const credentialFingerprintSearchParam = 'credential'
 
 const textEncoder = new TextEncoder()
 
-const getCredentialFingerprint = async (
+export const getCredentialFingerprint = async (
   credentials: TrelloCredentials,
 ): Promise<string | undefined> => {
   const subtle = globalThis.crypto?.subtle

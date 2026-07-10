@@ -899,6 +899,10 @@ test('list title renders as editable input', async () => {
 test('cards and lists render drag and drop attributes', async () => {
   expect(view.eventListeners).toEqual([
     {
+      name: 'handleImageError',
+      params: ['handleViewEvent', 'error', 'event.target.name'],
+    },
+    {
       name: 'handleDragStart',
       params: ['handleViewEvent', 'dragstart', 'event.target.name'],
     },
@@ -940,6 +944,11 @@ test('cards and lists render drag and drop attributes', async () => {
     },
     {
       name: 'handleAddCardActionPointerDown',
+      params: ['handleViewEvent', 'pointerdown', 'event.currentTarget.name'],
+      preventDefault: true,
+    },
+    {
+      name: 'handleCardDescriptionCancelPointerDown',
       params: ['handleViewEvent', 'pointerdown', 'event.currentTarget.name'],
       preventDefault: true,
     },
@@ -2376,6 +2385,9 @@ test('clicking card renders card detail and close dismisses it', async () => {
         },
       },
     }),
+    imageCache: createMockTrelloImageCache({
+      'https://example.com/screenshot.png': 'blob:private-screenshot',
+    }),
     recentStorage: createMemoryRecentBoardStorage(),
     storage: createMemoryCredentialStorage(),
   }))
@@ -2447,10 +2459,19 @@ test('clicking card renders card detail and close dismisses it', async () => {
     hasNode(detailDom, (node) => {
       return (
         node.className === 'TrelloCardDetailImage' &&
-        node.src === 'https://example.com/screenshot.png'
+        node.name === 'attachment-1' &&
+        node.onError === 'handleImageError' &&
+        node.src === 'blob:private-screenshot'
       )
     }),
   ).toBe(true)
+
+  await instance.handleEvent?.({ name: 'attachment-1', type: 'error' })
+
+  const imageErrorDom = await instance.render()
+  expect(getClassNames(imageErrorDom)).not.toContain('TrelloCardDetailImage')
+  expect(getClassNames(imageErrorDom)).toContain('TrelloCardDetailImageError')
+  expect(getText(imageErrorDom)).toContain('Image could not be loaded.')
   expect(
     hasNode(detailDom, (node) => {
       return (
@@ -3767,7 +3788,28 @@ test('editing card title and description saves card detail', async () => {
     hasNode(editingDom, (node) => {
       return node.name === 'cancelCardDescriptionEdit'
     }),
+  ).toBe(true)
+
+  await instance.handleEvent?.({
+    name: 'cardDescription',
+    type: 'input',
+    value: 'Discarded description',
+  })
+  await instance.handleEvent?.({
+    name: 'cancelCardDescriptionEdit',
+    type: 'click',
+  })
+
+  const cancelledDom = await instance.render()
+  expect(getText(cancelledDom)).toContain('Original description')
+  expect(getText(cancelledDom)).not.toContain('Discarded description')
+  expect(
+    hasNode(cancelledDom, (node) => {
+      return node.name === 'cardDescription'
+    }),
   ).toBe(false)
+
+  await instance.handleEvent?.({ name: 'editCardDescription', type: 'click' })
 
   await instance.handleEvent?.({
     name: 'cardDescription',

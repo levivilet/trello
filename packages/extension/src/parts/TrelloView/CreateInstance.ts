@@ -34,6 +34,7 @@ import {
   handleDropEvent,
 } from './actions/HandleDragEvent.ts'
 import { handleFocusEvent } from './actions/HandleFocusEvent.ts'
+import { handleImageErrorEvent } from './actions/HandleImageErrorEvent.ts'
 import { handleInputEvent } from './actions/HandleInputEvent.ts'
 import { handleKeyDownEvent } from './actions/HandleKeyDownEvent.ts'
 import { handleSubmitEvent } from './actions/HandleSubmitEvent.ts'
@@ -101,10 +102,14 @@ interface MutableTrelloViewActionContext extends TrelloViewActionContext {
 
 const activeInstances = new Set<ActiveTrelloViewInstance>()
 
-const handlePointerEvent = (
+const handleDirectEvent = (
   context: Readonly<TrelloViewActionContext>,
   event: Readonly<ViewEvent>,
 ): boolean => {
+  if (event.type === 'error') {
+    handleImageErrorEvent(context, event.name || '')
+    return true
+  }
   if (event.type === 'pointerdown' && event.name === 'resizeCardDetail') {
     startResizeCardDetail(context, event)
     return true
@@ -358,7 +363,7 @@ export const createInstance = async (
           await handleKeyDownEvent(viewContext, event)
           return
         }
-        if (handlePointerEvent(viewContext, event)) {
+        if (handleDirectEvent(viewContext, event)) {
           return
         }
         if (event.type === 'click') {

@@ -80,7 +80,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
             id: 'attachment-1',
             mimeType: 'image/png',
             name: 'Screenshot',
-            url: 'https://example.com/screenshot.png',
+            url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
           },
         ],
         card: {
