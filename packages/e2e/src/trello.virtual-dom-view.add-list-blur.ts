@@ -32,9 +32,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await expect(newListTitle).toBeVisible()
   await expect(newListTitle).toBeFocused()
 
-  const existingListTitle = Locator('input[name="listTitle:list-1"]')
-  // eslint-disable-next-line e2e/no-direct-click
-  await existingListTitle.click()
+  await newListTitle.dispatchEvent('blur', '{}')
 
   await expect(newListTitle).toHaveCount(0)
   await expect(addList).toBeVisible()
