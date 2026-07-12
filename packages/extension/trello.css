@@ -1135,6 +1135,7 @@ button.TrelloSearchResult:hover {
   contain: content;
   padding: 4px 8px;
   overflow: hidden;
+  color: #ffffff;
   text-overflow: ellipsis;
   white-space: nowrap;
   border-radius: 4px;
