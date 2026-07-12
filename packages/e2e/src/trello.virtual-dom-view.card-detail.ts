@@ -115,4 +115,11 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await expect(commentAuthor).toBeVisible()
   await expect(commentText).toBeVisible()
   await expect(image).toBeVisible()
+
+  const writeComment = Locator('button[name="startWriteComment"]')
+  await expect(writeComment).toBeVisible()
+  // eslint-disable-next-line e2e/no-direct-click
+  await writeComment.click()
+  const commentBox = Locator('textarea[name="cardComment"]')
+  await expect(commentBox).toBeFocused()
 }

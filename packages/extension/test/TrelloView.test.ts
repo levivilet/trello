@@ -2700,6 +2700,7 @@ test('card detail comment controls and shortcuts save and cancel comments', asyn
 
   const writingDom = await instance.render()
   expect(getNodeByName(writingDom, 'cardComment')).toMatchObject({
+    autofocus: true,
     name: 'cardComment',
     placeholder: 'Write a comment...',
   })
