@@ -6,6 +6,10 @@ const genericEditorVariablePattern =
 const oldDarkFallbackPattern =
   /#(?:181f1f|202929|121818|111616|314040|334040|087d90|006a7a|4dc8ff|aeb8b8|f4f4f4|f7f7f7|394545|2a3434)\b/i
 const hardcodedDarkOverlayPattern = /rgba\((?:0,\s*0,\s*0|255,\s*255,\s*255)/
+const labelChoiceTextColorPattern =
+  /\.TrelloCardLabelChoiceText \{[^}]*color: #ffffff;/s
+const lightLabelTextColorPattern =
+  /\.TrelloCardLabelColorGreenLight \{[^}]*color: #172b4d;/s
 
 const readTrelloCss = async (): Promise<string> => {
   return readFile(new URL('../trello.css', import.meta.url), 'utf8')
@@ -78,4 +82,11 @@ test('trello card description preview uses pointer cursor', async () => {
 
   expect(css).toContain('.TrelloCardDescriptionPreview {')
   expect(css).toContain('cursor: pointer;')
+})
+
+test('trello label picker uses contrasting text colors', async () => {
+  const css = await readTrelloCss()
+
+  expect(css).toMatch(labelChoiceTextColorPattern)
+  expect(css).toMatch(lightLabelTextColorPattern)
 })
