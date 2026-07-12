@@ -26,6 +26,10 @@ export const test: Test = async ({ Command, expect, Locator }) => {
     await expect(apiKeyInput).toBeVisible()
     await expect(tokenInput).toBeVisible()
 
+    step = 'expect auth form width'
+    const authForm = Locator('.TrelloAuthForm')
+    await expect(authForm).toHaveCSS('max-width', '760px')
+
     step = 'locate labels'
     const apiKey = Locator('text=API key')
     const token = Locator('text=Token')

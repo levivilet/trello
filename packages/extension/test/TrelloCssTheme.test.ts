@@ -10,6 +10,7 @@ const labelChoiceTextColorPattern =
   /\.TrelloCardLabelChoiceText \{[^}]*color: #ffffff;/s
 const lightLabelTextColorPattern =
   /\.TrelloCardLabelColorGreenLight \{[^}]*color: #172b4d;/s
+const authFormMaxWidthPattern = /\.TrelloAuthForm\s*\{[^}]*max-width: 760px;/
 
 const readTrelloCss = async (): Promise<string> => {
   return readFile(new URL('../trello.css', import.meta.url), 'utf8')
@@ -75,6 +76,12 @@ test('trello readable content allows text selection', async () => {
   expect(css).toContain('.TrelloCardDescriptionPreview,')
   expect(css).toContain('.TrelloCardCommentText,')
   expect(css).toContain('user-select: text;')
+})
+
+test('trello auth form matches the welcome section maximum width', async () => {
+  const css = await readTrelloCss()
+
+  expect(css).toMatch(authFormMaxWidthPattern)
 })
 
 test('trello card description preview uses pointer cursor', async () => {

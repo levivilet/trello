@@ -14,14 +14,12 @@ export const renderAuth = (
     'connect',
     state.loading ? 'Connecting...' : 'Connect',
   )
-  return Dom.flatten(
-    Dom.div('TrelloView TrelloAuth', [
-      title,
-      apiKey,
-      token,
-      connect,
-      ...renderError(state.error),
-      renderWelcome(),
-    ]),
-  )
+  const form = Dom.div('TrelloAuthForm', [
+    title,
+    apiKey,
+    token,
+    connect,
+    ...renderError(state.error),
+  ])
+  return Dom.flatten(Dom.div('TrelloView TrelloAuth', [form, renderWelcome()]))
 }
