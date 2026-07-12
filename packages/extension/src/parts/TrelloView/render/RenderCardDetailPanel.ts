@@ -150,6 +150,7 @@ const renderCardCommentComposer = (
   }
   return Dom.div('TrelloCardCommentComposer', [
     Dom.node(VirtualDomElements.TextArea, {
+      autofocus: true,
       className: 'TrelloTextArea TrelloCardCommentTextArea',
       disabled: state.savingComment,
       name: 'cardComment',
