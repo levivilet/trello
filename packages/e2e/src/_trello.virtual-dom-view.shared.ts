@@ -10,8 +10,22 @@ export interface TrelloBoard {
 }
 
 export interface TrelloCard {
+  readonly desc?: string
   readonly id: string
+  readonly labels?: readonly TrelloLabel[]
   readonly name: string
+}
+
+export interface TrelloLabel {
+  readonly color?: string
+  readonly id: string
+  readonly name?: string
+}
+
+export interface TrelloCardDetail {
+  readonly attachments: readonly unknown[]
+  readonly card: TrelloCard
+  readonly comments: readonly unknown[]
 }
 
 export interface TrelloList {
@@ -28,7 +42,9 @@ export interface TrelloBoardDetail {
 export interface MockTrelloData {
   readonly boardDetailErrors?: Readonly<Record<string, string>>
   readonly boardDetails?: Readonly<Record<string, TrelloBoardDetail>>
+  readonly boardLabels?: Readonly<Record<string, readonly TrelloLabel[]>>
   readonly boards?: readonly TrelloBoard[]
+  readonly cardDetails?: Readonly<Record<string, TrelloCardDetail>>
   readonly error?: string
   readonly listBoardsError?: string
   readonly listBoardsResponses?: readonly (readonly TrelloBoard[])[]
@@ -128,4 +144,15 @@ export const openBoard = async (
   await expect(board).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await board.click()
+}
+
+export const openCard = async (
+  Locator: Locator,
+  expect: Expect,
+  cardId = 'card-1',
+): Promise<void> => {
+  const card = Locator(`button[name="card:${cardId}"]`)
+  await expect(card).toBeVisible()
+  // eslint-disable-next-line e2e/no-direct-click
+  await card.click()
 }
