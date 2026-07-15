@@ -25,7 +25,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await openBoard(Locator, expect)
   await openCard(Locator, expect)
 
-  const panel = Locator('[name="cardDetail"]')
+  const panel = Locator('.TrelloCardDetailPanel')
   const title = Locator('textarea[name="cardTitle"]')
   const close = Locator('button[name="closeCardDetail"]')
   const cardButton = Locator('button[name="card:card-1"]')

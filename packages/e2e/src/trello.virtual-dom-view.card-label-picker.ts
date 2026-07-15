@@ -45,7 +45,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   // eslint-disable-next-line e2e/no-direct-click
   await openPicker.click()
 
-  const picker = Locator('[name="cardLabelPicker"]')
+  const picker = Locator('.TrelloCardLabelPicker')
   const search = Locator('input[name="cardLabelSearch"]')
   const ready = Locator('button[name="addCardLabel:label-1"]')
   const needsReview = Locator('button[name="addCardLabel:label-2"]')
