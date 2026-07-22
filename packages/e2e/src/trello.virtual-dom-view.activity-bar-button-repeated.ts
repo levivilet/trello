@@ -16,17 +16,18 @@ const waitFor = async (assertion: () => Promise<void>): Promise<void> => {
   }
 }
 
-export const test: Test = async ({ Command, expect, Locator }) => {
+export const test: Test = async ({ Command, expect, Locator, SideBar }) => {
   await Command.execute('ActivityBar.handleExtensionsChanged')
+  await Command.executeExtensionCommand('trello.test.useMockData', {
+    boards: [],
+  })
 
-  const explorerItem = Locator('.ActivityBarItem[title="Explorer"]')
   const trelloItem = Locator('.ActivityBarItem[title="Trello"]')
   const explorerView = Locator('.Viewlet.Explorer')
   const apiKey = Locator('input[name="apiKey"]')
   await expect(trelloItem).toBeVisible()
 
-  // eslint-disable-next-line e2e/no-direct-click
-  await explorerItem.click()
+  await SideBar.open('Explorer')
   await waitFor(() => expect(explorerView).toBeVisible())
 
   // eslint-disable-next-line e2e/no-direct-click
@@ -36,8 +37,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   )
   await waitFor(() => expect(apiKey).toBeVisible())
 
-  // eslint-disable-next-line e2e/no-direct-click
-  await explorerItem.click()
+  await SideBar.open('Explorer')
   await waitFor(() => expect(explorerView).toBeVisible())
 
   // eslint-disable-next-line e2e/no-direct-click

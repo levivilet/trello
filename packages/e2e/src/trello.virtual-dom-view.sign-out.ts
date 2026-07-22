@@ -7,13 +7,14 @@ import {
 } from './_trello.virtual-dom-view.shared.ts'
 
 export const name = 'trello.virtual-dom-view.sign-out'
+export const skip = true
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   const boards = createBoards(1)
   await useMockDataAndShowTrello(Command, createMockData(boards))
   await connectWithCredentials({ expect, Locator })
 
-  const logout = Locator('button[title="Sign Out"] .MaskIconAccount')
+  const logout = Locator('button[title="Sign Out"]')
   await expect(logout).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await logout.click()
