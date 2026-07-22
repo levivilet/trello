@@ -6,7 +6,6 @@ import {
 } from './_trello.virtual-dom-view.shared.ts'
 
 export const name = 'trello.virtual-dom-view.refresh-boards'
-export const skip = true
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   const firstBoards = createBoards(1)
@@ -25,7 +24,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   const firstBoard = Locator('button[name="board:board-1"]')
   await expect(firstBoard).toBeVisible()
 
-  const refresh = Locator('button[title="Refresh Boards"]')
+  const refresh = Locator('button[title="Refresh Boards"] .MaskIconRefresh')
   await expect(refresh).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await refresh.click()

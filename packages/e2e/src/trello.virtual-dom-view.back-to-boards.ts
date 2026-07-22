@@ -8,7 +8,6 @@ import {
 } from './_trello.virtual-dom-view.shared.ts'
 
 export const name = 'trello.virtual-dom-view.back-to-boards'
-export const skip = true
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   const boards = createBoards(1)
@@ -16,7 +15,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await connectWithCredentials({ expect, Locator })
   await openBoard(Locator, expect)
 
-  const back = Locator('button[title="Back to Boards"]')
+  const back = Locator('button[title="Back to Boards"] .MaskIconArrowLeft')
   await expect(back).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await back.click()
