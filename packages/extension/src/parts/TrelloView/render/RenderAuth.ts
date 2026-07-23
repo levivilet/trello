@@ -6,7 +6,8 @@ import {
 import type { TrelloViewState } from '../state/TrelloViewState.ts'
 import * as DomEventListenerFunctions from '../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../MergeClassNames/MergeClassNames.ts'
-import { renderError, renderField } from './RenderShared.ts'
+import { renderError } from './RenderError/RenderError.ts'
+import { renderField } from './RenderField/RenderField.ts'
 import { renderWelcome } from './RenderWelcome.ts'
 
 export const renderAuth = (
