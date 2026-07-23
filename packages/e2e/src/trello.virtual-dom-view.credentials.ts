@@ -30,6 +30,10 @@ export const test: Test = async ({ Command, expect, Locator }) => {
     const authForm = Locator('.TrelloAuthForm')
     await expect(authForm).toHaveCSS('max-width', '760px')
 
+    step = 'expect no duplicate title'
+    const authTitle = Locator('.TrelloAuthForm > .TrelloTitle')
+    await expect(authTitle).toHaveCount(0)
+
     step = 'locate labels'
     const apiKey = Locator('text=API key')
     const token = Locator('text=Token')

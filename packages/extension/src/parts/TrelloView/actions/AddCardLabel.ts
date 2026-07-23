@@ -67,9 +67,16 @@ export const closeCardLabelPicker = (
 ): void => {
   const { requestRerender } = context
   const state = context.state as TrelloViewState
+  state.cardLabelCreateOpen = false
   state.cardLabelPickerOpen = false
   state.draftLabelSearchQuery = ''
-  if (state.focusedName === 'cardLabelSearch') {
+  state.draftNewLabelColor = 'green'
+  state.draftNewLabelName = ''
+  state.savingNewLabel = false
+  if (
+    state.focusedName === 'cardLabelSearch' ||
+    state.focusedName === 'newLabelName'
+  ) {
     state.focusedName = ''
   }
   requestRerender()

@@ -19,7 +19,11 @@ import {
   getCommentInitials,
   getCommentText,
 } from '../CommentHelpers.ts'
-import { getLabelColorClassName, getLabelText } from '../LabelHelpers.ts'
+import {
+  getLabelColorClassName,
+  getLabelText,
+  labelColors,
+} from '../LabelHelpers.ts'
 import { renderMarkdown } from './RenderMarkdown.ts'
 import { renderListTitle } from './RenderShared.ts'
 
@@ -254,10 +258,16 @@ const renderCardLabelPickerContent = (
   }
   const matchingLabels = getMatchingLabels(state)
   if (matchingLabels.length === 0) {
-    const text = state.draftLabelSearchQuery.trim()
-      ? 'No matching labels'
-      : 'No labels available'
-    return Dom.div('TrelloCardLabelPickerEmpty', [Dom.textNode(text)])
+    if (state.draftLabelSearchQuery.trim()) {
+      return Dom.button(
+        'openCardLabelCreate',
+        'Create a new label',
+        'TrelloButton TrelloCardLabelCreateButton',
+      )
+    }
+    return Dom.div('TrelloCardLabelPickerEmpty', [
+      Dom.textNode('No labels available'),
+    ])
   }
   return Dom.div(
     'TrelloCardLabelPickerList',
@@ -277,6 +287,89 @@ const renderCardLabelPickerHeader = (): Dom.TreeNode => {
   return Dom.div('TrelloCardLabelPickerHeader', [title, closeButton])
 }
 
+const renderCardLabelCreateHeader = (): Dom.TreeNode => {
+  const backButton = Dom.button(
+    'closeCardLabelCreate',
+    '<',
+    'TrelloButton TrelloCardLabelPickerBackButton',
+  )
+  const title = Dom.div('TrelloCardLabelPickerTitle', [
+    Dom.textNode('Create label'),
+  ])
+  const closeButton = Dom.button(
+    'closeCardLabelPicker',
+    'x',
+    'TrelloButton TrelloCardLabelPickerCloseButton',
+  )
+  return Dom.div('TrelloCardLabelPickerHeader', [
+    backButton,
+    title,
+    closeButton,
+  ])
+}
+
+const renderCardLabelColorChoice = (
+  state: Readonly<TrelloViewState>,
+  color: string,
+): Dom.TreeNode => {
+  const selected = state.draftNewLabelColor === color
+  return Dom.node(VirtualDomElements.Button, {
+    'aria-label': `Select ${color.replace('_', ' ')} label color`,
+    'aria-pressed': selected,
+    className: `TrelloCardLabelColorChoice ${getLabelColorClassName(color)}${selected ? ' TrelloCardLabelColorChoiceSelected' : ''}`,
+    disabled: state.savingNewLabel,
+    name: `selectCardLabelColor:${color}`,
+    onClick: 'handleClick',
+    title: color.replace('_', ' '),
+  })
+}
+
+const renderCardLabelCreate = (
+  state: Readonly<TrelloViewState>,
+): Dom.TreeNode => {
+  const preview = Dom.div(
+    `TrelloCardLabelCreatePreview ${getLabelColorClassName(state.draftNewLabelColor)}`,
+    [Dom.textNode(state.draftNewLabelName || 'Label title')],
+  )
+  const titleInput = Dom.node(VirtualDomElements.Input, {
+    autocomplete: 'off',
+    className: 'TrelloInput',
+    disabled: state.savingNewLabel,
+    name: 'newLabelName',
+    onFocus: 'handleFocus',
+    onInput: 'handleInput',
+    placeholder: 'Label title',
+    value: state.draftNewLabelName,
+  })
+  const colorChoices = Dom.div(
+    'TrelloCardLabelColorGrid',
+    labelColors.map((color) => {
+      return renderCardLabelColorChoice(state, color)
+    }),
+  )
+  const createButton = Dom.node(
+    VirtualDomElements.Button,
+    {
+      className: 'TrelloButton TrelloPrimaryButton',
+      disabled: state.savingNewLabel || !state.draftNewLabelName.trim(),
+      name: 'createCardLabel',
+      onClick: 'handleClick',
+    },
+    [Dom.textNode(state.savingNewLabel ? 'Creating...' : 'Create')],
+  )
+  return Dom.div('TrelloCardLabelCreate', [
+    renderCardLabelCreateHeader(),
+    preview,
+    Dom.div('TrelloCardLabelCreateFields', [
+      Dom.label('Title'),
+      titleInput,
+      Dom.label('Select a color'),
+      colorChoices,
+      createButton,
+    ]),
+  ])
+}
+
 const renderCardLabelPicker = (
   state: Readonly<TrelloViewState>,
   labels: readonly TrelloLabel[] | undefined,
@@ -288,20 +381,22 @@ const renderCardLabelPicker = (
       name: 'cardLabelPicker',
       onPointerDown: 'handleCardLabelPickerPointerDown',
     },
-    [
-      renderCardLabelPickerHeader(),
-      Dom.node(VirtualDomElements.Input, {
-        autocomplete: 'off',
-        className: 'TrelloInput TrelloCardLabelSearchInput',
-        name: 'cardLabelSearch',
-        onBlur: 'handleBlur',
-        onFocus: 'handleFocus',
-        onInput: 'handleInput',
-        placeholder: 'Search labels',
-        value: state.draftLabelSearchQuery,
-      }),
-      renderCardLabelPickerContent(state, labels),
-    ],
+    state.cardLabelCreateOpen
+      ? [renderCardLabelCreate(state)]
+      : [
+          renderCardLabelPickerHeader(),
+          Dom.node(VirtualDomElements.Input, {
+            autocomplete: 'off',
+            className: 'TrelloInput TrelloCardLabelSearchInput',
+            name: 'cardLabelSearch',
+            onBlur: 'handleBlur',
+            onFocus: 'handleFocus',
+            onInput: 'handleInput',
+            placeholder: 'Search labels',
+            value: state.draftLabelSearchQuery,
+          }),
+          renderCardLabelPickerContent(state, labels),
+        ],
   )
 }
 

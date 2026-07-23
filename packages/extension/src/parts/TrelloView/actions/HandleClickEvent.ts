@@ -15,6 +15,12 @@ import { startAddList } from './AddList.ts'
 import { cancelCardDescriptionEdit } from './CancelCardDescriptionEdit.ts'
 import { closeCardDetail } from './CloseCardDetail.ts'
 import { connect } from './Connect.ts'
+import {
+  closeCardLabelCreate,
+  createCardLabel,
+  openCardLabelCreate,
+  selectCardLabelColor,
+} from './CreateCardLabel.ts'
 import { editCardDescription, editCardTitle } from './EditCardDetail.ts'
 import { goBackToBoards } from './GoBackToBoards.ts'
 import { loadBoards } from './LoadBoards.ts'
@@ -46,6 +52,13 @@ export const handleClickEvent = async (
     await addCardLabel(context, event.name.slice('addCardLabel:'.length))
     return
   }
+  if (event.name?.startsWith('selectCardLabelColor:')) {
+    selectCardLabelColor(
+      context,
+      event.name.slice('selectCardLabelColor:'.length),
+    )
+    return
+  }
   switch (event.name) {
     case 'backToBoards':
       await goBackToBoards(context)
@@ -62,17 +75,26 @@ export const handleClickEvent = async (
     case 'closeCardDetail':
       closeCardDetail(context)
       return
+    case 'closeCardLabelCreate':
+      closeCardLabelCreate(context)
+      return
     case 'closeCardLabelPicker':
       closeCardLabelPicker(context)
       return
     case 'connect':
       await connect(context)
       return
+    case 'createCardLabel':
+      await createCardLabel(context)
+      return
     case 'editCardDescription':
       editCardDescription(context)
       return
     case 'logout':
       await logout(context)
+      return
+    case 'openCardLabelCreate':
+      openCardLabelCreate(context)
       return
     case 'openCardLabelPicker':
       await openCardLabelPicker(context)

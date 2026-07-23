@@ -47,6 +47,7 @@ export interface TrelloViewState {
   cardDetailResizeStartWidth: number
   cardDetailResizeStartX: number
   cardDetailWidth: number
+  cardLabelCreateOpen: boolean
   cardLabelPickerOpen: boolean
   context: Readonly<Record<string, boolean>>
   contextMenuCardId: string
@@ -60,6 +61,8 @@ export interface TrelloViewState {
   draftLabelSearchQuery: string
   draftListTitles: Readonly<Record<string, string>>
   draftNewCardTitle: string
+  draftNewLabelColor: string
+  draftNewLabelName: string
   draftNewListTitle: string
   draftSearchQuery: string
   draftToken: string
@@ -78,6 +81,7 @@ export interface TrelloViewState {
   savingCardDetail: boolean
   savingComment: boolean
   savingNewCard: boolean
+  savingNewLabel: boolean
   savingNewList: boolean
   searchEnabled: boolean
   searchResults: readonly TrelloSearchResult[]
