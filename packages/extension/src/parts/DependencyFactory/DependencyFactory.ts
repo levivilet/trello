@@ -1,6 +1,7 @@
 import * as ExtensionApi from '@lvce-editor/api'
 import type { TrelloViewDependencies } from '../TrelloViewState/TrelloViewState.ts'
 import {
+  batchRequestsEnabledPreference,
   boardBackgroundEnabledPreference,
   searchEnabledPreference,
 } from '../Constants/Constants.ts'
@@ -26,8 +27,17 @@ const readBoardBackgroundEnabledPreference = async (): Promise<boolean> => {
   return (await api.getPreference?.(boardBackgroundEnabledPreference)) === true
 }
 
+const readBatchRequestsEnabledPreference = async (): Promise<boolean> => {
+  const api = ExtensionApi as unknown as {
+    readonly getPreference?: (key: string) => Promise<unknown>
+  }
+  return (await api.getPreference?.(batchRequestsEnabledPreference)) === true
+}
+
 const defaultDependencyFactory = (): TrelloViewDependencies => ({
-  client: createTrelloClient(),
+  client: createTrelloClient(undefined, undefined, {
+    readBatchRequestsEnabled: readBatchRequestsEnabledPreference,
+  }),
   currentBoardStorage: createCacheCurrentBoardStorage(),
   imageCache: createTrelloImageCache(),
   readBoardBackgroundEnabled: readBoardBackgroundEnabledPreference,

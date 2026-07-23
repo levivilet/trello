@@ -1,4 +1,5 @@
 export const viewId = 'trello.views.boards'
 export const searchEnabledPreference = 'trello.searchEnabled'
 export const boardBackgroundEnabledPreference = 'trello.boardBackgroundEnabled'
+export const batchRequestsEnabledPreference = 'trello.batchRequestsEnabled'
 export const trelloPowerUpsUrl = 'https://trello.com/power-ups/admin'

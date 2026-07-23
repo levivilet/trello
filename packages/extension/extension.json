@@ -20,6 +20,11 @@
     "trello.boardBackgroundEnabled": {
       "type": "boolean",
       "default": false
+    },
+    "trello.batchRequestsEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Use Trello's batch API for supported read requests."
     }
   },
   "activation": [

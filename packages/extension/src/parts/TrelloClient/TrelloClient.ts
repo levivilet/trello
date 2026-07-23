@@ -2,6 +2,7 @@ import type {
   FetchLike,
   TrelloCacheFirstResult,
   TrelloClient,
+  TrelloClientOptions,
 } from '../TrelloClientTypes/TrelloClientTypes.ts'
 import type {
   TrelloBoard,
@@ -24,9 +25,7 @@ import {
 } from '../GetBoardDetail/GetBoardDetail.ts'
 import {
   getCardDetail,
-  getCardDetailAttachments,
-  getCardDetailCard,
-  getCardDetailComments,
+  getCardDetailParts,
   readCachedCardDetail,
 } from '../GetCardDetail/GetCardDetail.ts'
 import { listBoardLabels } from '../ListBoardLabels/ListBoardLabels.ts'
@@ -48,7 +47,35 @@ export type {
 export const createTrelloClient = (
   fetchLike: FetchLike = fetch,
   cache: TrelloApiCache | undefined = createCacheStorageTrelloApiCache(),
+  options: TrelloClientOptions = {},
 ): TrelloClient => {
+  const readBatchRequestsEnabled =
+    options.readBatchRequestsEnabled ||
+    ((): Promise<boolean> => Promise.resolve(false))
+  const getFreshBoardDetail = async (
+    board: TrelloBoard,
+    credentials: TrelloCredentials,
+  ): Promise<TrelloBoardDetail> => {
+    return getBoardDetail(
+      fetchLike,
+      board,
+      credentials,
+      cache,
+      await readBatchRequestsEnabled(),
+    )
+  }
+  const getFreshCardDetail = async (
+    card: TrelloCard,
+    credentials: TrelloCredentials,
+  ): Promise<TrelloCardDetail> => {
+    return getCardDetail(
+      fetchLike,
+      card,
+      credentials,
+      cache,
+      await readBatchRequestsEnabled(),
+    )
+  }
   return {
     addCardComment(
       card: TrelloCard,
@@ -85,11 +112,11 @@ export const createTrelloClient = (
     ): ReturnType<TrelloClient['createList']> {
       return createList(fetchLike, board, create, credentials, cache)
     },
-    getBoardDetail(
+    async getBoardDetail(
       board,
       credentials,
     ): ReturnType<TrelloClient['getBoardDetail']> {
-      return getBoardDetail(fetchLike, board, credentials, cache)
+      return getFreshBoardDetail(board, credentials)
     },
     async getBoardDetailCacheFirst(
       board: TrelloBoard,
@@ -97,14 +124,14 @@ export const createTrelloClient = (
     ): Promise<TrelloCacheFirstResult<TrelloBoardDetail>> {
       return {
         cached: await readCachedBoardDetail(cache, board, credentials),
-        fresh: getBoardDetail(fetchLike, board, credentials, cache),
+        fresh: getFreshBoardDetail(board, credentials),
       }
     },
-    getCardDetail(
+    async getCardDetail(
       card,
       credentials,
     ): ReturnType<TrelloClient['getCardDetail']> {
-      return getCardDetail(fetchLike, card, credentials, cache)
+      return getFreshCardDetail(card, credentials)
     },
     async getCardDetailCacheFirst(
       card: TrelloCard,
@@ -112,25 +139,26 @@ export const createTrelloClient = (
     ): Promise<TrelloCacheFirstResult<TrelloCardDetail>> {
       return {
         cached: await readCachedCardDetail(cache, card, credentials),
-        fresh: getCardDetail(fetchLike, card, credentials, cache),
+        fresh: getFreshCardDetail(card, credentials),
       }
     },
     async getCardDetailPartsCacheFirst(
       card: TrelloCard,
       credentials: TrelloCredentials,
     ): ReturnType<TrelloClient['getCardDetailPartsCacheFirst']> {
+      const [cached, batchRequestsEnabled] = await Promise.all([
+        readCachedCardDetail(cache, card, credentials),
+        readBatchRequestsEnabled(),
+      ])
       return {
-        cached: await readCachedCardDetail(cache, card, credentials),
-        fresh: {
-          attachments: getCardDetailAttachments(
-            fetchLike,
-            card,
-            credentials,
-            cache,
-          ),
-          card: getCardDetailCard(fetchLike, card, credentials, cache),
-          comments: getCardDetailComments(fetchLike, card, credentials, cache),
-        },
+        cached,
+        fresh: getCardDetailParts(
+          fetchLike,
+          card,
+          credentials,
+          cache,
+          batchRequestsEnabled,
+        ),
       }
     },
     listBoardLabels(
