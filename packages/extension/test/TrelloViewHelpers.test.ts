@@ -6,6 +6,7 @@ import {
 import {
   getRecentlyViewedBoards,
   getWorkspaceSections,
+  sortBoardsByViewedAt,
 } from '../src/parts/TrelloView/BoardSections.ts'
 import { getCardCoverImageUrl } from '../src/parts/TrelloView/CardCoverHelpers.ts'
 import {
@@ -13,13 +14,23 @@ import {
   getCommentAvatarUrl,
   getCommentDateText,
   getCommentInitials,
+  getCommentText,
 } from '../src/parts/TrelloView/CommentHelpers.ts'
+import { getErrorMessage } from '../src/parts/TrelloView/GetErrorMessage.ts'
 import {
   getLabelColorClassName,
   getLabelText,
 } from '../src/parts/TrelloView/LabelHelpers.ts'
+import {
+  getMenuEntries,
+  MenuIdCard,
+  MenuIdList,
+} from '../src/parts/TrelloView/MenuEntries.ts'
+import { renderMarkdown } from '../src/parts/TrelloView/render/RenderMarkdown.ts'
+import { getAssetBaseUrl } from '../src/parts/TrelloView/state/AssetBaseUrl.ts'
 import { createInitialState } from '../src/parts/TrelloView/state/CreateInitialState.ts'
 import { validateCredentials } from '../src/parts/TrelloView/ValidateCredentials.ts'
+import { flatten, node } from '../src/parts/VirtualDom/VirtualDom.ts'
 
 const validApiKey = 'abcdefghijklmnopqrstuvwxyz123456'
 const validToken =
@@ -76,6 +87,22 @@ test('getRecentlyViewedBoards sorts by trello and local viewed dates', () => {
     'Local newer',
     'Trello older',
   ])
+})
+
+test('sortBoardsByViewedAt preserves order for boards outside the loaded list', () => {
+  const state = createInitialState()
+  const boards = [
+    {
+      id: 'external-1',
+      name: 'First',
+    },
+    {
+      id: 'external-2',
+      name: 'Second',
+    },
+  ]
+
+  expect(sortBoardsByViewedAt(state, boards)).toEqual(boards)
 })
 
 test('getWorkspaceSections groups boards by workspace with personal fallback', () => {
@@ -156,6 +183,24 @@ test('attachment helpers detect image attachments and choose fallback urls', () 
       url: 'https://example.com/file',
     }),
   ).toBe('https://example.com/preview-large.png')
+  expect(
+    getAttachmentImageUrl({
+      id: 'attachment-6',
+      mimeType: 'image/png',
+      url: 'https://example.com/download',
+    }),
+  ).toBe('https://example.com/download')
+  expect(
+    getAttachmentImageUrl({
+      id: 'attachment-7',
+      url: 'https://example.com/download',
+    }),
+  ).toBe('https://example.com/download')
+  expect(
+    getAttachmentImageUrl({
+      id: 'attachment-8',
+    }),
+  ).toBe('')
 })
 
 test('card cover helper chooses image urls with fallbacks', () => {
@@ -189,6 +234,108 @@ test('card cover helper chooses image urls with fallbacks', () => {
       name: 'Color cover card',
     }),
   ).toBe('')
+  expect(
+    getCardCoverImageUrl({
+      cover: {
+        url: 'https://example.com/direct-cover.png',
+      },
+      id: 'card-4',
+      name: 'Direct cover card',
+    }),
+  ).toBe('https://example.com/direct-cover.png')
+})
+
+test('comment helpers handle single names and missing text', () => {
+  expect(
+    getCommentInitials({
+      data: {},
+      id: 'comment-single-name',
+      memberCreator: {
+        fullName: 'simon',
+      },
+    }),
+  ).toBe('SI')
+  expect(
+    getCommentText({
+      data: {},
+      id: 'comment-without-text',
+    }),
+  ).toBe('No comment text')
+})
+
+test('error, menu, asset, and virtual dom helpers handle fallbacks', () => {
+  expect(getErrorMessage(new Error('Expected error'))).toBe('Expected error')
+
+  const state = createInitialState()
+  expect(getMenuEntries(state, MenuIdCard)).toEqual([
+    {
+      command: 'trello.refreshBoards',
+      id: 'refreshBoards',
+      label: 'Refresh Boards',
+    },
+    {
+      command: 'trello.backToBoards',
+      id: 'backToBoards',
+      label: 'Back to Boards',
+    },
+  ])
+  expect(getMenuEntries(state, MenuIdList)).toEqual([
+    {
+      command: 'trello.refreshBoards',
+      id: 'refreshBoards',
+      label: 'Refresh Boards',
+    },
+    {
+      command: 'trello.backToBoards',
+      id: 'backToBoards',
+      label: 'Back to Boards',
+    },
+  ])
+  expect(getMenuEntries(state, 'unknown')).toEqual([])
+
+  expect(getAssetBaseUrl('https://example.com/extension/trelloMain.js')).toBe(
+    'https://example.com/',
+  )
+  expect(
+    getAssetBaseUrl(
+      'file:///workspace/src/parts/TrelloView/state/AssetBaseUrl.ts',
+    ),
+  ).toBe('/remote/workspace/')
+
+  expect(flatten(node(1))).toEqual([
+    {
+      childCount: 0,
+      type: 1,
+    },
+  ])
+})
+
+test('markdown rendering treats incomplete and unsafe markup as text', () => {
+  const markdown = [
+    '**unclosed',
+    '',
+    '`unclosed',
+    '',
+    '*unclosed',
+    '',
+    '[unclosed',
+    '',
+    '[label] without target',
+    '',
+    '[label](unclosed',
+    '',
+    '[](https://example.com) [label]() [label](has space)',
+    '',
+    '[unsafe](javascript:alert)',
+    '',
+    'first line',
+    'second line',
+    '# heading',
+    'paragraph before list',
+    '- list item',
+  ].join('\n')
+
+  expect(renderMarkdown(markdown)).not.toHaveLength(0)
 })
 
 test('comment helpers use trello member metadata with fallbacks', () => {
