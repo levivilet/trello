@@ -1,12 +1,11 @@
 import * as config from '@lvce-editor/eslint-config'
-import * as actions from '@lvce-editor/eslint-plugin-github-actions'
 
 export default [
   ...config.default,
   ...config.recommendedRegex,
   ...config.recommendedTsconfig,
   ...config.recommendedVirtualDom,
-  ...actions.default,
+  ...config.recommendedActions,
   {
     files: ['packages/extension/**/*.ts'],
     rules: {
