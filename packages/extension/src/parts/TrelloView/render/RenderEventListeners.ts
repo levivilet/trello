@@ -9,71 +9,66 @@ export const renderEventListeners = (): readonly DomEventListener[] => {
   return [
     {
       name: 'handleImageError',
-      params: ['handleViewEvent', 'error', 'event.target.name'],
+      params: ['handleImageError', 'event.target.name'],
     },
     {
       name: 'handleDragStart',
-      params: ['handleViewEvent', 'dragstart', 'event.target.name'],
+      params: ['handleDragStart', 'event.target.name'],
     },
     {
       name: 'handleDragEnd',
-      params: ['handleViewEvent', 'dragend', 'event.target.name'],
+      params: ['handleDragEnd'],
     },
     {
       name: 'handleDragOver',
-      params: ['handleViewEvent', 'dragover', 'event.currentTarget.name'],
+      params: ['handleDragOver', 'event.currentTarget.name'],
       preventDefault: true,
     },
     {
       name: 'handleDragLeave',
-      params: ['handleViewEvent', 'dragleave', 'event.currentTarget.name'],
+      params: ['handleDragLeave'],
     },
     {
       name: 'handleDrop',
-      params: ['handleViewEvent', 'drop', 'event.currentTarget.name'],
+      params: ['handleDrop', 'event.currentTarget.name'],
       preventDefault: true,
     },
     {
       name: 'handleKeyDown',
-      params: ['handleViewEvent', 'keydown', 'event.target.name', 'event.key'],
+      params: [
+        'handleKeyDown',
+        'event.target.name',
+        'event.key',
+        'event.ctrlKey',
+      ],
     },
     {
       name: 'handlePointerDown',
-      params: [
-        'handleViewEvent',
-        'pointerdown',
-        'event.target.name',
-        'event.clientX',
-      ],
+      params: ['handlePointerDown', 'event.target.name', 'event.clientX'],
       trackPointerEvents: ['handlePointerMove', 'handlePointerUp'],
     },
     {
       name: 'handleCardLabelPickerPointerDown',
-      params: ['handleViewEvent', 'pointerdown', 'event.currentTarget.name'],
+      params: ['handlePointerDown', 'event.currentTarget.name'],
       preventDefault: true,
     },
     {
       name: 'handleAddCardActionPointerDown',
-      params: ['handleViewEvent', 'pointerdown', 'event.currentTarget.name'],
+      params: ['handlePointerDown', 'event.currentTarget.name'],
       preventDefault: true,
     },
     {
       name: 'handleCardDescriptionCancelPointerDown',
-      params: ['handleViewEvent', 'pointerdown', 'event.currentTarget.name'],
+      params: ['handlePointerDown', 'event.currentTarget.name'],
       preventDefault: true,
     },
     {
       name: 'handlePointerMove',
-      params: [
-        'handleViewEvent',
-        'pointermove',
-        'event.target.name',
-        'event.clientX',
-      ],
+      params: ['handlePointerMove', 'event.clientX'],
     },
     {
       name: 'handlePointerUp',
-      params: ['handleViewEvent', 'pointerup', 'event.target.name'],
+      params: ['handlePointerUp'],
     },
   ]
 }
