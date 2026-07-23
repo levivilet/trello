@@ -52,6 +52,16 @@ const renderSearchForm = (
   ]
 }
 
+const renderSearchToolbar = (
+  state: Readonly<TrelloViewState>,
+): readonly VirtualDomNode[] => {
+  const { searchEnabled } = state
+  if (!searchEnabled) {
+    return []
+  }
+  return renderToolbar([renderSearchForm(state)])
+}
+
 const renderBoardButton = (
   board: Readonly<TrelloBoard>,
 ): readonly VirtualDomNode[] => {
@@ -223,7 +233,7 @@ export const renderBoards = (
       onContextMenu: DomEventListenerFunctions.HandleContextMenu,
       type: VirtualDomElements.Div,
     },
-    ...(searchEnabled ? renderToolbar([renderSearchForm(state)]) : []),
+    ...renderSearchToolbar(state),
     ...renderTitle(TrelloStrings.boards()),
     ...boardContent.dom,
     ...errorDom,
