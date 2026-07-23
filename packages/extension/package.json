@@ -25,6 +25,17 @@
           "useESM": true
         }
       ]
+    },
+    "testMatch": [
+      "**/test/**"
+    ],
+    "collectCoverage": true,
+    "coverageThreshold": {
+      "global": {
+        "branches": 74,
+        "functions": 89,
+        "lines": 87
+      }
     }
   },
   "devDependencies": {
