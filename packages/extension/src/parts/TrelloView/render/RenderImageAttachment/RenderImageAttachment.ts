@@ -5,6 +5,7 @@ import {
 } from '@lvce-editor/virtual-dom-worker'
 import type { TrelloAttachment } from '../../../TrelloTypes/TrelloTypes.ts'
 import * as DomEventListenerFunctions from '../../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
+import * as TrelloStrings from '../../../TrelloStrings/TrelloStrings.ts'
 import { getAttachmentImageUrl } from '../../AttachmentHelpers.ts'
 
 export const renderImageAttachment = (
@@ -21,12 +22,12 @@ export const renderImageAttachment = (
         className: 'TrelloCardDetailImageError',
         type: VirtualDomElements.Div,
       },
-      text('Image could not be loaded.'),
+      text(TrelloStrings.imageCouldNotBeLoaded()),
     ]
   }
   return [
     {
-      alt: attachment.name || 'Card attachment',
+      alt: attachment.name || TrelloStrings.cardAttachment(),
       childCount: 0,
       className: 'TrelloCardDetailImage',
       name: attachment.id,

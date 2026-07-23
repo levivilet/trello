@@ -4,6 +4,7 @@ import {
   type VirtualDomNode,
 } from '@lvce-editor/virtual-dom-worker'
 import type { TrelloComment } from '../../../TrelloTypes/TrelloTypes.ts'
+import * as TrelloStrings from '../../../TrelloStrings/TrelloStrings.ts'
 import { getCommentInitials } from '../../CommentHelpers.ts'
 
 export const renderCardDetailAvatar = (
@@ -14,7 +15,7 @@ export const renderCardDetailAvatar = (
   if (avatarUrl) {
     return [
       {
-        alt: `${author} avatar`,
+        alt: TrelloStrings.avatar(author),
         childCount: 0,
         className: 'TrelloCardCommentAvatar',
         src: avatarUrl,

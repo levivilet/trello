@@ -6,6 +6,7 @@ import type { TrelloLabel } from '../../../TrelloTypes/TrelloTypes.ts'
 import type { TrelloViewState } from '../../state/TrelloViewState.ts'
 import * as DomEventListenerFunctions from '../../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../../MergeClassNames/MergeClassNames.ts'
+import * as TrelloStrings from '../../../TrelloStrings/TrelloStrings.ts'
 import { renderCardLabelCreate } from '../RenderCardLabelCreate/RenderCardLabelCreate.ts'
 import { renderCardLabelPickerContent } from '../RenderCardLabelPickerContent/RenderCardLabelPickerContent.ts'
 import { renderCardLabelPickerHeader } from '../RenderCardLabelPickerHeader/RenderCardLabelPickerHeader.ts'
@@ -48,7 +49,7 @@ export const renderCardLabelPicker = (
       onBlur: DomEventListenerFunctions.HandleBlur,
       onFocus: DomEventListenerFunctions.HandleFocus,
       onInput: DomEventListenerFunctions.HandleInput,
-      placeholder: 'Search labels',
+      placeholder: TrelloStrings.searchLabels(),
       type: VirtualDomElements.Input,
       value: draftLabelSearchQuery,
     },

@@ -1,6 +1,7 @@
 import { text, VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import type { TrelloAttachment } from '../../../TrelloTypes/TrelloTypes.ts'
 import type { VirtualDomSegment } from '../VirtualDomSegment/VirtualDomSegment.ts'
+import * as TrelloStrings from '../../../TrelloStrings/TrelloStrings.ts'
 import { isImageAttachment } from '../../AttachmentHelpers.ts'
 import { renderImageAttachment } from '../RenderImageAttachment/RenderImageAttachment.ts'
 import { renderListTitle } from '../RenderListTitle/RenderListTitle.ts'
@@ -15,13 +16,13 @@ export const renderCardDetailImages = (
     return {
       childCount: 2,
       dom: [
-        ...renderListTitle('Images'),
+        ...renderListTitle(TrelloStrings.images()),
         {
           childCount: 1,
           className: 'TrelloCardDetailEmpty',
           type: VirtualDomElements.Div,
         },
-        text('Loading images...'),
+        text(TrelloStrings.loadingImages()),
       ],
     }
   }
@@ -32,7 +33,7 @@ export const renderCardDetailImages = (
   return {
     childCount: 2,
     dom: [
-      ...renderListTitle('Images'),
+      ...renderListTitle(TrelloStrings.images()),
       {
         childCount: imageAttachments.length,
         className: 'TrelloCardDetailImages',

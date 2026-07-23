@@ -6,6 +6,7 @@ import {
 import type { TrelloCard } from '../../TrelloTypes/TrelloTypes.ts'
 import * as DomEventListenerFunctions from '../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../MergeClassNames/MergeClassNames.ts'
+import * as TrelloStrings from '../../TrelloStrings/TrelloStrings.ts'
 import { getCardCoverImageUrl } from '../CardCoverHelpers.ts'
 import { getLabelColorClassName, getLabelText } from '../LabelHelpers.ts'
 import { getAssetUrl } from '../state/AssetBaseUrl.ts'
@@ -16,9 +17,9 @@ const getCardCommentCount = (card: Readonly<TrelloCard>): number => {
 
 const getCardCommentLabel = (count: number): string => {
   if (count === 1) {
-    return '1 comment'
+    return TrelloStrings.cardComment()
   }
-  return `${count} comments`
+  return TrelloStrings.cardComments(count)
 }
 
 const renderCardCommentIcon = (baseUrl: string): VirtualDomNode => {
@@ -123,7 +124,7 @@ const renderCard = (
     ...(coverImageUrl
       ? [
           {
-            alt: `${card.name} cover`,
+            alt: TrelloStrings.cardCover(card.name),
             childCount: 0,
             className: 'TrelloCardCoverImage',
             src: coverImageUrl,
@@ -153,7 +154,7 @@ export const renderCards = (
   cards: readonly TrelloCard[],
 ): readonly VirtualDomNode[] => {
   if (cards.length === 0) {
-    return [text('No cards')]
+    return [text(TrelloStrings.noCards())]
   }
   return cards.flatMap((card) => renderCard(baseUrl, coverImageUrls, card))
 }

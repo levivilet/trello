@@ -4,6 +4,7 @@ import type { TrelloViewState } from '../../state/TrelloViewState.ts'
 import type { VirtualDomSegment } from '../VirtualDomSegment/VirtualDomSegment.ts'
 import * as DomEventListenerFunctions from '../../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../../MergeClassNames/MergeClassNames.ts'
+import * as TrelloStrings from '../../../TrelloStrings/TrelloStrings.ts'
 import { getCardListId } from '../GetCardListId/GetCardListId.ts'
 import { renderCardListOption } from '../RenderCardListOption/RenderCardListOption.ts'
 
@@ -30,7 +31,7 @@ export const renderCardListSelect = (
         className: 'TrelloCardListLabel',
         type: VirtualDomElements.Label,
       },
-      text('List'),
+      text(TrelloStrings.list()),
       {
         childCount: lists.length,
         className: MergeClassNames.mergeClassNames(

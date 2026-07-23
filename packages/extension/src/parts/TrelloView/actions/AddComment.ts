@@ -3,6 +3,7 @@ import type {
   TrelloViewActionContext,
   TrelloViewState,
 } from '../state/TrelloViewState.ts'
+import * as TrelloStrings from '../../TrelloStrings/TrelloStrings.ts'
 import { getErrorMessage } from '../GetErrorMessage.ts'
 import { updateBoardDetailCard } from './UpdateBoardDetailCard.ts'
 
@@ -54,7 +55,7 @@ export const submitComment = async (
   }
   const text = state.draftComment.trim()
   if (!text) {
-    state.error = 'Comment is required.'
+    state.error = TrelloStrings.commentRequired()
     requestRerender()
     return
   }

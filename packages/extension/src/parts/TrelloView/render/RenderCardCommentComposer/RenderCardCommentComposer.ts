@@ -6,6 +6,7 @@ import {
 import type { TrelloViewState } from '../../state/TrelloViewState.ts'
 import * as DomEventListenerFunctions from '../../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../../MergeClassNames/MergeClassNames.ts'
+import * as TrelloStrings from '../../../TrelloStrings/TrelloStrings.ts'
 import { renderCardCommentButton } from '../RenderCardCommentButton/RenderCardCommentButton.ts'
 
 export const renderCardCommentComposer = (
@@ -24,7 +25,7 @@ export const renderCardCommentComposer = (
         onClick: DomEventListenerFunctions.HandleClick,
         type: VirtualDomElements.Button,
       },
-      text('Write a comment'),
+      text(TrelloStrings.writeAComment()),
     ]
   }
   return [
@@ -44,7 +45,7 @@ export const renderCardCommentComposer = (
       name: 'cardComment',
       onInput: DomEventListenerFunctions.HandleInput,
       onKeyDown: DomEventListenerFunctions.HandleKeyDown,
-      placeholder: 'Write a comment...',
+      placeholder: TrelloStrings.writeACommentPlaceholder(),
       type: VirtualDomElements.TextArea,
       value: draftComment,
     },
@@ -55,7 +56,7 @@ export const renderCardCommentComposer = (
     },
     ...renderCardCommentButton(
       'submitComment',
-      savingComment ? 'Saving...' : 'Save',
+      savingComment ? TrelloStrings.saving() : TrelloStrings.save(),
       MergeClassNames.mergeClassNames(
         'TrelloButton',
         'TrelloCardCommentSaveButton',
@@ -64,7 +65,7 @@ export const renderCardCommentComposer = (
     ),
     ...renderCardCommentButton(
       'cancelWriteComment',
-      'Cancel',
+      TrelloStrings.cancel(),
       MergeClassNames.mergeClassNames(
         'TrelloButton',
         'TrelloCardCommentCancelButton',

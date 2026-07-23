@@ -7,6 +7,7 @@ import type { TrelloLabel } from '../../../TrelloTypes/TrelloTypes.ts'
 import type { TrelloViewState } from '../../state/TrelloViewState.ts'
 import * as DomEventListenerFunctions from '../../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../../MergeClassNames/MergeClassNames.ts'
+import * as TrelloStrings from '../../../TrelloStrings/TrelloStrings.ts'
 import { getMatchingLabels } from '../GetMatchingLabels/GetMatchingLabels.ts'
 import { renderCardLabelChoice } from '../RenderCardLabelChoice/RenderCardLabelChoice.ts'
 
@@ -22,7 +23,7 @@ export const renderCardLabelPickerContent = (
         className: 'TrelloCardLabelPickerEmpty',
         type: VirtualDomElements.Div,
       },
-      text('Loading labels...'),
+      text(TrelloStrings.loadingLabels()),
     ]
   }
   const matchingLabels = getMatchingLabels(state)
@@ -39,7 +40,7 @@ export const renderCardLabelPickerContent = (
           onClick: DomEventListenerFunctions.HandleClick,
           type: VirtualDomElements.Button,
         },
-        text('Create a new label'),
+        text(TrelloStrings.createNewLabel()),
       ]
     }
     return [
@@ -48,7 +49,7 @@ export const renderCardLabelPickerContent = (
         className: 'TrelloCardLabelPickerEmpty',
         type: VirtualDomElements.Div,
       },
-      text('No labels available'),
+      text(TrelloStrings.noLabelsAvailable()),
     ]
   }
   return [

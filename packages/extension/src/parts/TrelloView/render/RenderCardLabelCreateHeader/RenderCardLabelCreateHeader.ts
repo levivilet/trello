@@ -5,6 +5,7 @@ import {
 } from '@lvce-editor/virtual-dom-worker'
 import * as DomEventListenerFunctions from '../../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../../MergeClassNames/MergeClassNames.ts'
+import * as TrelloStrings from '../../../TrelloStrings/TrelloStrings.ts'
 
 export const renderCardLabelCreateHeader = (): readonly VirtualDomNode[] => {
   return [
@@ -29,7 +30,7 @@ export const renderCardLabelCreateHeader = (): readonly VirtualDomNode[] => {
       className: 'TrelloCardLabelPickerTitle',
       type: VirtualDomElements.Div,
     },
-    text('Create label'),
+    text(TrelloStrings.createLabel()),
     {
       childCount: 1,
       className: MergeClassNames.mergeClassNames(

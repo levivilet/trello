@@ -8,6 +8,7 @@ import type {
   TrelloViewActionContext,
   TrelloViewState,
 } from '../state/TrelloViewState.ts'
+import * as TrelloStrings from '../../TrelloStrings/TrelloStrings.ts'
 import {
   getAttachmentImageUrl,
   isImageAttachment,
@@ -217,7 +218,7 @@ export const openCard = async (
   }
   const card = findBoardCard(state, cardId)
   if (!card) {
-    state.error = `Card not found: ${cardId}`
+    state.error = TrelloStrings.cardNotFound(cardId)
     requestRerender()
     return
   }

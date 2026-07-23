@@ -10,6 +10,7 @@ import type {
 import type { TrelloViewState } from '../state/TrelloViewState.ts'
 import * as DomEventListenerFunctions from '../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../MergeClassNames/MergeClassNames.ts'
+import * as TrelloStrings from '../../TrelloStrings/TrelloStrings.ts'
 import {
   getRecentlyViewedBoards,
   getWorkspaceSections,
@@ -44,7 +45,7 @@ const renderSearchForm = (
       onBlur: DomEventListenerFunctions.HandleBlur,
       onFocus: DomEventListenerFunctions.HandleFocus,
       onInput: DomEventListenerFunctions.HandleInput,
-      placeholder: 'Search Trello',
+      placeholder: TrelloStrings.searchTrello(),
       type: VirtualDomElements.Input,
       value: draftSearchQuery,
     },
@@ -93,7 +94,7 @@ const renderRecentlyViewed = (
         className: 'TrelloSection',
         type: VirtualDomElements.Div,
       },
-      ...renderListTitle('Recently viewed'),
+      ...renderListTitle(TrelloStrings.recentlyViewed()),
       ...renderBoardGrid(boards),
     ],
   }
@@ -125,7 +126,7 @@ const renderSearchResult = (
         onClick: DomEventListenerFunctions.HandleClick,
         type: VirtualDomElements.Button,
       },
-      text(`Board: ${result.name}`),
+      text(TrelloStrings.boardSearchResult(result.name)),
     ]
   }
   return [
@@ -134,7 +135,7 @@ const renderSearchResult = (
       className: 'TrelloSearchResult',
       type: VirtualDomElements.Div,
     },
-    text(`Card: ${result.name}`),
+    text(TrelloStrings.cardSearchResult(result.name)),
   ]
 }
 
@@ -143,14 +144,14 @@ const renderSearchContent = (
 ): VirtualDomSegment => {
   const { activeSearchQuery, loading, searchResults } = state
   if (loading) {
-    return { childCount: 1, dom: [text('Searching...')] }
+    return { childCount: 1, dom: [text(TrelloStrings.searching())] }
   }
   if (searchResults.length === 0) {
     return {
       childCount: 2,
       dom: [
-        ...renderListTitle(`Search results for "${activeSearchQuery}"`),
-        text('No search results'),
+        ...renderListTitle(TrelloStrings.searchResultsFor(activeSearchQuery)),
+        text(TrelloStrings.noSearchResults()),
       ],
     }
   }
@@ -162,7 +163,7 @@ const renderSearchContent = (
         className: 'TrelloSearchSection',
         type: VirtualDomElements.Div,
       },
-      ...renderListTitle(`Search results for "${activeSearchQuery}"`),
+      ...renderListTitle(TrelloStrings.searchResultsFor(activeSearchQuery)),
       {
         childCount: searchResults.length,
         className: 'TrelloSearchResults',
@@ -181,10 +182,10 @@ const renderBoardContent = (
     return renderSearchContent(state)
   }
   if (loading) {
-    return { childCount: 1, dom: [text('Loading boards...')] }
+    return { childCount: 1, dom: [text(TrelloStrings.loadingBoards())] }
   }
   if (boards.length === 0) {
-    return { childCount: 1, dom: [text('No boards found')] }
+    return { childCount: 1, dom: [text(TrelloStrings.noBoardsFound())] }
   }
   const recentBoards = getRecentlyViewedBoards(state)
   const workspaceSections = getWorkspaceSections(state)
@@ -198,7 +199,7 @@ const renderBoardContent = (
         className: 'TrelloWorkspaces',
         type: VirtualDomElements.Div,
       },
-      ...renderListTitle('Your workspaces'),
+      ...renderListTitle(TrelloStrings.yourWorkspaces()),
       ...workspaceSections.flatMap(renderWorkspaceSection),
     ],
   }
@@ -223,7 +224,7 @@ export const renderBoards = (
       type: VirtualDomElements.Div,
     },
     ...(searchEnabled ? renderToolbar([renderSearchForm(state)]) : []),
-    ...renderTitle('Boards'),
+    ...renderTitle(TrelloStrings.boards()),
     ...boardContent.dom,
     ...errorDom,
   ]

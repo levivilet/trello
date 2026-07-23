@@ -4,6 +4,7 @@ import type {
   TrelloViewState,
 } from '../state/TrelloViewState.ts'
 import { updateRecentBoardViews } from '../../RecentBoardStorage/RecentBoardStorage.ts'
+import * as TrelloStrings from '../../TrelloStrings/TrelloStrings.ts'
 import { getErrorMessage } from '../GetErrorMessage.ts'
 import { isSameJson } from './CacheFirstHelpers.ts'
 import { resolveBoardCoverImages } from './ResolveBoardCoverImages.ts'
@@ -35,7 +36,7 @@ export const openBoard = async (
   }
   const board = findBoard(context, boardId)
   if (!board) {
-    state.error = `Board not found: ${boardId}`
+    state.error = TrelloStrings.boardNotFound(boardId)
     requestRerender()
     return
   }
