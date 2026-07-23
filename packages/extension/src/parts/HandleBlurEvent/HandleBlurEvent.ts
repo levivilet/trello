@@ -130,6 +130,9 @@ export const handleBlurEvent = async (
   event: Readonly<ViewEvent>,
 ): Promise<void> => {
   if (event.name?.startsWith('newCardTitle:')) {
+    if (context.state.savingNewCard) {
+      return
+    }
     cancelAddCard(context)
     return
   }

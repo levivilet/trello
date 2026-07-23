@@ -253,6 +253,7 @@ const createAuthenticatedInstance = async (
     readonly cardDetails?: Readonly<Record<string, TrelloCardDetail>>
     readonly cardLabelAddErrors?: Readonly<Record<string, string>>
     readonly cardMoveErrors?: Readonly<Record<string, string>>
+    readonly client?: TrelloClient
     readonly imageCache?: TrelloImageCache
     readonly listUpdateErrors?: Readonly<Record<string, string>>
     readonly showContextMenu?: (
@@ -273,16 +274,18 @@ const createAuthenticatedInstance = async (
     listUpdateErrors,
   } = options
   setTrelloViewDependencyFactory(() => ({
-    client: createMockTrelloClient({
-      boards,
-      ...(boardDetails && { boardDetails }),
-      ...(boardLabels && { boardLabels }),
-      ...(cardCreateErrors && { cardCreateErrors }),
-      ...(cardDetails && { cardDetails }),
-      ...(cardLabelAddErrors && { cardLabelAddErrors }),
-      ...(cardMoveErrors && { cardMoveErrors }),
-      ...(listUpdateErrors && { listUpdateErrors }),
-    }),
+    client:
+      options.client ||
+      createMockTrelloClient({
+        boards,
+        ...(boardDetails && { boardDetails }),
+        ...(boardLabels && { boardLabels }),
+        ...(cardCreateErrors && { cardCreateErrors }),
+        ...(cardDetails && { cardDetails }),
+        ...(cardLabelAddErrors && { cardLabelAddErrors }),
+        ...(cardMoveErrors && { cardMoveErrors }),
+        ...(listUpdateErrors && { listUpdateErrors }),
+      }),
     ...(imageCache && { imageCache }),
     readBoardBackgroundEnabled: async (): Promise<boolean> => {
       return options.boardBackgroundEnabled === true
@@ -1967,6 +1970,78 @@ test('submitting add card appends card and focuses an empty input for the next c
       nextCardContext,
     ),
   ).toBe('[name="newCardTitle:list-1"]')
+  resetTrelloViewDependencyFactory()
+})
+
+test('add card stays open when saving blurs the input', async () => {
+  const boards = [{ id: 'board-1', name: 'Roadmap' }]
+  const boardDetails = {
+    'board-1': {
+      board: boards[0],
+      lists: [
+        {
+          cards: [],
+          id: 'list-1',
+          name: 'Todo',
+        },
+      ],
+    },
+  }
+  const card = createDeferred<TrelloCard>()
+  const mockClient = createMockTrelloClient({
+    boardDetails,
+    boards,
+  })
+  const client: TrelloClient = {
+    ...mockClient,
+    createCard: async () => card.promise,
+  }
+  const instance = await createAuthenticatedInstance(boards, [], {
+    boardDetails,
+    client,
+  })
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'addCard:list-1', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'newCardTitle:list-1',
+    type: 'input',
+    value: 'Build add card',
+  })
+
+  const submit = instance.handleEvent?.({
+    name: 'submitAddCard:list-1',
+    type: 'click',
+  })
+  await Promise.resolve()
+  await instance.handleEvent?.({
+    name: 'newCardTitle:list-1',
+    type: 'blur',
+  })
+
+  expect(getNodeByName(await instance.render(), 'newCardTitle:list-1')).toEqual(
+    expect.objectContaining({
+      disabled: true,
+      value: 'Build add card',
+    }),
+  )
+
+  card.resolve({
+    id: 'created-card-1',
+    idList: 'list-1',
+    name: 'Build add card',
+  })
+  await submit
+
+  const dom = await instance.render()
+  expect(getSubtreeTextByNodeName(dom, 'list:list-1')).toContain(
+    'Build add card',
+  )
+  expect(getNodeByName(dom, 'newCardTitle:list-1')).toEqual(
+    expect.objectContaining({
+      disabled: false,
+      value: '',
+    }),
+  )
   resetTrelloViewDependencyFactory()
 })
 
