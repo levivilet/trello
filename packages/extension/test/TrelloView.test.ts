@@ -746,7 +746,7 @@ test('connect loads boards and clicking board loads detail', async () => {
   expect(getNodeByClass(detailDom, 'TrelloCardCommentIcon')).toMatchObject({
     alt: '',
     'aria-hidden': true,
-    src: `${getExpectedAssetBaseUrl()}comments.svg`,
+    src: `${getExpectedAssetBaseUrl()}media/comments.svg`,
   })
   expect(detailClassNames).toContain('TrelloCardCommentCount')
   expect(detailClassNames).toContain('TrelloCardCoverImage')

@@ -8,23 +8,31 @@ import esbuild from 'rollup-plugin-esbuild'
 import { root } from './root.ts'
 
 const extension = path.join(root, 'packages', 'extension')
+const media = path.join(extension, 'media')
 const require = createRequire(import.meta.url)
 const commonjs = require('@rollup/plugin-commonjs') as () => Plugin
 
 fs.rmSync(join(root, 'dist'), { recursive: true, force: true })
 
 fs.mkdirSync(path.join(root, 'dist'))
+fs.mkdirSync(path.join(root, 'dist', 'media'))
 
 fs.copyFileSync(join(root, 'README.md'), join(root, 'dist', 'README.md'))
 fs.copyFileSync(
   join(extension, 'extension.json'),
   join(root, 'dist', 'extension.json'),
 )
-fs.copyFileSync(join(extension, 'trello.css'), join(root, 'dist', 'trello.css'))
-fs.copyFileSync(join(extension, 'trello.svg'), join(root, 'dist', 'trello.svg'))
 fs.copyFileSync(
-  join(extension, 'comments.svg'),
-  join(root, 'dist', 'comments.svg'),
+  join(media, 'trello.css'),
+  join(root, 'dist', 'media', 'trello.css'),
+)
+fs.copyFileSync(
+  join(media, 'trello.svg'),
+  join(root, 'dist', 'media', 'trello.svg'),
+)
+fs.copyFileSync(
+  join(media, 'comments.svg'),
+  join(root, 'dist', 'media', 'comments.svg'),
 )
 
 const bundle = await rollup({

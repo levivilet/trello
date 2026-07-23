@@ -21,7 +21,7 @@ const renderCardCommentIcon = (baseUrl: string): Dom.TreeNode => {
     alt: '',
     'aria-hidden': true,
     className: 'TrelloCardCommentIcon',
-    src: getAssetUrl(baseUrl, 'comments.svg'),
+    src: getAssetUrl(baseUrl, 'media/comments.svg'),
   })
 }
 
