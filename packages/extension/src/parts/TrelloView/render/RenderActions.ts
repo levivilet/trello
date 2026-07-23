@@ -27,10 +27,11 @@ const actionSignOut: ViewAction = {
 export const renderActions = (
   state: Readonly<TrelloViewState>,
 ): readonly ViewAction[] => {
-  if (!state.credentials) {
+  const { boardDetail, credentials } = state
+  if (!credentials) {
     return []
   }
-  if (state.boardDetail) {
+  if (boardDetail) {
     return [actionBackToBoards, actionRefreshBoards, actionSignOut]
   }
   return [actionRefreshBoards, actionSignOut]

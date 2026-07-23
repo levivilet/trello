@@ -1,5 +1,9 @@
-import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
-import * as Dom from '../../VirtualDom/VirtualDom.ts'
+import {
+  text,
+  VirtualDomElements,
+  type VirtualDomNode,
+} from '@lvce-editor/virtual-dom-worker'
+import * as MergeClassNames from '../../MergeClassNames/MergeClassNames.ts'
 
 const headingTypes = [
   VirtualDomElements.H1,
@@ -14,9 +18,19 @@ const escapedMarkdownTextPattern = /\\([\\`*_{}()[\]#+\-.!])/g
 
 const allowedLinkProtocols = ['http:', 'https:', 'mailto:']
 
+const breakNode: VirtualDomNode = {
+  childCount: 0,
+  type: VirtualDomElements.Br,
+}
+
+export interface VirtualDomSegment {
+  readonly childCount: number
+  readonly dom: readonly VirtualDomNode[]
+}
+
 interface InlineMatch {
   readonly end: number
-  readonly node: Dom.TreeNode
+  readonly node: VirtualDomSegment
   readonly start: number
 }
 
@@ -33,89 +47,113 @@ const sanitizeHref = (href: string): string => {
 }
 
 const findDelimited = (
-  text: string,
+  value: string,
   delimiter: string,
   type: number,
   className: string,
 ): InlineMatch | undefined => {
-  const start = text.indexOf(delimiter)
+  const start = value.indexOf(delimiter)
   if (start === -1) {
     return undefined
   }
-  const end = text.indexOf(delimiter, start + delimiter.length)
+  const end = value.indexOf(delimiter, start + delimiter.length)
   if (end === -1) {
     return undefined
   }
-  const value = text.slice(start + delimiter.length, end)
+  const innerValue = value.slice(start + delimiter.length, end)
+  const children = parseInline(innerValue)
   return {
     end: end + delimiter.length,
-    node: Dom.node(type, { className }, parseInline(value)),
+    node: {
+      childCount: 1,
+      dom: [
+        {
+          childCount: children.childCount,
+          className,
+          type,
+        },
+        ...children.dom,
+      ],
+    },
     start,
   }
 }
 
-const findInlineCode = (text: string): InlineMatch | undefined => {
-  const start = text.indexOf('`')
+const findInlineCode = (value: string): InlineMatch | undefined => {
+  const start = value.indexOf('`')
   if (start === -1) {
     return undefined
   }
-  const end = text.indexOf('`', start + 1)
+  const end = value.indexOf('`', start + 1)
   if (end === -1) {
     return undefined
   }
   return {
     end: end + 1,
-    node: Dom.node(
-      VirtualDomElements.Code,
-      { className: 'TrelloMarkdownCode' },
-      [Dom.textNode(text.slice(start + 1, end))],
-    ),
+    node: {
+      childCount: 1,
+      dom: [
+        {
+          childCount: 1,
+          className: 'TrelloMarkdownCode',
+          type: VirtualDomElements.Code,
+        },
+        text(value.slice(start + 1, end)),
+      ],
+    },
     start,
   }
 }
 
-const findItalic = (text: string): InlineMatch | undefined => {
-  for (let i = 0; i < text.length; i++) {
-    if (text[i] !== '*' || text[i + 1] === '*' || text[i - 1] === '*') {
+const findItalic = (value: string): InlineMatch | undefined => {
+  for (let i = 0; i < value.length; i++) {
+    if (value[i] !== '*' || value[i + 1] === '*' || value[i - 1] === '*') {
       continue
     }
-    const end = text.indexOf('*', i + 1)
-    if (end === -1 || text[end + 1] === '*') {
+    const end = value.indexOf('*', i + 1)
+    if (end === -1 || value[end + 1] === '*') {
       return undefined
     }
+    const children = parseInline(value.slice(i + 1, end))
     return {
       end: end + 1,
-      node: Dom.node(
-        VirtualDomElements.Em,
-        { className: 'TrelloMarkdownEmphasis' },
-        parseInline(text.slice(i + 1, end)),
-      ),
+      node: {
+        childCount: 1,
+        dom: [
+          {
+            childCount: children.childCount,
+            className: 'TrelloMarkdownEmphasis',
+            type: VirtualDomElements.Em,
+          },
+          ...children.dom,
+        ],
+      },
       start: i,
     }
   }
   return undefined
 }
 
-const findLink = (text: string): InlineMatch | undefined => {
-  let start = text.indexOf('[')
+const findLink = (value: string): InlineMatch | undefined => {
+  let start = value.indexOf('[')
   while (start !== -1) {
-    const labelEnd = text.indexOf(']', start + 1)
+    const labelEnd = value.indexOf(']', start + 1)
     if (labelEnd === -1) {
       return undefined
     }
-    if (text[labelEnd + 1] !== '(') {
-      start = text.indexOf('[', start + 1)
+    if (value[labelEnd + 1] !== '(') {
+      start = value.indexOf('[', start + 1)
       continue
     }
     const hrefStart = labelEnd + 2
-    const hrefEnd = text.indexOf(')', hrefStart)
+    const hrefEnd = value.indexOf(')', hrefStart)
     if (hrefEnd === -1) {
       return undefined
     }
-    const label = text.slice(start + 1, labelEnd)
-    const hrefText = text.slice(hrefStart, hrefEnd)
+    const label = value.slice(start + 1, labelEnd)
+    const hrefText = value.slice(hrefStart, hrefEnd)
     if (!label || !hrefText || hrefText.includes(' ')) {
-      start = text.indexOf('[', start + 1)
+      start = value.indexOf('[', start + 1)
       continue
     }
     const href = sanitizeHref(hrefText)
@@ -123,38 +161,51 @@ const findLink = (text: string): InlineMatch | undefined => {
     if (!href) {
       return {
         end: hrefEnd + 1,
-        node: Dom.node(VirtualDomElements.Span, {}, children),
+        node: {
+          childCount: 1,
+          dom: [
+            {
+              childCount: children.childCount,
+              type: VirtualDomElements.Span,
+            },
+            ...children.dom,
+          ],
+        },
         start,
       }
     }
     return {
       end: hrefEnd + 1,
-      node: Dom.node(
-        VirtualDomElements.A,
-        {
-          className: 'TrelloMarkdownLink',
-          href,
-          target: '_blank',
-        },
-        children,
-      ),
+      node: {
+        childCount: 1,
+        dom: [
+          {
+            childCount: children.childCount,
+            className: 'TrelloMarkdownLink',
+            href,
+            target: '_blank',
+            type: VirtualDomElements.A,
+          },
+          ...children.dom,
+        ],
+      },
       start,
     }
   }
   return undefined
 }
 
-const getFirstInlineMatch = (text: string): InlineMatch | undefined => {
+const getFirstInlineMatch = (value: string): InlineMatch | undefined => {
   const matches = [
-    findInlineCode(text),
-    findLink(text),
+    findInlineCode(value),
+    findLink(value),
     findDelimited(
-      text,
+      value,
       '**',
       VirtualDomElements.Strong,
       'TrelloMarkdownStrong',
     ),
-    findItalic(text),
+    findItalic(value),
   ].filter((match): match is InlineMatch => Boolean(match))
   let first: InlineMatch | undefined
   for (const match of matches) {
@@ -165,34 +216,53 @@ const getFirstInlineMatch = (text: string): InlineMatch | undefined => {
   return first
 }
 
-const unescapeMarkdownText = (text: string): string => {
-  return text.replaceAll(escapedMarkdownTextPattern, '$1')
+const unescapeMarkdownText = (value: string): string => {
+  return value.replaceAll(escapedMarkdownTextPattern, '$1')
 }
 
-const parseInline = (text: string): readonly Dom.TreeNode[] => {
-  if (!text) {
-    return []
+const parseInline = (value: string): VirtualDomSegment => {
+  if (!value) {
+    return { childCount: 0, dom: [] }
   }
-  const match = getFirstInlineMatch(text)
+  const match = getFirstInlineMatch(value)
   if (!match) {
-    return [Dom.textNode(unescapeMarkdownText(text))]
+    return {
+      childCount: 1,
+      dom: [text(unescapeMarkdownText(value))],
+    }
   }
-  return [
-    ...parseInline(text.slice(0, match.start)),
-    match.node,
-    ...parseInline(text.slice(match.end)),
-  ]
+  const before = parseInline(value.slice(0, match.start))
+  const after = parseInline(value.slice(match.end))
+  return {
+    childCount: before.childCount + match.node.childCount + after.childCount,
+    dom: [...before.dom, ...match.node.dom, ...after.dom],
+  }
 }
 
-const renderInlineLines = (
-  lines: readonly string[],
-): readonly Dom.TreeNode[] => {
-  return lines.flatMap((line, index) => {
-    if (index === 0) {
-      return parseInline(line)
+const renderInlineLines = (lines: readonly string[]): VirtualDomSegment => {
+  let childCount = 0
+  const dom: VirtualDomNode[] = []
+  for (const [index, line] of lines.entries()) {
+    const lineDom = parseInline(line)
+    if (index > 0) {
+      childCount++
+      dom.push(breakNode)
     }
-    return [Dom.node(VirtualDomElements.Br), ...parseInline(line)]
-  })
+    childCount += lineDom.childCount
+    dom.push(...lineDom.dom)
+  }
+  return { childCount, dom }
+}
+
+const getHeadingLevel = (line: string): number => {
+  let level = 0
+  while (level < line.length && level < 6 && line[level] === '#') {
+    level++
+  }
+  if (level === 0 || line[level] !== ' ') {
+    return 0
+  }
+  return level
 }
 
 const isHeading = (line: string): boolean => {
@@ -208,73 +278,83 @@ const isListItem = (line: string): boolean => {
   )
 }
 
-const getHeadingLevel = (line: string): number => {
-  let level = 0
-  while (level < line.length && level < 6 && line[level] === '#') {
-    level++
-  }
-  if (level === 0 || line[level] !== ' ') {
-    return 0
-  }
-  return level
-}
-
-const renderHeading = (line: string): Dom.TreeNode => {
+const renderHeading = (line: string): readonly VirtualDomNode[] => {
   const level = getHeadingLevel(line)
   if (level === 0) {
     return renderParagraph([line])
   }
-  return Dom.node(
-    headingTypes[level - 1],
+  const children = parseInline(line.slice(level + 1))
+  return [
     {
-      className: `TrelloMarkdownHeading TrelloMarkdownHeading${level}`,
+      childCount: children.childCount,
+      className: MergeClassNames.mergeClassNames(
+        'TrelloMarkdownHeading',
+        `TrelloMarkdownHeading${level}`,
+      ),
+      type: headingTypes[level - 1],
     },
-    parseInline(line.slice(level + 1)),
-  )
+    ...children.dom,
+  ]
 }
 
-const renderListItem = (line: string): Dom.TreeNode => {
-  return Dom.node(
-    VirtualDomElements.Li,
-    { className: 'TrelloMarkdownListItem' },
-    parseInline(line.trimStart().slice(2)),
-  )
+const renderListItem = (line: string): readonly VirtualDomNode[] => {
+  const children = parseInline(line.trimStart().slice(2))
+  return [
+    {
+      childCount: children.childCount,
+      className: 'TrelloMarkdownListItem',
+      type: VirtualDomElements.Li,
+    },
+    ...children.dom,
+  ]
 }
 
-const renderParagraph = (lines: readonly string[]): Dom.TreeNode => {
-  return Dom.node(
-    VirtualDomElements.P,
-    { className: 'TrelloMarkdownParagraph' },
-    renderInlineLines(lines),
-  )
+const renderParagraph = (
+  lines: readonly string[],
+): readonly VirtualDomNode[] => {
+  const children = renderInlineLines(lines)
+  return [
+    {
+      childCount: children.childCount,
+      className: 'TrelloMarkdownParagraph',
+      type: VirtualDomElements.P,
+    },
+    ...children.dom,
+  ]
 }
 
-export const renderMarkdown = (markdown: string): readonly Dom.TreeNode[] => {
+export const renderMarkdown = (markdown: string): VirtualDomSegment => {
   const lines = markdown.replaceAll('\r\n', '\n').split('\n')
-  const nodes: Dom.TreeNode[] = []
+  const nodes: VirtualDomNode[] = []
+  let childCount = 0
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]
     if (!line.trim()) {
       continue
     }
     if (isHeading(line)) {
-      nodes.push(renderHeading(line))
+      nodes.push(...renderHeading(line))
+      childCount++
       continue
     }
     if (isListItem(line)) {
-      const items: Dom.TreeNode[] = []
+      const items: VirtualDomNode[] = []
+      let itemCount = 0
       while (i < lines.length && isListItem(lines[i])) {
-        items.push(renderListItem(lines[i]))
+        items.push(...renderListItem(lines[i]))
+        itemCount++
         i++
       }
       i--
       nodes.push(
-        Dom.node(
-          VirtualDomElements.Ul,
-          { className: 'TrelloMarkdownList' },
-          items,
-        ),
+        {
+          childCount: itemCount,
+          className: 'TrelloMarkdownList',
+          type: VirtualDomElements.Ul,
+        },
+        ...items,
       )
+      childCount++
       continue
     }
     const paragraphLines = [line]
@@ -287,7 +367,8 @@ export const renderMarkdown = (markdown: string): readonly Dom.TreeNode[] => {
       i++
       paragraphLines.push(lines[i])
     }
-    nodes.push(renderParagraph(paragraphLines))
+    nodes.push(...renderParagraph(paragraphLines))
+    childCount++
   }
-  return nodes
+  return { childCount, dom: nodes }
 }

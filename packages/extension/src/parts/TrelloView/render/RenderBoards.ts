@@ -1,4 +1,5 @@
 import {
+  text,
   VirtualDomElements,
   type VirtualDomNode,
 } from '@lvce-editor/virtual-dom-worker'
@@ -7,7 +8,8 @@ import type {
   TrelloSearchResult,
 } from '../../TrelloTypes/TrelloTypes.ts'
 import type { TrelloViewState } from '../state/TrelloViewState.ts'
-import * as Dom from '../../VirtualDom/VirtualDom.ts'
+import * as DomEventListenerFunctions from '../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
+import * as MergeClassNames from '../../MergeClassNames/MergeClassNames.ts'
 import {
   getRecentlyViewedBoards,
   getWorkspaceSections,
@@ -20,120 +22,211 @@ import {
   renderToolbar,
 } from './RenderShared.ts'
 
-const renderSearchForm = (state: Readonly<TrelloViewState>): Dom.TreeNode => {
-  return Dom.form('search', 'TrelloSearchForm', [
-    Dom.input('search', state.draftSearchQuery, 'Search Trello'),
-  ])
+interface VirtualDomSegment {
+  readonly childCount: number
+  readonly dom: readonly VirtualDomNode[]
 }
 
-const renderBoardButton = (board: TrelloBoard): Dom.TreeNode => {
-  return Dom.button(`board:${board.id}`, board.name, 'TrelloBoardButton')
+const renderSearchForm = (
+  state: Readonly<TrelloViewState>,
+): readonly VirtualDomNode[] => {
+  const { draftSearchQuery } = state
+  return [
+    {
+      childCount: 1,
+      className: 'TrelloSearchForm',
+      name: 'search',
+      onSubmit: DomEventListenerFunctions.HandleSubmit,
+      type: VirtualDomElements.Form,
+    },
+    {
+      childCount: 0,
+      className: 'TrelloInput',
+      name: 'search',
+      onBlur: DomEventListenerFunctions.HandleBlur,
+      onFocus: DomEventListenerFunctions.HandleFocus,
+      onInput: DomEventListenerFunctions.HandleInput,
+      placeholder: 'Search Trello',
+      type: VirtualDomElements.Input,
+      value: draftSearchQuery,
+    },
+  ]
 }
 
-const renderBoardGrid = (boards: readonly TrelloBoard[]): Dom.TreeNode => {
-  return Dom.div('TrelloBoardGrid', boards.map(renderBoardButton))
+const renderBoardButton = (
+  board: Readonly<TrelloBoard>,
+): readonly VirtualDomNode[] => {
+  return [
+    {
+      childCount: 1,
+      className: 'TrelloBoardButton',
+      name: `board:${board.id}`,
+      onClick: DomEventListenerFunctions.HandleClick,
+      type: VirtualDomElements.Button,
+    },
+    text(board.name),
+  ]
+}
+
+const renderBoardGrid = (
+  boards: readonly TrelloBoard[],
+): readonly VirtualDomNode[] => {
+  return [
+    {
+      childCount: boards.length,
+      className: 'TrelloBoardGrid',
+      type: VirtualDomElements.Div,
+    },
+    ...boards.flatMap(renderBoardButton),
+  ]
 }
 
 const renderRecentlyViewed = (
   boards: readonly TrelloBoard[],
-): readonly Dom.TreeNode[] => {
+): VirtualDomSegment => {
   if (boards.length === 0) {
-    return []
+    return { childCount: 0, dom: [] }
   }
-  return [
-    Dom.div('TrelloSection', [
-      renderListTitle('Recently viewed'),
-      renderBoardGrid(boards),
-    ]),
-  ]
+  return {
+    childCount: 1,
+    dom: [
+      {
+        childCount: 2,
+        className: 'TrelloSection',
+        type: VirtualDomElements.Div,
+      },
+      ...renderListTitle('Recently viewed'),
+      ...renderBoardGrid(boards),
+    ],
+  }
 }
 
 const renderWorkspaceSection = (
   section: Readonly<WorkspaceSection>,
-): Dom.TreeNode => {
-  return Dom.div('TrelloWorkspace', [
-    renderListTitle(section.name),
-    renderBoardGrid(section.boards),
-  ])
+): readonly VirtualDomNode[] => {
+  return [
+    {
+      childCount: 2,
+      className: 'TrelloWorkspace',
+      type: VirtualDomElements.Div,
+    },
+    ...renderListTitle(section.name),
+    ...renderBoardGrid(section.boards),
+  ]
 }
 
 const renderSearchResult = (
   result: Readonly<TrelloSearchResult>,
-): Dom.TreeNode => {
+): readonly VirtualDomNode[] => {
   if (result.type === 'board') {
-    return Dom.button(
-      `board:${result.id}`,
-      `Board: ${result.name}`,
-      'TrelloSearchResult',
-    )
+    return [
+      {
+        childCount: 1,
+        className: 'TrelloSearchResult',
+        name: `board:${result.id}`,
+        onClick: DomEventListenerFunctions.HandleClick,
+        type: VirtualDomElements.Button,
+      },
+      text(`Board: ${result.name}`),
+    ]
   }
-  return Dom.div('TrelloSearchResult', [Dom.textNode(`Card: ${result.name}`)])
+  return [
+    {
+      childCount: 1,
+      className: 'TrelloSearchResult',
+      type: VirtualDomElements.Div,
+    },
+    text(`Card: ${result.name}`),
+  ]
 }
 
 const renderSearchContent = (
   state: Readonly<TrelloViewState>,
-): readonly Dom.TreeNode[] => {
-  if (state.loading) {
-    return [Dom.textNode('Searching...')]
+): VirtualDomSegment => {
+  const { activeSearchQuery, loading, searchResults } = state
+  if (loading) {
+    return { childCount: 1, dom: [text('Searching...')] }
   }
-  if (state.searchResults.length === 0) {
-    return [
-      renderListTitle(`Search results for "${state.activeSearchQuery}"`),
-      Dom.textNode('No search results'),
-    ]
+  if (searchResults.length === 0) {
+    return {
+      childCount: 2,
+      dom: [
+        ...renderListTitle(`Search results for "${activeSearchQuery}"`),
+        text('No search results'),
+      ],
+    }
   }
-  return [
-    Dom.div('TrelloSearchSection', [
-      renderListTitle(`Search results for "${state.activeSearchQuery}"`),
-      Dom.div(
-        'TrelloSearchResults',
-        state.searchResults.map(renderSearchResult),
-      ),
-    ]),
-  ]
+  return {
+    childCount: 1,
+    dom: [
+      {
+        childCount: 2,
+        className: 'TrelloSearchSection',
+        type: VirtualDomElements.Div,
+      },
+      ...renderListTitle(`Search results for "${activeSearchQuery}"`),
+      {
+        childCount: searchResults.length,
+        className: 'TrelloSearchResults',
+        type: VirtualDomElements.Div,
+      },
+      ...searchResults.flatMap(renderSearchResult),
+    ],
+  }
 }
 
 const renderBoardContent = (
   state: Readonly<TrelloViewState>,
-): readonly Dom.TreeNode[] => {
-  if (state.activeSearchQuery) {
+): VirtualDomSegment => {
+  const { activeSearchQuery, boards, loading } = state
+  if (activeSearchQuery) {
     return renderSearchContent(state)
   }
-  if (state.loading) {
-    return [Dom.textNode('Loading boards...')]
+  if (loading) {
+    return { childCount: 1, dom: [text('Loading boards...')] }
   }
-  if (state.boards.length === 0) {
-    return [Dom.textNode('No boards found')]
+  if (boards.length === 0) {
+    return { childCount: 1, dom: [text('No boards found')] }
   }
   const recentBoards = getRecentlyViewedBoards(state)
   const workspaceSections = getWorkspaceSections(state)
-  return [
-    ...renderRecentlyViewed(recentBoards),
-    Dom.div('TrelloWorkspaces', [
-      renderListTitle('Your workspaces'),
-      ...workspaceSections.map(renderWorkspaceSection),
-    ]),
-  ]
+  const recentlyViewed = renderRecentlyViewed(recentBoards)
+  return {
+    childCount: recentlyViewed.childCount + 1,
+    dom: [
+      ...recentlyViewed.dom,
+      {
+        childCount: 1 + workspaceSections.length,
+        className: 'TrelloWorkspaces',
+        type: VirtualDomElements.Div,
+      },
+      ...renderListTitle('Your workspaces'),
+      ...workspaceSections.flatMap(renderWorkspaceSection),
+    ],
+  }
 }
 
 export const renderBoards = (
   state: Readonly<TrelloViewState>,
 ): readonly VirtualDomNode[] => {
-  const children = [
-    ...(state.searchEnabled ? [renderToolbar([renderSearchForm(state)])] : []),
-    renderTitle('Boards'),
-    ...renderBoardContent(state),
-    ...renderError(state.error),
+  const { error, searchEnabled } = state
+  const boardContent = renderBoardContent(state)
+  const errorDom = renderError(error)
+  return [
+    {
+      childCount:
+        1 +
+        boardContent.childCount +
+        (searchEnabled ? 1 : 0) +
+        (errorDom.length > 0 ? 1 : 0),
+      className: MergeClassNames.mergeClassNames('TrelloView', 'TrelloBoards'),
+      name: 'boards',
+      onContextMenu: DomEventListenerFunctions.HandleContextMenu,
+      type: VirtualDomElements.Div,
+    },
+    ...(searchEnabled ? renderToolbar([renderSearchForm(state)]) : []),
+    ...renderTitle('Boards'),
+    ...boardContent.dom,
+    ...errorDom,
   ]
-  return Dom.flatten(
-    Dom.node(
-      VirtualDomElements.Div,
-      {
-        className: 'TrelloView TrelloBoards',
-        name: 'boards',
-        onContextMenu: 'handleContextMenu',
-      },
-      children,
-    ),
-  )
 }
