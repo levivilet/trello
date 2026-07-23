@@ -48,6 +48,7 @@ import {
 } from './actions/ResizeCardDetail.ts'
 import { restoreCurrentBoard } from './actions/RestoreCurrentBoard.ts'
 import { saveCardDetail as saveCardDetailAction } from './actions/SaveCardDetail.ts'
+import { getCss } from './GetCss.ts'
 import { type MenuEntry, getMenuEntries } from './MenuEntries.ts'
 import { renderActions, type ViewAction } from './render/RenderActions.ts'
 import { renderAuth } from './render/RenderAuth.ts'
@@ -71,6 +72,7 @@ export interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly cancelNewCard: () => void
   readonly closeCardDetail: () => void
   readonly getContext: () => Readonly<Record<string, boolean>>
+  readonly getCss: () => string
   readonly getMenuEntries: (menuId: string) => readonly MenuEntry[]
   readonly logout: () => Promise<void>
   readonly openCard: (cardId: string) => Promise<void>
@@ -342,6 +344,9 @@ export const createInstance = async (
     },
     getContext(): Readonly<Record<string, boolean>> {
       return state.context
+    },
+    getCss(): string {
+      return getCss(state)
     },
     getMenuEntries(menuId: string): readonly MenuEntry[] {
       return getMenuEntries(state, menuId)

@@ -11,10 +11,7 @@ import type {
 import type { TrelloViewState } from '../state/TrelloViewState.ts'
 import * as DomEventListenerFunctions from '../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../MergeClassNames/MergeClassNames.ts'
-import {
-  getBoardBackgroundClassName,
-  getBoardBackgroundStyle,
-} from './BoardBackground.ts'
+import { getBoardBackgroundClassName } from './BoardBackground.ts'
 import { renderCardDetailPanel } from './RenderCardDetailPanel.ts'
 import { renderCards } from './RenderCards.ts'
 import { renderError } from './RenderShared.ts'
@@ -290,7 +287,6 @@ export const renderBoardDetail = (
         detail.board,
         boardBackgroundEnabled,
       ),
-      style: getBoardBackgroundStyle(detail.board, boardBackgroundEnabled),
       type: VirtualDomElements.Div,
     },
     ...content,

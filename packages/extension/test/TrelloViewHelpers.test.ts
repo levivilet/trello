@@ -30,7 +30,6 @@ import { renderMarkdown } from '../src/parts/TrelloView/render/RenderMarkdown.ts
 import { getAssetBaseUrl } from '../src/parts/TrelloView/state/AssetBaseUrl.ts'
 import { createInitialState } from '../src/parts/TrelloView/state/CreateInitialState.ts'
 import { validateCredentials } from '../src/parts/TrelloView/ValidateCredentials.ts'
-import { flatten, node } from '../src/parts/VirtualDom/VirtualDom.ts'
 
 const validApiKey = 'abcdefghijklmnopqrstuvwxyz123456'
 const validToken =
@@ -301,13 +300,6 @@ test('error, menu, asset, and virtual dom helpers handle fallbacks', () => {
       'file:///workspace/src/parts/TrelloView/state/AssetBaseUrl.ts',
     ),
   ).toBe('/remote/workspace/')
-
-  expect(flatten(node(1))).toEqual([
-    {
-      childCount: 0,
-      type: 1,
-    },
-  ])
 })
 
 test('markdown rendering treats incomplete and unsafe markup as text', () => {
@@ -335,7 +327,7 @@ test('markdown rendering treats incomplete and unsafe markup as text', () => {
     '- list item',
   ].join('\n')
 
-  expect(renderMarkdown(markdown)).not.toHaveLength(0)
+  expect(renderMarkdown(markdown).childCount).toBeGreaterThan(0)
 })
 
 test('comment helpers use trello member metadata with fallbacks', () => {

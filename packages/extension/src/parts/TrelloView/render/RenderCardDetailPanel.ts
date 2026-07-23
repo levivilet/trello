@@ -1001,7 +1001,6 @@ export const renderCardDetailPanel = (
     cardAttachmentsLoading,
     cardCommentsLoading,
     cardDetailLoading,
-    cardDetailWidth,
     failedCardAttachmentImageIds,
     selectedCardDetail,
   } = state
@@ -1043,7 +1042,6 @@ export const renderCardDetailPanel = (
       onContextMenu: DomEventListenerFunctions.HandleContextMenu,
       onPointerMove: DomEventListenerFunctions.HandlePointerMove,
       onPointerUp: DomEventListenerFunctions.HandlePointerUp,
-      style: `--TrelloCardDetailWidth: ${cardDetailWidth}px`,
       type: VirtualDomElements.Div,
     },
     ...renderCardDetailHeader(state),

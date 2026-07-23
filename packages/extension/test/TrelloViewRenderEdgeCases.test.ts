@@ -4,7 +4,6 @@ import { renderAuth } from '../src/parts/TrelloView/render/RenderAuth.ts'
 import { renderBoards } from '../src/parts/TrelloView/render/RenderBoards.ts'
 import { renderCardDetailPanel } from '../src/parts/TrelloView/render/RenderCardDetailPanel.ts'
 import { createInitialState } from '../src/parts/TrelloView/state/CreateInitialState.ts'
-import { flatten } from '../src/parts/VirtualDom/VirtualDom.ts'
 
 const imageUrl = 'https://example.com/attachment.png'
 
@@ -39,7 +38,7 @@ test('card detail rendering covers loading and active editor states', () => {
   const loading = renderCardDetailPanel({
     ...createInitialState(),
     cardDetailLoading: true,
-  }).flatMap(flatten)
+  })
   expect(loading.some((node) => node.text === 'Loading card...')).toBe(true)
 
   const active = renderCardDetailPanel({
@@ -56,7 +55,7 @@ test('card detail rendering covers loading and active editor states', () => {
     savingComment: true,
     selectedCardDetail: cardDetail,
     writingComment: true,
-  }).flatMap(flatten)
+  })
 
   expect(
     active.some((node) => node.className === 'TrelloCardDetailImage'),
@@ -73,7 +72,7 @@ test('card label rendering covers empty picker and create fallbacks', () => {
     ...createInitialState(),
     cardLabelPickerOpen: true,
     selectedCardDetail: cardDetail,
-  }).flatMap(flatten)
+  })
   expect(emptyPicker.some((node) => node.text === 'No labels available')).toBe(
     true,
   )
@@ -85,7 +84,7 @@ test('card label rendering covers empty picker and create fallbacks', () => {
     draftNewLabelName: '',
     savingNewLabel: true,
     selectedCardDetail: cardDetail,
-  }).flatMap(flatten)
+  })
   expect(createPicker.some((node) => node.text === 'Label title')).toBe(true)
   expect(createPicker.some((node) => node.text === 'Creating...')).toBe(true)
 })
