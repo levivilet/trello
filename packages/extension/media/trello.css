@@ -205,6 +205,13 @@
   max-width: 760px;
 }
 
+.TrelloAuthFields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  contain: content;
+}
+
 .TrelloWelcome {
   display: flex;
   flex-direction: column;

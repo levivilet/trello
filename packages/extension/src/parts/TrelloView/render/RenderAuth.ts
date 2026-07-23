@@ -9,13 +9,13 @@ export const renderAuth = (
 ): readonly VirtualDomNode[] => {
   const apiKey = renderField('API key', 'apiKey', state.draftApiKey)
   const token = renderField('Token', 'token', state.draftToken, 'password')
+  const fields = Dom.div('TrelloAuthFields', [apiKey, token])
   const connect = Dom.button(
     'connect',
     state.loading ? 'Connecting...' : 'Connect',
   )
   const form = Dom.div('TrelloAuthForm', [
-    apiKey,
-    token,
+    fields,
     connect,
     ...renderError(state.error),
   ])
