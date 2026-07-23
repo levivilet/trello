@@ -10,8 +10,9 @@ interface RunningExtension {
 const extensionId = 'builtin.trello'
 const viewId = 'trello.views.boards'
 
-export const test: Test = async ({ Command, expect, Locator }) => {
+export const test: Test = async ({ Command, expect, Locator, SideBar }) => {
   await Command.execute('ActivityBar.handleExtensionsChanged')
+  await SideBar.open('Explorer')
 
   const item = Locator('.ActivityBarItem[title="Trello"]')
   await expect(item).toBeVisible()
@@ -29,8 +30,13 @@ export const test: Test = async ({ Command, expect, Locator }) => {
     )
   }
 
-  // eslint-disable-next-line e2e/no-direct-click
-  await item.click()
+  await Command.execute(
+    'ActivityBar.handleClick',
+    0,
+    0,
+    0,
+    'trello.views.boards',
+  )
 
   const apiKey = Locator('input[name="apiKey"]')
   await expect(item).toHaveAttribute('aria-selected', 'true')
