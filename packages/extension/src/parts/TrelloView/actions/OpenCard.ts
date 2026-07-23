@@ -155,8 +155,8 @@ const loadCardComments = async (
   const state = context.state as TrelloViewState
   try {
     const comments = await commentsPromise
-    await cardPromise
     if (!getCurrentDetailForCard(state, cardId)) {
+      await cardPromise
       await Promise.resolve()
     }
     if (isCurrentCardLoad(state, cardId)) {
@@ -183,8 +183,8 @@ const loadCardAttachments = async (
   const state = context.state as TrelloViewState
   try {
     const attachments = await attachmentsPromise
-    await cardPromise
     if (!getCurrentDetailForCard(state, cardId)) {
+      await cardPromise
       await Promise.resolve()
     }
     if (isCurrentCardLoad(state, cardId)) {

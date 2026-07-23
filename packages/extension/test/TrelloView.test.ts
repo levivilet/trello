@@ -3435,6 +3435,91 @@ test('clicking card renders cached detail before fresh detail resolves', async (
   resetTrelloViewDependencyFactory()
 })
 
+test('fresh comments replace cached comments before fresh card resolves', async () => {
+  const cardDeferred = createDeferred<TrelloCard>()
+  const commentsDeferred = createDeferred<TrelloCardDetail['comments']>()
+  const boards = [{ id: 'board-1', name: 'Roadmap' }]
+  const boardDetail: TrelloBoardDetail = {
+    board: { id: 'board-1', name: 'Roadmap' },
+    lists: [
+      {
+        cards: [{ id: 'card-1', name: 'Ship Trello view' }],
+        id: 'list-1',
+        name: 'Todo',
+      },
+    ],
+  }
+  const cachedCardDetail: TrelloCardDetail = {
+    attachments: [],
+    card: {
+      desc: 'Cached description',
+      id: 'card-1',
+      name: 'Ship Trello view',
+    },
+    comments: [],
+  }
+  setTrelloViewDependencyFactory(() => ({
+    client: createStagedCardClient({
+      boardDetail,
+      boards,
+      async getCardDetailPartsCacheFirst() {
+        return {
+          cached: cachedCardDetail,
+          fresh: {
+            attachments: Promise.resolve([]),
+            card: cardDeferred.promise,
+            comments: commentsDeferred.promise,
+          },
+        }
+      },
+    }),
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage(),
+  }))
+
+  const instance = (await view.create()) as VirtualDomViewInstance
+  await instance.handleEvent?.({
+    name: 'apiKey',
+    type: 'input',
+    value: validApiKey,
+  })
+  await instance.handleEvent?.({
+    name: 'token',
+    type: 'input',
+    value: validToken,
+  })
+  await instance.handleEvent?.({ name: 'connect', type: 'click' })
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  const openCardPromise = instance.handleEvent?.({
+    name: 'card:card-1',
+    type: 'click',
+  }) as Promise<void>
+  await Promise.resolve()
+
+  commentsDeferred.resolve([
+    {
+      data: {
+        text: 'Fresh comment',
+      },
+      id: 'comment-1',
+    },
+  ])
+  await Promise.resolve()
+  await Promise.resolve()
+
+  const commentsText = getText(await instance.render())
+  expect(commentsText).toContain('Fresh comment')
+  expect(commentsText).not.toContain('Loading comments...')
+
+  cardDeferred.resolve({
+    desc: 'Fresh description',
+    id: 'card-1',
+    name: 'Ship Trello view',
+  })
+  await openCardPromise
+  resetTrelloViewDependencyFactory()
+})
+
 test('card detail renders title and description before comments finish loading', async () => {
   const cardDeferred = createDeferred<TrelloCard>()
   const commentsDeferred = createDeferred<TrelloCardDetail['comments']>()
