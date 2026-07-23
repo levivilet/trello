@@ -935,71 +935,66 @@ test('cards and lists render drag and drop attributes', async () => {
   expect(view.eventListeners).toEqual([
     {
       name: 'handleImageError',
-      params: ['handleViewEvent', 'error', 'event.target.name'],
+      params: ['handleImageError', 'event.target.name'],
     },
     {
       name: 'handleDragStart',
-      params: ['handleViewEvent', 'dragstart', 'event.target.name'],
+      params: ['handleDragStart', 'event.target.name'],
     },
     {
       name: 'handleDragEnd',
-      params: ['handleViewEvent', 'dragend', 'event.target.name'],
+      params: ['handleDragEnd'],
     },
     {
       name: 'handleDragOver',
-      params: ['handleViewEvent', 'dragover', 'event.currentTarget.name'],
+      params: ['handleDragOver', 'event.currentTarget.name'],
       preventDefault: true,
     },
     {
       name: 'handleDragLeave',
-      params: ['handleViewEvent', 'dragleave', 'event.currentTarget.name'],
+      params: ['handleDragLeave'],
     },
     {
       name: 'handleDrop',
-      params: ['handleViewEvent', 'drop', 'event.currentTarget.name'],
+      params: ['handleDrop', 'event.currentTarget.name'],
       preventDefault: true,
     },
     {
       name: 'handleKeyDown',
-      params: ['handleViewEvent', 'keydown', 'event.target.name', 'event.key'],
+      params: [
+        'handleKeyDown',
+        'event.target.name',
+        'event.key',
+        'event.ctrlKey',
+      ],
     },
     {
       name: 'handlePointerDown',
-      params: [
-        'handleViewEvent',
-        'pointerdown',
-        'event.target.name',
-        'event.clientX',
-      ],
+      params: ['handlePointerDown', 'event.target.name', 'event.clientX'],
       trackPointerEvents: ['handlePointerMove', 'handlePointerUp'],
     },
     {
       name: 'handleCardLabelPickerPointerDown',
-      params: ['handleViewEvent', 'pointerdown', 'event.currentTarget.name'],
+      params: ['handlePointerDown', 'event.currentTarget.name'],
       preventDefault: true,
     },
     {
       name: 'handleAddCardActionPointerDown',
-      params: ['handleViewEvent', 'pointerdown', 'event.currentTarget.name'],
+      params: ['handlePointerDown', 'event.currentTarget.name'],
       preventDefault: true,
     },
     {
       name: 'handleCardDescriptionCancelPointerDown',
-      params: ['handleViewEvent', 'pointerdown', 'event.currentTarget.name'],
+      params: ['handlePointerDown', 'event.currentTarget.name'],
       preventDefault: true,
     },
     {
       name: 'handlePointerMove',
-      params: [
-        'handleViewEvent',
-        'pointermove',
-        'event.target.name',
-        'event.clientX',
-      ],
+      params: ['handlePointerMove', 'event.clientX'],
     },
     {
       name: 'handlePointerUp',
-      params: ['handleViewEvent', 'pointerup', 'event.target.name'],
+      params: ['handlePointerUp'],
     },
   ])
   const contextMenuInvocations: unknown[] = []
@@ -1735,11 +1730,7 @@ test('escape closes new card input and preserves its draft for another list', as
     type: 'input',
     value: 'Draft card',
   })
-  await instance.handleEvent?.({
-    key: 'Escape',
-    name: 'newCardTitle:list-1',
-    type: 'keydown',
-  } as never)
+  await instance.handleKeyDown('newCardTitle:list-1', 'Escape')
 
   expect(
     getNodeByName(await instance.render(), 'newCardTitle:list-1'),
@@ -2067,8 +2058,8 @@ test('drag over marks list as drag target', async () => {
     },
   )
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
-  await instance.handleEvent?.({ name: 'card:card-1', type: 'dragstart' })
-  await instance.handleEvent?.({ name: 'list:list-1', type: 'dragover' })
+  await instance.handleDragStart('card:card-1')
+  await instance.handleDragOver('list:list-1')
 
   const dragTargetDom = await instance.render()
   expect(
@@ -2078,10 +2069,18 @@ test('drag over marks list as drag target', async () => {
     ),
   ).toBe(true)
 
-  await instance.handleEvent?.({ name: 'list:list-1', type: 'dragleave' })
+  await instance.handleDragLeave()
   const clearedDom = await instance.render()
   expect(
     hasClass(getNodeByName(clearedDom, 'list:list-1'), 'TrelloListDragTarget'),
+  ).toBe(false)
+
+  await instance.handleDragStart('card:card-1')
+  await instance.handleDragOver('list:list-1')
+  await instance.handleDragEnd()
+  const dragEndDom = await instance.render()
+  expect(
+    hasClass(getNodeByName(dragEndDom, 'list:list-1'), 'TrelloListDragTarget'),
   ).toBe(false)
   resetTrelloViewDependencyFactory()
 })
@@ -2111,8 +2110,8 @@ test('dropping card on another list moves card to top', async () => {
     },
   )
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
-  await instance.handleEvent?.({ name: 'card:card-1', type: 'dragstart' })
-  await instance.handleEvent?.({ name: 'list:list-2', type: 'drop' })
+  await instance.handleDragStart('card:card-1')
+  await instance.handleDrop('list:list-2')
 
   const dom = await instance.render()
   const todoText = getSubtreeTextByNodeName(dom, 'list:list-1')
@@ -2154,8 +2153,8 @@ test('dropping card on the same list is a no-op', async () => {
     },
   )
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
-  await instance.handleEvent?.({ name: 'card:card-1', type: 'dragstart' })
-  await instance.handleEvent?.({ name: 'list:list-1', type: 'drop' })
+  await instance.handleDragStart('card:card-1')
+  await instance.handleDrop('list:list-1')
 
   const dom = await instance.render()
   expect(getSubtreeTextByNodeName(dom, 'list:list-1')).toContain('Plan work')
@@ -2194,8 +2193,8 @@ test('failed card drop preserves placement and shows error', async () => {
     },
   )
   await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
-  await instance.handleEvent?.({ name: 'card:card-1', type: 'dragstart' })
-  await instance.handleEvent?.({ name: 'list:list-2', type: 'drop' })
+  await instance.handleDragStart('card:card-1')
+  await instance.handleDrop('list:list-2')
 
   const dom = await instance.render()
   expect(getSubtreeTextByNodeName(dom, 'list:list-1')).toContain('Plan work')
@@ -2284,11 +2283,7 @@ test('board detail creates another list from the trailing list control', async (
   await instance.handleEvent?.({ name: 'startAddList', type: 'click' })
   expect(getNodeByName(await instance.render(), 'newListTitle')).toBeDefined()
 
-  await instance.handleEvent?.({
-    key: 'Escape',
-    name: 'newListTitle',
-    type: 'keydown',
-  } as unknown as ViewEvent)
+  await instance.handleKeyDown('newListTitle', 'Escape')
 
   const cancelledDom = await instance.render()
   expect(getNodeByName(cancelledDom, 'newListTitle')).toBeUndefined()
@@ -2438,7 +2433,7 @@ test('clicking card renders card detail and close dismisses it', async () => {
     storage: createMemoryCredentialStorage(),
   }))
 
-  const instance = (await view.create()) as VirtualDomViewInstance
+  const instance = await view.create()
   await instance.handleEvent?.({
     name: 'apiKey',
     type: 'input',
@@ -2512,7 +2507,7 @@ test('clicking card renders card detail and close dismisses it', async () => {
     }),
   ).toBe(true)
 
-  await instance.handleEvent?.({ name: 'attachment-1', type: 'error' })
+  await instance.handleImageError('attachment-1')
 
   const imageErrorDom = await instance.render()
   expect(getClassNames(imageErrorDom)).not.toContain('TrelloCardDetailImage')
@@ -2671,25 +2666,13 @@ test('card detail panel resizes from the left sash', async () => {
   expect(getNodeByName(initialDom, 'cardDetail')?.style).toBeUndefined()
   expect(instance.getCss()).toContain('--TrelloCardDetailWidth: 360px')
 
-  await instance.handleEvent?.({
-    clientX: 100,
-    name: 'resizeCardDetail',
-    type: 'pointerdown',
-  } as unknown as ViewEvent)
-  await instance.handleEvent?.({
-    clientX: 60,
-    name: 'cardDetail',
-    type: 'pointermove',
-  } as unknown as ViewEvent)
+  await instance.handlePointerDown('resizeCardDetail', 100)
+  await instance.handlePointerMove(60)
 
   expect(instance.getCss()).toContain('--TrelloCardDetailWidth: 400px')
 
-  await instance.handleEvent?.({
-    clientX: 500,
-    name: 'cardDetail',
-    type: 'pointermove',
-  } as unknown as ViewEvent)
-  await instance.handleEvent?.({ name: 'cardDetail', type: 'pointerup' })
+  await instance.handlePointerMove(500)
+  await instance.handlePointerUp()
 
   expect(instance.getCss()).toContain('--TrelloCardDetailWidth: 200px')
   resetTrelloViewDependencyFactory()
@@ -2767,11 +2750,7 @@ test('card detail comment controls and shortcuts save and cancel comments', asyn
   expect(getNodeByName(updatedDom, 'cardComment')).toBeUndefined()
 
   await instance.handleEvent?.({ name: 'startWriteComment', type: 'click' })
-  await instance.handleEvent?.({
-    key: 'Escape',
-    name: 'cardComment',
-    type: 'keydown',
-  } as unknown as ViewEvent)
+  await instance.handleKeyDown('cardComment', 'Escape')
   expect(getNodeByName(await instance.render(), 'cardComment')).toBeUndefined()
 
   await instance.handleEvent?.({ name: 'startWriteComment', type: 'click' })
@@ -2780,12 +2759,7 @@ test('card detail comment controls and shortcuts save and cancel comments', asyn
     type: 'input',
     value: 'Saved with the keyboard',
   })
-  await instance.handleEvent?.({
-    ctrlKey: true,
-    key: 'Enter',
-    name: 'cardComment',
-    type: 'keydown',
-  } as unknown as ViewEvent)
+  await instance.handleKeyDown('cardComment', 'Enter', true)
   expect(getText(await instance.render())).toContain('Saved with the keyboard')
   resetTrelloViewDependencyFactory()
 })
@@ -3143,10 +3117,7 @@ test('card detail label picker adds an existing board label', async () => {
   expect(filteredPickerText).toContain('Bug')
   expect(filteredPickerText).not.toContain('Extension Api')
 
-  await instance.handleEvent?.({
-    name: 'cardLabelPicker',
-    type: 'pointerdown',
-  })
+  await instance.handlePointerDown('cardLabelPicker')
   await instance.handleEvent?.({ name: 'addCardLabel:label-2', type: 'click' })
 
   const updatedDom = await instance.render()

@@ -74,6 +74,20 @@ export interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly getContext: () => Readonly<Record<string, boolean>>
   readonly getCss: () => string
   readonly getMenuEntries: (menuId: string) => readonly MenuEntry[]
+  readonly handleDragEnd: () => Promise<void>
+  readonly handleDragLeave: () => Promise<void>
+  readonly handleDragOver: (name: string) => Promise<void>
+  readonly handleDragStart: (name: string) => Promise<void>
+  readonly handleDrop: (name: string) => Promise<void>
+  readonly handleImageError: (name: string) => Promise<void>
+  readonly handleKeyDown: (
+    name: string,
+    key: string,
+    ctrlKey?: boolean,
+  ) => Promise<void>
+  readonly handlePointerDown: (name: string, clientX?: number) => Promise<void>
+  readonly handlePointerMove: (clientX: number) => Promise<void>
+  readonly handlePointerUp: () => Promise<void>
   readonly logout: () => Promise<void>
   readonly openCard: (cardId: string) => Promise<void>
   readonly openMockBoard: (options: any) => Promise<void>
@@ -103,29 +117,6 @@ interface MutableTrelloViewActionContext extends TrelloViewActionContext {
 }
 
 const activeInstances = new Set<ActiveTrelloViewInstance>()
-
-const handleDirectEvent = (
-  context: Readonly<TrelloViewActionContext>,
-  event: Readonly<ViewEvent>,
-): boolean => {
-  if (event.type === 'error') {
-    handleImageErrorEvent(context, event.name || '')
-    return true
-  }
-  if (event.type === 'pointerdown' && event.name === 'resizeCardDetail') {
-    startResizeCardDetail(context, event)
-    return true
-  }
-  if (event.type === 'pointermove') {
-    resizeCardDetail(context, event)
-    return true
-  }
-  if (event.type === 'pointerup') {
-    stopResizeCardDetail(context)
-    return true
-  }
-  return false
-}
 
 const getActiveInstance = (): ActiveTrelloViewInstance | undefined => {
   let activeInstance: ActiveTrelloViewInstance | undefined
@@ -287,6 +278,19 @@ export const createInstance = async (
 
   await initialize(false)
 
+  const runEventHandler = async (
+    handler: () => void | Promise<void>,
+  ): Promise<void> => {
+    activeInstances.delete(instance)
+    activeInstances.add(instance)
+    state.pendingSelections = []
+    try {
+      await handler()
+    } finally {
+      updateContext(state)
+    }
+  }
+
   const instance: ActiveTrelloViewInstance = {
     async addCard({
       listId,
@@ -351,24 +355,35 @@ export const createInstance = async (
     getMenuEntries(menuId: string): readonly MenuEntry[] {
       return getMenuEntries(state, menuId)
     },
+    async handleDragEnd(): Promise<void> {
+      await runEventHandler(() => handleDragEndEvent(viewContext))
+    },
+    async handleDragLeave(): Promise<void> {
+      await runEventHandler(() => handleDragLeaveEvent(viewContext))
+    },
+    async handleDragOver(name: string): Promise<void> {
+      await runEventHandler(() =>
+        handleDragOverEvent(viewContext, { name, type: 'dragover' }),
+      )
+    },
+    async handleDragStart(name: string): Promise<void> {
+      await runEventHandler(() =>
+        handleDragStartEvent(viewContext, { name, type: 'dragstart' }),
+      )
+    },
+    async handleDrop(name: string): Promise<void> {
+      await runEventHandler(() =>
+        handleDropEvent(viewContext, { name, type: 'drop' }),
+      )
+    },
     async handleEvent(event: Readonly<ViewEvent>): Promise<void> {
-      activeInstances.delete(instance)
-      activeInstances.add(instance)
-      state.pendingSelections = []
-      try {
+      await runEventHandler(async () => {
         if (event.type === 'focus') {
           handleFocusEvent(viewContext, event)
           return
         }
         if (event.type === 'input') {
           await handleInputEvent(viewContext, event)
-          return
-        }
-        if (event.type === 'keydown') {
-          await handleKeyDownEvent(viewContext, event)
-          return
-        }
-        if (handleDirectEvent(viewContext, event)) {
           return
         }
         if (event.type === 'click') {
@@ -388,30 +403,50 @@ export const createInstance = async (
           if (!event.name || state.focusedName === event.name) {
             state.focusedName = ''
           }
-          return
         }
-        if (event.type === 'dragstart') {
-          handleDragStartEvent(viewContext, event)
-          return
+      })
+    },
+    async handleImageError(name: string): Promise<void> {
+      await runEventHandler(() => handleImageErrorEvent(viewContext, name))
+    },
+    async handleKeyDown(
+      name: string,
+      key: string,
+      ctrlKey = false,
+    ): Promise<void> {
+      await runEventHandler(() =>
+        handleKeyDownEvent(viewContext, {
+          ctrlKey,
+          key,
+          name,
+          type: 'keydown',
+        } as ViewEvent & {
+          readonly ctrlKey: boolean
+          readonly key: string
+        }),
+      )
+    },
+    async handlePointerDown(name: string, clientX = 0): Promise<void> {
+      await runEventHandler(() => {
+        if (name === 'resizeCardDetail') {
+          startResizeCardDetail(viewContext, {
+            clientX,
+            name,
+            type: 'pointerdown',
+          } as ViewEvent & { readonly clientX: number })
         }
-        if (event.type === 'dragover') {
-          handleDragOverEvent(viewContext, event)
-          return
-        }
-        if (event.type === 'dragleave') {
-          handleDragLeaveEvent(viewContext)
-          return
-        }
-        if (event.type === 'dragend') {
-          handleDragEndEvent(viewContext)
-          return
-        }
-        if (event.type === 'drop') {
-          await handleDropEvent(viewContext, event)
-        }
-      } finally {
-        updateContext(state)
-      }
+      })
+    },
+    async handlePointerMove(clientX: number): Promise<void> {
+      await runEventHandler(() =>
+        resizeCardDetail(viewContext, {
+          clientX,
+          type: 'pointermove',
+        } as ViewEvent & { readonly clientX: number }),
+      )
+    },
+    async handlePointerUp(): Promise<void> {
+      await runEventHandler(() => stopResizeCardDetail(viewContext))
     },
     async logout(): Promise<void> {
       await logout(viewContext)
