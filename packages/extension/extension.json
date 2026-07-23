@@ -6,6 +6,11 @@
   "repository": "https://github.com/lvce-editor/trello",
   "browser": "dist/trelloMain.js",
   "isolated": true,
+  "contentSecurityPolicy": [
+    "default-src 'none'",
+    "connect-src https:",
+    "script-src 'self'"
+  ],
   "categories": ["Other"],
   "configuration": {
     "trello.searchEnabled": {
