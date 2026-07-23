@@ -43,32 +43,32 @@ export const renderEventListeners = (): readonly DomEventListener[] => {
       ],
     },
     {
-      name: 'handlePointerDown',
-      params: ['handlePointerDown', 'event.target.name', 'event.clientX'],
-      trackPointerEvents: ['handlePointerMove', 'handlePointerUp'],
+      name: 'handleSashPointerDown',
+      params: ['handleSashPointerDown', 'event.clientX'],
+      trackPointerEvents: ['handleSashPointerMove', 'handleSashPointerUp'],
     },
     {
       name: 'handleCardLabelPickerPointerDown',
-      params: ['handlePointerDown', 'event.currentTarget.name'],
+      params: ['handleCardLabelPickerPointerDown'],
       preventDefault: true,
     },
     {
       name: 'handleAddCardActionPointerDown',
-      params: ['handlePointerDown', 'event.currentTarget.name'],
+      params: ['handleAddCardActionPointerDown'],
       preventDefault: true,
     },
     {
       name: 'handleCardDescriptionCancelPointerDown',
-      params: ['handlePointerDown', 'event.currentTarget.name'],
+      params: ['handleCardDescriptionCancelPointerDown'],
       preventDefault: true,
     },
     {
-      name: 'handlePointerMove',
-      params: ['handlePointerMove', 'event.clientX'],
+      name: 'handleSashPointerMove',
+      params: ['handleSashPointerMove', 'event.clientX'],
     },
     {
-      name: 'handlePointerUp',
-      params: ['handlePointerUp'],
+      name: 'handleSashPointerUp',
+      params: ['handleSashPointerUp'],
     },
   ]
 }

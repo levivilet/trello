@@ -74,6 +74,9 @@ export interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly getContext: () => Readonly<Record<string, boolean>>
   readonly getCss: () => string
   readonly getMenuEntries: (menuId: string) => readonly MenuEntry[]
+  readonly handleAddCardActionPointerDown: () => Promise<void>
+  readonly handleCardDescriptionCancelPointerDown: () => Promise<void>
+  readonly handleCardLabelPickerPointerDown: () => Promise<void>
   readonly handleDragEnd: () => Promise<void>
   readonly handleDragLeave: () => Promise<void>
   readonly handleDragOver: (name: string) => Promise<void>
@@ -85,9 +88,9 @@ export interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
     key: string,
     ctrlKey?: boolean,
   ) => Promise<void>
-  readonly handlePointerDown: (name: string, clientX?: number) => Promise<void>
-  readonly handlePointerMove: (clientX: number) => Promise<void>
-  readonly handlePointerUp: () => Promise<void>
+  readonly handleSashPointerDown: (clientX: number) => Promise<void>
+  readonly handleSashPointerMove: (clientX: number) => Promise<void>
+  readonly handleSashPointerUp: () => Promise<void>
   readonly logout: () => Promise<void>
   readonly openCard: (cardId: string) => Promise<void>
   readonly openMockBoard: (options: any) => Promise<void>
@@ -355,6 +358,15 @@ export const createInstance = async (
     getMenuEntries(menuId: string): readonly MenuEntry[] {
       return getMenuEntries(state, menuId)
     },
+    async handleAddCardActionPointerDown(): Promise<void> {
+      await runEventHandler(() => {})
+    },
+    async handleCardDescriptionCancelPointerDown(): Promise<void> {
+      await runEventHandler(() => {})
+    },
+    async handleCardLabelPickerPointerDown(): Promise<void> {
+      await runEventHandler(() => {})
+    },
     async handleDragEnd(): Promise<void> {
       await runEventHandler(() => handleDragEndEvent(viewContext))
     },
@@ -426,18 +438,16 @@ export const createInstance = async (
         }),
       )
     },
-    async handlePointerDown(name: string, clientX = 0): Promise<void> {
-      await runEventHandler(() => {
-        if (name === 'resizeCardDetail') {
-          startResizeCardDetail(viewContext, {
-            clientX,
-            name,
-            type: 'pointerdown',
-          } as ViewEvent & { readonly clientX: number })
-        }
-      })
+    async handleSashPointerDown(clientX: number): Promise<void> {
+      await runEventHandler(() =>
+        startResizeCardDetail(viewContext, {
+          clientX,
+          name: 'resizeCardDetail',
+          type: 'pointerdown',
+        } as ViewEvent & { readonly clientX: number }),
+      )
     },
-    async handlePointerMove(clientX: number): Promise<void> {
+    async handleSashPointerMove(clientX: number): Promise<void> {
       await runEventHandler(() =>
         resizeCardDetail(viewContext, {
           clientX,
@@ -445,7 +455,7 @@ export const createInstance = async (
         } as ViewEvent & { readonly clientX: number }),
       )
     },
-    async handlePointerUp(): Promise<void> {
+    async handleSashPointerUp(): Promise<void> {
       await runEventHandler(() => stopResizeCardDetail(viewContext))
     },
     async logout(): Promise<void> {

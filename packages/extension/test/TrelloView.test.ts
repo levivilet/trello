@@ -969,32 +969,32 @@ test('cards and lists render drag and drop attributes', async () => {
       ],
     },
     {
-      name: 'handlePointerDown',
-      params: ['handlePointerDown', 'event.target.name', 'event.clientX'],
-      trackPointerEvents: ['handlePointerMove', 'handlePointerUp'],
+      name: 'handleSashPointerDown',
+      params: ['handleSashPointerDown', 'event.clientX'],
+      trackPointerEvents: ['handleSashPointerMove', 'handleSashPointerUp'],
     },
     {
       name: 'handleCardLabelPickerPointerDown',
-      params: ['handlePointerDown', 'event.currentTarget.name'],
+      params: ['handleCardLabelPickerPointerDown'],
       preventDefault: true,
     },
     {
       name: 'handleAddCardActionPointerDown',
-      params: ['handlePointerDown', 'event.currentTarget.name'],
+      params: ['handleAddCardActionPointerDown'],
       preventDefault: true,
     },
     {
       name: 'handleCardDescriptionCancelPointerDown',
-      params: ['handlePointerDown', 'event.currentTarget.name'],
+      params: ['handleCardDescriptionCancelPointerDown'],
       preventDefault: true,
     },
     {
-      name: 'handlePointerMove',
-      params: ['handlePointerMove', 'event.clientX'],
+      name: 'handleSashPointerMove',
+      params: ['handleSashPointerMove', 'event.clientX'],
     },
     {
-      name: 'handlePointerUp',
-      params: ['handlePointerUp'],
+      name: 'handleSashPointerUp',
+      params: ['handleSashPointerUp'],
     },
   ])
   const contextMenuInvocations: unknown[] = []
@@ -2654,7 +2654,7 @@ test('card detail panel resizes from the left sash', async () => {
   const initialDom = await instance.render()
   expect(getNodeByName(initialDom, 'resizeCardDetail')).toMatchObject({
     className: 'TrelloCardDetailResizeSash',
-    onPointerDown: 'handlePointerDown',
+    onPointerDown: 'handleSashPointerDown',
   })
   expect(
     getDirectChildClassNamesByClassName(initialDom, 'TrelloBoardDetailContent'),
@@ -2666,13 +2666,13 @@ test('card detail panel resizes from the left sash', async () => {
   expect(getNodeByName(initialDom, 'cardDetail')?.style).toBeUndefined()
   expect(instance.getCss()).toContain('--TrelloCardDetailWidth: 360px')
 
-  await instance.handlePointerDown('resizeCardDetail', 100)
-  await instance.handlePointerMove(60)
+  await instance.handleSashPointerDown(100)
+  await instance.handleSashPointerMove(60)
 
   expect(instance.getCss()).toContain('--TrelloCardDetailWidth: 400px')
 
-  await instance.handlePointerMove(500)
-  await instance.handlePointerUp()
+  await instance.handleSashPointerMove(500)
+  await instance.handleSashPointerUp()
 
   expect(instance.getCss()).toContain('--TrelloCardDetailWidth: 200px')
   resetTrelloViewDependencyFactory()
@@ -3117,7 +3117,7 @@ test('card detail label picker adds an existing board label', async () => {
   expect(filteredPickerText).toContain('Bug')
   expect(filteredPickerText).not.toContain('Extension Api')
 
-  await instance.handlePointerDown('cardLabelPicker')
+  await instance.handleCardLabelPickerPointerDown()
   await instance.handleEvent?.({ name: 'addCardLabel:label-2', type: 'click' })
 
   const updatedDom = await instance.render()

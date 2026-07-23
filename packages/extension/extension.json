@@ -139,22 +139,22 @@
           ]
         },
         {
-          "name": "handlePointerDown",
-          "params": ["handlePointerDown", "event.target.name", "event.clientX"],
-          "trackPointerEvents": ["handlePointerMove", "handlePointerUp"]
+          "name": "handleSashPointerDown",
+          "params": ["handleSashPointerDown", "event.clientX"],
+          "trackPointerEvents": ["handleSashPointerMove", "handleSashPointerUp"]
         },
         {
           "name": "handleCardLabelPickerPointerDown",
-          "params": ["handlePointerDown", "event.currentTarget.name"],
+          "params": ["handleCardLabelPickerPointerDown"],
           "preventDefault": true
         },
         {
-          "name": "handlePointerMove",
-          "params": ["handlePointerMove", "event.clientX"]
+          "name": "handleSashPointerMove",
+          "params": ["handleSashPointerMove", "event.clientX"]
         },
         {
-          "name": "handlePointerUp",
-          "params": ["handlePointerUp"]
+          "name": "handleSashPointerUp",
+          "params": ["handleSashPointerUp"]
         }
       ],
       "id": "trello.views.boards",
