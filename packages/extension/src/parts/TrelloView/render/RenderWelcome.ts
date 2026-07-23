@@ -1,60 +1,123 @@
-import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
-import * as Dom from '../../VirtualDom/VirtualDom.ts'
+import {
+  text,
+  VirtualDomElements,
+  type VirtualDomNode,
+} from '@lvce-editor/virtual-dom-worker'
 import { trelloPowerUpsUrl } from '../Constants.ts'
 
-const renderWelcomeText = (text: string): Dom.TreeNode => {
-  return Dom.div('TrelloWelcomeText', [Dom.textNode(text)])
+const renderWelcomeText = (value: string): readonly VirtualDomNode[] => {
+  return [
+    {
+      childCount: 1,
+      className: 'TrelloWelcomeText',
+      type: VirtualDomElements.Div,
+    },
+    text(value),
+  ]
 }
 
-const renderWelcomeNote = (text: string): Dom.TreeNode => {
-  return Dom.div('TrelloWelcomeNote', [Dom.textNode(text)])
+const renderWelcomeNote = (value: string): readonly VirtualDomNode[] => {
+  return [
+    {
+      childCount: 1,
+      className: 'TrelloWelcomeNote',
+      type: VirtualDomElements.Div,
+    },
+    text(value),
+  ]
+}
+
+const renderWelcomeLink = (): readonly VirtualDomNode[] => {
+  return [
+    {
+      childCount: 1,
+      className: 'TrelloWelcomeLink',
+      href: trelloPowerUpsUrl,
+      target: '_blank',
+      type: VirtualDomElements.A,
+    },
+    text(trelloPowerUpsUrl),
+  ]
 }
 
 const renderWelcomeStep = (
   number: string,
-  children: readonly Dom.TreeNode[],
-): Dom.TreeNode => {
-  return Dom.node(VirtualDomElements.Li, { className: 'TrelloWelcomeStep' }, [
-    Dom.node(
-      VirtualDomElements.Span,
-      { className: 'TrelloWelcomeStepNumber' },
-      [Dom.textNode(number)],
+  children: readonly VirtualDomNode[],
+  childCount: number,
+): readonly VirtualDomNode[] => {
+  return [
+    {
+      childCount: 2,
+      className: 'TrelloWelcomeStep',
+      type: VirtualDomElements.Li,
+    },
+    {
+      childCount: 1,
+      className: 'TrelloWelcomeStepNumber',
+      type: VirtualDomElements.Span,
+    },
+    text(number),
+    {
+      childCount,
+      className: 'TrelloWelcomeStepText',
+      type: VirtualDomElements.Span,
+    },
+    ...children,
+  ]
+}
+
+const renderWelcomeSteps = (): readonly VirtualDomNode[] => {
+  return [
+    {
+      childCount: 3,
+      className: 'TrelloWelcomeSteps',
+      type: VirtualDomElements.Ol,
+    },
+    ...renderWelcomeStep(
+      '1',
+      [
+        text('Create or open a Trello Power-Up at '),
+        ...renderWelcomeLink(),
+        text('.'),
+      ],
+      3,
     ),
-    Dom.node(VirtualDomElements.Span, { className: 'TrelloWelcomeStepText' }, [
-      ...children,
-    ]),
-  ])
+    ...renderWelcomeStep(
+      '2',
+      [text('Open the API Key tab and generate an API key.')],
+      1,
+    ),
+    ...renderWelcomeStep(
+      '3',
+      [
+        text(
+          "Use that key to generate a token from Trello's authorization page, then paste both values here.",
+        ),
+      ],
+      1,
+    ),
+  ]
 }
 
-const renderWelcomeSteps = (): Dom.TreeNode => {
-  return Dom.node(VirtualDomElements.Ol, { className: 'TrelloWelcomeSteps' }, [
-    renderWelcomeStep('1', [
-      Dom.textNode('Create or open a Trello Power-Up at '),
-      Dom.link('TrelloWelcomeLink', trelloPowerUpsUrl, trelloPowerUpsUrl),
-      Dom.textNode('.'),
-    ]),
-    renderWelcomeStep('2', [
-      Dom.textNode('Open the API Key tab and generate an API key.'),
-    ]),
-    renderWelcomeStep('3', [
-      Dom.textNode(
-        "Use that key to generate a token from Trello's authorization page, then paste both values here.",
-      ),
-    ]),
-  ])
-}
-
-export const renderWelcome = (): Dom.TreeNode => {
-  return Dom.div('TrelloWelcome', [
-    Dom.node(VirtualDomElements.H3, { className: 'TrelloWelcomeTitle' }, [
-      Dom.textNode('Welcome to Trello'),
-    ]),
-    renderWelcomeText(
+export const renderWelcome = (): readonly VirtualDomNode[] => {
+  return [
+    {
+      childCount: 4,
+      className: 'TrelloWelcome',
+      type: VirtualDomElements.Div,
+    },
+    {
+      childCount: 1,
+      className: 'TrelloWelcomeTitle',
+      type: VirtualDomElements.H3,
+    },
+    text('Welcome to Trello'),
+    ...renderWelcomeText(
       'Connect your Trello account to browse your boards from Lvce Editor.',
     ),
-    renderWelcomeSteps(),
-    renderWelcomeNote(
+    ...renderWelcomeSteps(),
+    ...renderWelcomeNote(
       'The API key identifies the app. The token grants access to your Trello account, so keep the token private.',
     ),
-  ])
+  ]
 }

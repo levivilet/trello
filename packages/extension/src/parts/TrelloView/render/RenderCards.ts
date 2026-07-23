@@ -1,6 +1,11 @@
-import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
+import {
+  text,
+  VirtualDomElements,
+  type VirtualDomNode,
+} from '@lvce-editor/virtual-dom-worker'
 import type { TrelloCard } from '../../TrelloTypes/TrelloTypes.ts'
-import * as Dom from '../../VirtualDom/VirtualDom.ts'
+import * as DomEventListenerFunctions from '../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
+import * as MergeClassNames from '../../MergeClassNames/MergeClassNames.ts'
 import { getCardCoverImageUrl } from '../CardCoverHelpers.ts'
 import { getLabelColorClassName, getLabelText } from '../LabelHelpers.ts'
 import { getAssetUrl } from '../state/AssetBaseUrl.ts'
@@ -16,64 +21,78 @@ const getCardCommentLabel = (count: number): string => {
   return `${count} comments`
 }
 
-const renderCardCommentIcon = (baseUrl: string): Dom.TreeNode => {
-  return Dom.node(VirtualDomElements.Img, {
+const renderCardCommentIcon = (baseUrl: string): VirtualDomNode => {
+  return {
     alt: '',
     'aria-hidden': true,
+    childCount: 0,
     className: 'TrelloCardCommentIcon',
     src: getAssetUrl(baseUrl, 'media/comments.svg'),
-  })
+    type: VirtualDomElements.Img,
+  }
 }
 
 const renderCardCommentCount = (
   baseUrl: string,
   card: Readonly<TrelloCard>,
-): readonly Dom.TreeNode[] => {
+): readonly VirtualDomNode[] => {
   const commentCount = getCardCommentCount(card)
   if (commentCount <= 0) {
     return []
   }
   const commentLabel = getCardCommentLabel(commentCount)
-  const commentCountNode = Dom.node(
-    VirtualDomElements.Span,
-    { className: 'TrelloCardCommentCount' },
-    [Dom.textNode(String(commentCount))],
-  )
   return [
-    Dom.node(
-      VirtualDomElements.Div,
-      {
-        'aria-label': commentLabel,
-        className: 'TrelloCardMeta',
-        title: commentLabel,
-      },
-      [renderCardCommentIcon(baseUrl), commentCountNode],
-    ),
+    {
+      'aria-label': commentLabel,
+      childCount: 2,
+      className: 'TrelloCardMeta',
+      title: commentLabel,
+      type: VirtualDomElements.Div,
+    },
+    renderCardCommentIcon(baseUrl),
+    {
+      childCount: 1,
+      className: 'TrelloCardCommentCount',
+      type: VirtualDomElements.Span,
+    },
+    text(String(commentCount)),
   ]
 }
 
 const renderCardLabel = (
   label: NonNullable<TrelloCard['labels']>[number],
-): Dom.TreeNode => {
+): VirtualDomNode => {
   const labelText = getLabelText(label)
-  return Dom.node(VirtualDomElements.Div, {
+  return {
     'aria-label': labelText,
-    className: `TrelloCardLabel TrelloCardPreviewLabel ${getLabelColorClassName(label.color)}`,
+    childCount: 0,
+    className: MergeClassNames.mergeClassNames(
+      'TrelloCardLabel',
+      'TrelloCardPreviewLabel',
+      getLabelColorClassName(label.color),
+    ),
     title: labelText,
-  })
+    type: VirtualDomElements.Div,
+  }
 }
 
 const renderCardLabels = (
   card: Readonly<TrelloCard>,
-): readonly Dom.TreeNode[] => {
-  if (!card.labels || card.labels.length === 0) {
+): readonly VirtualDomNode[] => {
+  const { labels } = card
+  if (!labels || labels.length === 0) {
     return []
   }
   return [
-    Dom.div(
-      'TrelloCardLabels TrelloCardPreviewLabels',
-      card.labels.map(renderCardLabel),
-    ),
+    {
+      childCount: labels.length,
+      className: MergeClassNames.mergeClassNames(
+        'TrelloCardLabels',
+        'TrelloCardPreviewLabels',
+      ),
+      type: VirtualDomElements.Div,
+    },
+    ...labels.map(renderCardLabel),
   ]
 }
 
@@ -81,43 +100,60 @@ const renderCard = (
   baseUrl: string,
   coverImageUrls: Readonly<Record<string, string>>,
   card: Readonly<TrelloCard>,
-): Dom.TreeNode => {
+): readonly VirtualDomNode[] => {
   const coverSourceUrl = getCardCoverImageUrl(card)
   const coverImageUrl = coverSourceUrl ? coverImageUrls[coverSourceUrl] : ''
-  const cardBody = Dom.div('TrelloCardBody', [
-    ...renderCardLabels(card),
-    Dom.div('TrelloCardTitle', [Dom.textNode(card.name)]),
-    ...renderCardCommentCount(baseUrl, card),
-  ])
-  const children = coverImageUrl
-    ? [
-        Dom.image('TrelloCardCoverImage', coverImageUrl, `${card.name} cover`),
-        cardBody,
-      ]
-    : [cardBody]
-  return Dom.node(
-    VirtualDomElements.Button,
+  const labelDom = renderCardLabels(card)
+  const commentDom = renderCardCommentCount(baseUrl, card)
+  const bodyChildCount =
+    1 + (labelDom.length > 0 ? 1 : 0) + (commentDom.length > 0 ? 1 : 0)
+  return [
     {
+      childCount: coverImageUrl ? 2 : 1,
       className: coverImageUrl
-        ? 'TrelloCard TrelloCardWithCover'
+        ? MergeClassNames.mergeClassNames('TrelloCard', 'TrelloCardWithCover')
         : 'TrelloCard',
       draggable: true,
       name: `card:${card.id}`,
-      onContextMenu: 'handleContextMenu',
-      onDragEnd: 'handleDragEnd',
-      onDragStart: 'handleDragStart',
+      onContextMenu: DomEventListenerFunctions.HandleContextMenu,
+      onDragEnd: DomEventListenerFunctions.HandleDragEnd,
+      onDragStart: DomEventListenerFunctions.HandleDragStart,
+      type: VirtualDomElements.Button,
     },
-    children,
-  )
+    ...(coverImageUrl
+      ? [
+          {
+            alt: `${card.name} cover`,
+            childCount: 0,
+            className: 'TrelloCardCoverImage',
+            src: coverImageUrl,
+            type: VirtualDomElements.Img,
+          },
+        ]
+      : []),
+    {
+      childCount: bodyChildCount,
+      className: 'TrelloCardBody',
+      type: VirtualDomElements.Div,
+    },
+    ...labelDom,
+    {
+      childCount: 1,
+      className: 'TrelloCardTitle',
+      type: VirtualDomElements.Div,
+    },
+    text(card.name),
+    ...commentDom,
+  ]
 }
 
 export const renderCards = (
   baseUrl: string,
   coverImageUrls: Readonly<Record<string, string>>,
   cards: readonly TrelloCard[],
-): readonly Dom.TreeNode[] => {
+): readonly VirtualDomNode[] => {
   if (cards.length === 0) {
-    return [Dom.textNode('No cards')]
+    return [text('No cards')]
   }
-  return cards.map((card) => renderCard(baseUrl, coverImageUrls, card))
+  return cards.flatMap((card) => renderCard(baseUrl, coverImageUrls, card))
 }

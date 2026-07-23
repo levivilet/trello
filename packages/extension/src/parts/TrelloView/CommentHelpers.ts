@@ -1,10 +1,16 @@
 import type { TrelloComment } from '../TrelloTypes/TrelloTypes.ts'
 
-const commentDateFormatter = new Intl.DateTimeFormat('en-US', {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-  timeZone: 'Europe/Berlin',
-})
+const getCommentDateFormatter = (() => {
+  let commentDateFormatter: Intl.DateTimeFormat | undefined
+  return (): Intl.DateTimeFormat => {
+    commentDateFormatter ??= new Intl.DateTimeFormat('en-US', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+      timeZone: 'Europe/Berlin',
+    })
+    return commentDateFormatter
+  }
+})()
 
 const whitespaceRegex = /\s+/
 const trelloAvatarHosts = new Set([
@@ -63,7 +69,7 @@ export const getCommentDateText = (
   if (Number.isNaN(time)) {
     return ''
   }
-  return commentDateFormatter.format(new Date(time))
+  return getCommentDateFormatter().format(new Date(time))
 }
 
 export const getCommentAvatarUrl = (
