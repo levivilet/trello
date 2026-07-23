@@ -44,6 +44,8 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await expect(list).toHaveCSS('list-style-position', 'inside')
   await expect(list).toHaveCSS('list-style-type', 'disc')
   await expect(items).toHaveCount(2)
-  await expect(items.first()).toHaveText('First item')
-  await expect(items.nth(1)).toHaveText('Second item')
+  const firstItem = items.first()
+  const secondItem = items.nth(1)
+  await expect(firstItem).toHaveText('First item')
+  await expect(secondItem).toHaveText('Second item')
 }
