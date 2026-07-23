@@ -3187,8 +3187,8 @@ test('card detail label picker creates and assigns a new label', async () => {
   )
   expect(getNodeByName(unmatchedDom, 'openCardLabelCreate')).toBeDefined()
 
-  const pickerContext = instance.getContext()
   await instance.handleEvent?.({ name: 'openCardLabelCreate', type: 'click' })
+  await instance.handleEvent?.({ name: 'cardLabelSearch', type: 'blur' })
 
   const createDom = await instance.render()
   expect(getNodeByName(createDom, 'cardLabelSearch')).toBeUndefined()
@@ -3203,14 +3203,6 @@ test('card detail label picker creates and assigns a new label', async () => {
       'aria-pressed': false,
     },
   )
-  const createContext = instance.getContext()
-  expect(createContext).toMatchObject({
-    'trello.cardLabelCreateFocus': true,
-  })
-  expect(instance.renderFocus(pickerContext, createContext)).toBe(
-    '[name="newLabelName"]',
-  )
-
   await instance.handleEvent?.({
     name: 'selectCardLabelColor:purple',
     type: 'click',

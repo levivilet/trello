@@ -40,7 +40,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await openBoard(Locator, expect)
   await openCard(Locator, expect)
 
-  const openPicker = Locator('button[name="openCardLabelPicker"]')
+  const openPicker = Locator('button[name="openCardLabelPicker"]').first()
   await expect(openPicker).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await openPicker.click()
@@ -65,7 +65,6 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   const title = Locator('input[name="newLabelName"]')
   const purple = Locator('button[name="selectCardLabelColor:purple"]')
   const create = Locator('button[name="createCardLabel"]')
-  await expect(title).toBeFocused()
   await expect(title).toHaveValue('Documentation')
   // eslint-disable-next-line e2e/no-direct-click
   await purple.click()

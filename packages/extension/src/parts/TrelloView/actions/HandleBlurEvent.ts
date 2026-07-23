@@ -145,6 +145,9 @@ export const handleBlurEvent = async (
     return
   }
   if (event.name === 'cardLabelSearch') {
+    if (context.state.cardLabelCreateOpen) {
+      return
+    }
     closeCardLabelPicker(context)
     return
   }
