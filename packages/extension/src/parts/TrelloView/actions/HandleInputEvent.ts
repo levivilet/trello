@@ -3,7 +3,7 @@ import type {
   TrelloViewActionContext,
   TrelloViewState,
 } from '../state/TrelloViewState.ts'
-import { moveCardToList } from './MoveCardToList.ts'
+import { moveCardToList } from './MoveCardToList/MoveCardToList.ts'
 
 export const handleInputEvent = async (
   context: TrelloViewActionContext,
