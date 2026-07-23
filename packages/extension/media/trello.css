@@ -700,7 +700,6 @@ button.TrelloSearchResult:hover {
 
 .TrelloCardDetailPanel {
   box-sizing: border-box;
-  position: relative;
   display: flex;
   flex: 0 0 var(--TrelloCardDetailWidth, 360px);
   flex-direction: column;
@@ -716,10 +715,7 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloCardDetailResizeSash {
-  position: absolute;
-  inset-block: 0;
-  left: 0;
-  width: 8px;
+  flex: 0 0 8px;
   contain: strict;
   cursor: ew-resize;
 }

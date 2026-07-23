@@ -149,6 +149,29 @@ const getDirectChildClassNamesByName = (
   return classNames
 }
 
+const getDirectChildClassNamesByClassName = (
+  dom: readonly any[],
+  parentClassName: string,
+): readonly string[] => {
+  const index = dom.findIndex((node) => {
+    return node.className === parentClassName
+  })
+  if (index === -1) {
+    return []
+  }
+  const classNames: string[] = []
+  let childIndex = index + 1
+  const childCount = dom[index]?.childCount || 0
+  for (let i = 0; i < childCount; i++) {
+    const className = dom[childIndex]?.className
+    if (typeof className === 'string') {
+      classNames.push(className)
+    }
+    childIndex = getNodeEndIndex(dom, childIndex)
+  }
+  return classNames
+}
+
 const hasNode = (
   dom: readonly any[],
   predicate: (node: any) => boolean,
@@ -2635,6 +2658,13 @@ test('card detail panel resizes from the left sash', async () => {
     className: 'TrelloCardDetailResizeSash',
     onPointerDown: 'handlePointerDown',
   })
+  expect(
+    getDirectChildClassNamesByClassName(initialDom, 'TrelloBoardDetailContent'),
+  ).toEqual([
+    'TrelloLists',
+    'TrelloCardDetailResizeSash',
+    'TrelloCardDetailPanel',
+  ])
   expect(getNodeByName(initialDom, 'cardDetail')?.style).toBe(
     '--TrelloCardDetailWidth: 360px',
   )
