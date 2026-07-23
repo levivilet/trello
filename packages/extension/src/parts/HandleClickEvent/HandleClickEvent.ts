@@ -11,6 +11,10 @@ import {
   submitComment,
 } from '../AddComment/AddComment.ts'
 import { startAddList } from '../AddList/AddList.ts'
+import {
+  closeBoardFilter,
+  openBoardFilter,
+} from '../BoardFilter/BoardFilter.ts'
 import { cancelCardDescriptionEdit } from '../CancelCardDescriptionEdit/CancelCardDescriptionEdit.ts'
 import {
   addCardLabel,
@@ -79,6 +83,9 @@ export const handleClickEvent = async (
     case 'cancelWriteComment':
       cancelWriteComment(context)
       return
+    case 'closeBoardFilter':
+      closeBoardFilter(context)
+      return
     case 'closeCardDetail':
       closeCardDetail(context)
       return
@@ -99,6 +106,9 @@ export const handleClickEvent = async (
       return
     case 'logout':
       await logout(context)
+      return
+    case 'openBoardFilter':
+      openBoardFilter(context)
       return
     case 'openCardLabelCreate':
       openCardLabelCreate(context)

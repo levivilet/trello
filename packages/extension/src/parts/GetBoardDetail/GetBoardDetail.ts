@@ -24,7 +24,7 @@ const listParams = {
 const cardsParams = {
   attachment_fields: 'name,url,mimeType,previews',
   attachments: 'cover',
-  fields: 'name,url,idBoard,idList,badges,cover,labels',
+  fields: 'name,desc,url,idBoard,idList,badges,cover,labels',
 } as const
 
 export const deleteCachedBoardLists = async (

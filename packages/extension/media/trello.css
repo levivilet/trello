@@ -427,8 +427,108 @@ button.TrelloSearchResult:hover {
 }
 
 .TrelloBoardDetail {
+  position: relative;
   min-height: 0;
   overflow: hidden;
+}
+
+.TrelloBoardHeader {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  contain: content;
+}
+
+.TrelloBoardFilterButton {
+  min-width: 76px;
+  color: var(--TrelloForegroundStrong);
+  background: var(--TrelloSurface);
+  border-color: var(--TrelloBorder);
+}
+
+.TrelloBoardFilterButtonActive {
+  color: var(--TrelloButtonForeground);
+  background: var(--TrelloButtonBackground);
+  border-color: transparent;
+}
+
+.TrelloBoardFilterPopup {
+  position: absolute;
+  z-index: 10;
+  top: 52px;
+  right: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(360px, calc(100% - 32px));
+  contain: content;
+  padding: 12px;
+  color: var(--TrelloForeground);
+  background: var(--TrelloSurface);
+  border: 1px solid var(--TrelloBorder);
+  border-radius: 8px;
+  box-shadow:
+    0 4px 8px var(--TrelloShadow),
+    0 12px 32px var(--TrelloShadow);
+}
+
+.TrelloBoardFilterPopupHeader {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  contain: content;
+}
+
+.TrelloBoardFilterPopupTitle {
+  flex: 1 1 auto;
+  padding-left: 28px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--TrelloForegroundStrong);
+}
+
+.TrelloBoardFilterCloseButton {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  min-height: 28px;
+  padding: 0;
+  color: var(--TrelloForegroundMuted);
+  background: transparent;
+  border-color: transparent;
+}
+
+.TrelloBoardFilterCloseButton:hover,
+.TrelloBoardFilterCloseButton:focus {
+  color: var(--TrelloForegroundStrong);
+  background: var(--TrelloHoverBackground);
+  outline: none;
+}
+
+.TrelloBoardFilterField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  contain: content;
+}
+
+.TrelloBoardFilterLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--TrelloForegroundStrong);
+}
+
+.TrelloBoardFilterHint {
+  contain: content;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--TrelloForegroundMuted);
 }
 
 .TrelloBoardDetailWithBackground {

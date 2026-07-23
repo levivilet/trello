@@ -11,7 +11,9 @@ import type {
 import type { TrelloViewState } from '../TrelloViewState/TrelloViewState.ts'
 import { getBoardBackgroundClassName } from '../BoardBackground/BoardBackground.ts'
 import * as DomEventListenerFunctions from '../DomEventListenerFunctions/DomEventListenerFunctions.ts'
+import { filterListCards } from '../FilterBoardCards/FilterBoardCards.ts'
 import * as MergeClassNames from '../MergeClassNames/MergeClassNames.ts'
+import { renderBoardFilter } from '../RenderBoardFilter/RenderBoardFilter.ts'
 import { renderCardDetailPanel } from '../RenderCardDetailPanel/RenderCardDetailPanel.ts'
 import { renderCards } from '../RenderCards/RenderCards.ts'
 import { renderError } from '../RenderError/RenderError.ts'
@@ -208,8 +210,9 @@ const renderList = (
   state: Readonly<TrelloViewState>,
   list: Readonly<TrelloList>,
 ): readonly VirtualDomNode[] => {
-  const { baseUrl, coverImageUrls } = state
-  const cards = renderCards(baseUrl, coverImageUrls, list.cards)
+  const { baseUrl, coverImageUrls, draftBoardFilter } = state
+  const filteredList = filterListCards(list, draftBoardFilter)
+  const cards = renderCards(baseUrl, coverImageUrls, filteredList.cards)
   return [
     {
       childCount: 3,
@@ -223,9 +226,9 @@ const renderList = (
       role: AriaRoles.None,
       type: VirtualDomElements.Div,
     },
-    ...renderListHeader(state, list),
+    ...renderListHeader(state, filteredList),
     {
-      childCount: Math.max(1, list.cards.length),
+      childCount: Math.max(1, filteredList.cards.length),
       className: 'TrelloCards',
       type: VirtualDomElements.Div,
     },
@@ -278,18 +281,20 @@ export const renderBoardDetail = (
   state: Readonly<TrelloViewState>,
   detail: Readonly<TrelloBoardDetail>,
 ): readonly VirtualDomNode[] => {
-  const { boardBackgroundEnabled, error } = state
+  const { boardBackgroundEnabled, boardFilterOpen, error } = state
   const content = renderBoardDetailContent(state, detail)
+  const filter = renderBoardFilter(state)
   const errorDom = renderError(error)
   return [
     {
-      childCount: 1 + (errorDom.length > 0 ? 1 : 0),
+      childCount: 2 + (boardFilterOpen ? 1 : 0) + (errorDom.length > 0 ? 1 : 0),
       className: getBoardBackgroundClassName(
         detail.board,
         boardBackgroundEnabled,
       ),
       type: VirtualDomElements.Div,
     },
+    ...filter,
     ...content,
     ...errorDom,
   ]

@@ -53,6 +53,12 @@ export const activate = async (): Promise<void> => {
     id: 'trello.closeCardDetail',
   })
   registerCommand({
+    execute() {
+      return TrelloView.closeBoardFilterActiveTrelloViewInstance()
+    },
+    id: 'trello.closeBoardFilter',
+  })
+  registerCommand({
     execute(cardId: string) {
       return TrelloView.openCardActiveTrelloViewInstance(cardId)
     },
