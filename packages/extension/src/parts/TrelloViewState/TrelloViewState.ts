@@ -36,6 +36,7 @@ export interface TrelloViewState {
   baseUrl: string
   boardBackgroundEnabled: boolean
   boardDetail: TrelloBoardDetail | undefined
+  boardFilterOpen: boolean
   boardLabels: readonly TrelloLabel[]
   boardLabelsLoaded: boolean
   boardLabelsLoading: boolean
@@ -55,6 +56,7 @@ export interface TrelloViewState {
   coverImageUrls: Readonly<Record<string, string>>
   credentials: TrelloCredentials | undefined
   draftApiKey: string
+  draftBoardFilter: string
   draftCardDescription: string
   draftCardTitle: string
   draftComment: string

@@ -63,6 +63,7 @@ import { createTrelloImageCache } from '../TrelloImageCache/TrelloImageCache.ts'
 import {
   contextKeyCardDescriptionFocus,
   contextKeyCardLabelPickerFocus,
+  contextKeyBoardFilterFocus,
   contextKeyNewCardInputFocus,
   contextKeyNewListInputFocus,
   updateContext,
@@ -514,6 +515,9 @@ export const createInstance = async (
       oldContext: Readonly<Record<string, boolean>>,
       newContext: Readonly<Record<string, boolean>>,
     ): string {
+      if (becameActive(oldContext, newContext, contextKeyBoardFilterFocus)) {
+        return '[name="boardFilter"]'
+      }
       if (
         becameActive(oldContext, newContext, contextKeyCardLabelPickerFocus)
       ) {

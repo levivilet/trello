@@ -61,6 +61,10 @@ export const description = (): string => getString(UiStrings.Description)
 export const edit = (): string => getString(UiStrings.Edit)
 export const enterCardTitle = (): string => getString(UiStrings.EnterCardTitle)
 export const enterListTitle = (): string => getString(UiStrings.EnterListTitle)
+export const filter = (): string => getString(UiStrings.Filter)
+export const filterCards = (): string => getString(UiStrings.FilterCards)
+export const filterCardsHint = (): string =>
+  getString(UiStrings.FilterCardsHint)
 export const images = (): string => getString(UiStrings.Images)
 export const imageCouldNotBeLoaded = (): string =>
   getString(UiStrings.ImageCouldNotBeLoaded)
@@ -69,6 +73,7 @@ export const labels = (): string => getString(UiStrings.Labels)
 export const labelTitle = (): string => getString(UiStrings.LabelTitle)
 export const labelTitleRequired = (): string =>
   getString(UiStrings.LabelTitleRequired)
+export const keyword = (): string => getString(UiStrings.Keyword)
 export const list = (): string => getString(UiStrings.List)
 export const listTitleRequired = (): string =>
   getString(UiStrings.ListTitleRequired)
