@@ -816,7 +816,18 @@ test('connect loads boards and clicking board loads detail', async () => {
   const listCardCountIndex = detailDom.indexOf(listCardCount)
   expect(detailDom[listCardCountIndex + 1]?.text).toBe('3')
   expect(
-    hasDirectChildClass(detailDom, 'TrelloListHeader', 'TrelloListTitleInput'),
+    hasDirectChildClass(
+      detailDom,
+      'TrelloListHeader',
+      'TrelloListTitleInputWrapper',
+    ),
+  ).toBe(true)
+  expect(
+    hasDirectChildClass(
+      detailDom,
+      'TrelloListTitleInputWrapper',
+      'TrelloListTitleInput',
+    ),
   ).toBe(true)
   expect(
     hasDirectChildClass(detailDom, 'TrelloListHeader', 'TrelloListCardCount'),

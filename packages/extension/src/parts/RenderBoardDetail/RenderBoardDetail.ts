@@ -22,18 +22,25 @@ import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
 const renderListTitleInput = (
   state: Readonly<TrelloViewState>,
   list: Readonly<TrelloList>,
-): VirtualDomNode => {
+): readonly VirtualDomNode[] => {
   const { draftListTitles } = state
-  return {
-    childCount: 0,
-    className: 'TrelloListTitleInput',
-    name: `listTitle:${list.id}`,
-    onBlur: DomEventListenerFunctions.HandleBlur,
-    onFocus: DomEventListenerFunctions.HandleFocus,
-    onInput: DomEventListenerFunctions.HandleInput,
-    type: VirtualDomElements.Input,
-    value: draftListTitles[list.id] ?? list.name,
-  }
+  return [
+    {
+      childCount: 1,
+      className: 'TrelloListTitleInputWrapper',
+      type: VirtualDomElements.Div,
+    },
+    {
+      childCount: 0,
+      className: 'TrelloListTitleInput',
+      name: `listTitle:${list.id}`,
+      onBlur: DomEventListenerFunctions.HandleBlur,
+      onFocus: DomEventListenerFunctions.HandleFocus,
+      onInput: DomEventListenerFunctions.HandleInput,
+      type: VirtualDomElements.Input,
+      value: draftListTitles[list.id] ?? list.name,
+    },
+  ]
 }
 
 const renderListHeader = (
@@ -46,7 +53,7 @@ const renderListHeader = (
       className: 'TrelloListHeader',
       type: VirtualDomElements.Div,
     },
-    renderListTitleInput(state, list),
+    ...renderListTitleInput(state, list),
     {
       childCount: 1,
       className: 'TrelloListCardCount',
