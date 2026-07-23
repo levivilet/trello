@@ -5,6 +5,17 @@ import {
 } from '@lvce-editor/virtual-dom-worker'
 import * as DomEventListenerFunctions from '../../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 
+const fieldNode: VirtualDomNode = {
+  childCount: 2,
+  className: 'TrelloField',
+  type: VirtualDomElements.Div,
+}
+
+const labelNode: VirtualDomNode = {
+  childCount: 1,
+  type: VirtualDomElements.Label,
+}
+
 export const renderField = (
   label: string,
   name: string,
@@ -12,15 +23,8 @@ export const renderField = (
   inputType?: string,
 ): readonly VirtualDomNode[] => {
   return [
-    {
-      childCount: 2,
-      className: 'TrelloField',
-      type: VirtualDomElements.Div,
-    },
-    {
-      childCount: 1,
-      type: VirtualDomElements.Label,
-    },
+    fieldNode,
+    labelNode,
     text(label),
     {
       childCount: 0,

@@ -4,16 +4,15 @@ import {
   type VirtualDomNode,
 } from '@lvce-editor/virtual-dom-worker'
 
+const errorNode: VirtualDomNode = {
+  childCount: 1,
+  className: 'TrelloError',
+  type: VirtualDomElements.Div,
+}
+
 export const renderError = (error: string): readonly VirtualDomNode[] => {
   if (!error) {
     return []
   }
-  return [
-    {
-      childCount: 1,
-      className: 'TrelloError',
-      type: VirtualDomElements.Div,
-    },
-    text(error),
-  ]
+  return [errorNode, text(error)]
 }

@@ -30,8 +30,8 @@ import {
   getLabelText,
   labelColors,
 } from '../LabelHelpers.ts'
-import { renderMarkdown } from './RenderMarkdown.ts'
 import { renderListTitle } from './RenderListTitle/RenderListTitle.ts'
+import { renderMarkdown } from './RenderMarkdown.ts'
 
 interface VirtualDomSegment {
   readonly childCount: number
