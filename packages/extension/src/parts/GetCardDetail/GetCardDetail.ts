@@ -9,6 +9,7 @@ import {
   deleteCachedJson,
   readCachedJson,
   requestJson,
+  requestJsonBatch,
 } from '../RequestJson/RequestJson.ts'
 
 const cardParams = {
@@ -25,6 +26,33 @@ const commentsParams = {
   memberCreator: 'true',
   memberCreator_fields: 'avatarHash,avatarUrl,fullName,initials,username',
 } as const
+
+type TrelloCardDetailBatchResult = readonly [
+  TrelloCard,
+  TrelloCardDetail['attachments'],
+  TrelloCardDetail['comments'],
+]
+
+const getBatchCard = async (
+  result: Readonly<Promise<TrelloCardDetailBatchResult>>,
+): Promise<TrelloCard> => {
+  const values = await result
+  return values[0]
+}
+
+const getBatchAttachments = async (
+  result: Readonly<Promise<TrelloCardDetailBatchResult>>,
+): Promise<TrelloCardDetail['attachments']> => {
+  const values = await result
+  return values[1]
+}
+
+const getBatchComments = async (
+  result: Readonly<Promise<TrelloCardDetailBatchResult>>,
+): Promise<TrelloCardDetail['comments']> => {
+  const values = await result
+  return values[2]
+}
 
 export const readCachedCardDetail = async (
   cache: TrelloApiCache | undefined,
@@ -135,15 +163,76 @@ export const getCardDetail = async (
   card: TrelloCard,
   credentials: TrelloCredentials,
   cache?: TrelloApiCache,
+  batchRequestsEnabled = false,
 ): Promise<TrelloCardDetail> => {
-  const [detailCard, attachments, comments] = await Promise.all([
-    getCardDetailCard(fetchLike, card, credentials, cache),
-    getCardDetailAttachments(fetchLike, card, credentials, cache),
-    getCardDetailComments(fetchLike, card, credentials, cache),
-  ])
-  return {
+  const {
     attachments,
     card: detailCard,
     comments,
+  } = getCardDetailParts(
+    fetchLike,
+    card,
+    credentials,
+    cache,
+    batchRequestsEnabled,
+  )
+  const [resolvedCard, resolvedAttachments, resolvedComments] =
+    await Promise.all([detailCard, attachments, comments])
+  return {
+    attachments: resolvedAttachments,
+    card: resolvedCard,
+    comments: resolvedComments,
+  }
+}
+
+export const getCardDetailParts = (
+  fetchLike: FetchLike,
+  card: TrelloCard,
+  credentials: TrelloCredentials,
+  cache?: TrelloApiCache,
+  batchRequestsEnabled = false,
+): {
+  readonly attachments: Promise<TrelloCardDetail['attachments']>
+  readonly card: Promise<TrelloCard>
+  readonly comments: Promise<TrelloCardDetail['comments']>
+} => {
+  if (!batchRequestsEnabled) {
+    const detailCard = getCardDetailCard(fetchLike, card, credentials, cache)
+    const attachments = getCardDetailAttachments(
+      fetchLike,
+      card,
+      credentials,
+      cache,
+    )
+    const comments = getCardDetailComments(fetchLike, card, credentials, cache)
+    return {
+      attachments,
+      card: detailCard,
+      comments,
+    }
+  }
+  const result = requestJsonBatch<TrelloCardDetailBatchResult>(
+    fetchLike,
+    [
+      {
+        params: cardParams,
+        path: `/cards/${card.id}`,
+      },
+      {
+        params: attachmentsParams,
+        path: `/cards/${card.id}/attachments`,
+      },
+      {
+        params: commentsParams,
+        path: `/cards/${card.id}/actions`,
+      },
+    ],
+    credentials,
+    cache,
+  )
+  return {
+    attachments: getBatchAttachments(result),
+    card: getBatchCard(result),
+    comments: getBatchComments(result),
   }
 }

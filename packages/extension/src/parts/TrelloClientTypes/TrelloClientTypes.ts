@@ -123,6 +123,10 @@ export interface TrelloRequestInit {
   readonly method?: string
 }
 
+export interface TrelloClientOptions {
+  readonly readBatchRequestsEnabled?: () => Promise<boolean>
+}
+
 export type FetchLike = (
   input: string,
   init?: TrelloRequestInit,
