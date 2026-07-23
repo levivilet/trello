@@ -16,6 +16,13 @@ import { renderCardListSelect } from '../RenderCardListSelect/RenderCardListSele
 import { renderListTitle } from '../RenderListTitle/RenderListTitle.ts'
 import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
 
+const renderCardLink = (url: string | undefined): readonly VirtualDomNode[] => {
+  if (!url) {
+    return []
+  }
+  return renderCardDetailLink(url)
+}
+
 export const renderCardDetailPanel = (
   state: Readonly<TrelloViewState>,
 ): readonly VirtualDomNode[] => {
@@ -75,6 +82,6 @@ export const renderCardDetailPanel = (
     ...renderCardDetailComments(cardCommentsLoading, comments),
     ...renderCardCommentComposer(state),
     ...images.dom,
-    ...(card.url ? renderCardDetailLink(card.url) : []),
+    ...renderCardLink(card.url),
   ]
 }

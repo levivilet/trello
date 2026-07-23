@@ -183,6 +183,7 @@ const findLink = (value: string): InlineMatch | undefined => {
             childCount: children.childCount,
             className: 'TrelloMarkdownLink',
             href,
+            rel: 'noopener noreferrer',
             target: '_blank',
             type: VirtualDomElements.A,
           },

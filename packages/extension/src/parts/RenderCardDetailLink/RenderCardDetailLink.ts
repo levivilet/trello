@@ -13,6 +13,7 @@ export const renderCardDetailLink = (
       childCount: 1,
       className: 'TrelloCardDetailLink',
       href: url,
+      rel: 'noopener noreferrer',
       target: '_blank',
       type: VirtualDomElements.A,
     },
