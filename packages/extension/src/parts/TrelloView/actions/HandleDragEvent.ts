@@ -4,7 +4,7 @@ import type {
   TrelloViewState,
 } from '../state/TrelloViewState.ts'
 import { findBoardCard } from './FindBoardCard.ts'
-import { moveCardToList } from './MoveCardToList.ts'
+import { moveCardToList } from './MoveCardToList/MoveCardToList.ts'
 
 const cardPrefix = 'card:'
 const listPrefix = 'list:'

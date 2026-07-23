@@ -1,80 +1,14 @@
-import type {
-  TrelloCard,
-  TrelloCardMove,
-} from '../../TrelloTypes/TrelloTypes.ts'
+import type { TrelloCardMove } from '../../../TrelloTypes/TrelloTypes.ts'
 import type {
   TrelloViewActionContext,
   TrelloViewState,
-} from '../state/TrelloViewState.ts'
-import { getErrorMessage } from '../GetErrorMessage.ts'
-import { isSameJson } from './CacheFirstHelpers.ts'
-import { findBoardCard } from './FindBoardCard.ts'
-
-const getCardListId = (
-  state: Readonly<TrelloViewState>,
-  card: Readonly<TrelloCard>,
-): string => {
-  if (card.idList) {
-    return card.idList
-  }
-  const lists = state.boardDetail?.lists || []
-  const list = lists.find((item) => {
-    return item.cards.some((listCard) => {
-      return listCard.id === card.id
-    })
-  })
-  return list?.id || ''
-}
-
-const moveBoardDetailCard = (
-  state: Readonly<TrelloViewState>,
-  card: Readonly<TrelloCard>,
-  targetListId: string,
-  position: TrelloCardMove['pos'],
-): void => {
-  const mutableState = state as TrelloViewState
-  if (!mutableState.boardDetail) {
-    return
-  }
-  mutableState.boardDetail = {
-    ...mutableState.boardDetail,
-    lists: mutableState.boardDetail.lists.map((list) => {
-      const cardsWithoutMoved = list.cards.filter((item) => {
-        return item.id !== card.id
-      })
-      if (list.id !== targetListId) {
-        return {
-          ...list,
-          cards: cardsWithoutMoved,
-        }
-      }
-      return {
-        ...list,
-        cards:
-          position === 'top'
-            ? [card, ...cardsWithoutMoved]
-            : [...cardsWithoutMoved, card],
-      }
-    }),
-  }
-}
-
-const updateSelectedCard = (
-  state: Readonly<TrelloViewState>,
-  card: Readonly<TrelloCard>,
-): void => {
-  const mutableState = state as TrelloViewState
-  if (mutableState.selectedCardDetail?.card.id !== card.id) {
-    return
-  }
-  mutableState.selectedCardDetail = {
-    ...mutableState.selectedCardDetail,
-    card: {
-      ...mutableState.selectedCardDetail.card,
-      ...card,
-    },
-  }
-}
+} from '../../state/TrelloViewState.ts'
+import { getErrorMessage } from '../../GetErrorMessage.ts'
+import { isSameJson } from '../CacheFirstHelpers.ts'
+import { findBoardCard } from '../FindBoardCard.ts'
+import { getCardListId } from '../GetCardListId/GetCardListId.ts'
+import { moveBoardDetailCard } from '../MoveBoardDetailCard/MoveBoardDetailCard.ts'
+import { updateSelectedCard } from '../UpdateSelectedCard/UpdateSelectedCard.ts'
 
 export const moveCardToList = async (
   context: TrelloViewActionContext,
