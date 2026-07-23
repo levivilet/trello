@@ -12,7 +12,7 @@ import type { TrelloViewState } from '../state/TrelloViewState.ts'
 import * as DomEventListenerFunctions from '../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../MergeClassNames/MergeClassNames.ts'
 import { getBoardBackgroundClassName } from './BoardBackground.ts'
-import { renderCardDetailPanel } from './RenderCardDetailPanel.ts'
+import { renderCardDetailPanel } from './RenderCardDetailPanel/RenderCardDetailPanel.ts'
 import { renderCards } from './RenderCards.ts'
 import { renderError } from './RenderError/RenderError.ts'
 
