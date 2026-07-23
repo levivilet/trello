@@ -529,6 +529,8 @@ test('renders auth inputs when unauthenticated', async () => {
   expect(hasLabelText(dom, 'API key')).toBe(true)
   expect(hasLabelText(dom, 'Token')).toBe(true)
   expect(getNodeByClass(dom, 'TrelloAuthForm')).toBeDefined()
+  expect(hasDirectChildClass(dom, 'TrelloAuthFields', 'TrelloField')).toBe(true)
+  expect(hasDirectChildClass(dom, 'TrelloAuthForm', 'TrelloField')).toBe(false)
   expect(getNodeByClass(dom, 'TrelloTitle')).toBeUndefined()
   const apiKeyInput = dom.find((node) => node.name === 'apiKey')
   const tokenInput = dom.find((node) => node.name === 'token')
