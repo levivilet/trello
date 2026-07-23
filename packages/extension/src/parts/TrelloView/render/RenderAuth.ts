@@ -1,13 +1,12 @@
 import type { VirtualDomNode } from '@lvce-editor/virtual-dom-worker'
 import type { TrelloViewState } from '../state/TrelloViewState.ts'
 import * as Dom from '../../VirtualDom/VirtualDom.ts'
-import { renderError, renderField, renderTitle } from './RenderShared.ts'
+import { renderError, renderField } from './RenderShared.ts'
 import { renderWelcome } from './RenderWelcome.ts'
 
 export const renderAuth = (
   state: Readonly<TrelloViewState>,
 ): readonly VirtualDomNode[] => {
-  const title = renderTitle('Trello')
   const apiKey = renderField('API key', 'apiKey', state.draftApiKey)
   const token = renderField('Token', 'token', state.draftToken, 'password')
   const connect = Dom.button(
@@ -15,7 +14,6 @@ export const renderAuth = (
     state.loading ? 'Connecting...' : 'Connect',
   )
   const form = Dom.div('TrelloAuthForm', [
-    title,
     apiKey,
     token,
     connect,
