@@ -1,7 +1,7 @@
 // cspell:ignore prefs
 
 import { expect, test } from '@jest/globals'
-import { createMemoryTrelloApiCache } from '../src/parts/TrelloClient/TrelloApiCache.ts'
+import { createMemoryTrelloApiCache } from '../src/parts/TrelloApiCache/TrelloApiCache.ts'
 import { createTrelloClient } from '../src/parts/TrelloClient/TrelloClient.ts'
 
 const validApiKey = 'abcdefghijklmnopqrstuvwxyz123456'

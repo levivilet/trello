@@ -1,5 +1,5 @@
 import type { TrelloCredentials } from '../TrelloTypes/TrelloTypes.ts'
-import { getCredentialFingerprint } from '../TrelloClient/TrelloApiCache.ts'
+import { getCredentialFingerprint } from '../TrelloApiCache/TrelloApiCache.ts'
 
 export interface TrelloImageCache {
   readonly dispose: () => void

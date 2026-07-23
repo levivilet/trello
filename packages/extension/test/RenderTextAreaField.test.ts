@@ -1,7 +1,7 @@
 import { expect, test } from '@jest/globals'
 import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import * as DomEventListenerFunctions from '../src/parts/DomEventListenerFunctions/DomEventListenerFunctions.ts'
-import { renderTextAreaField } from '../src/parts/TrelloView/render/RenderTextAreaField/RenderTextAreaField.ts'
+import { renderTextAreaField } from '../src/parts/RenderTextAreaField/RenderTextAreaField.ts'
 
 test('renders a labelled text area', () => {
   expect(renderTextAreaField('Description', 'description', 'Details')).toEqual([

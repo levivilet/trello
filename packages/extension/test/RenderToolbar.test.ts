@@ -4,7 +4,7 @@ import {
   VirtualDomElements,
   type VirtualDomNode,
 } from '@lvce-editor/virtual-dom-worker'
-import { renderToolbar } from '../src/parts/TrelloView/render/RenderToolbar/RenderToolbar.ts'
+import { renderToolbar } from '../src/parts/RenderToolbar/RenderToolbar.ts'
 
 test('renders an empty toolbar', () => {
   expect(renderToolbar([])).toEqual([

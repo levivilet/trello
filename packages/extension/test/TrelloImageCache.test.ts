@@ -1,6 +1,6 @@
 import { expect, test } from '@jest/globals'
 import type { TrelloCredentials } from '../src/parts/TrelloTypes/TrelloTypes.ts'
-import { getCredentialFingerprint } from '../src/parts/TrelloClient/TrelloApiCache.ts'
+import { getCredentialFingerprint } from '../src/parts/TrelloApiCache/TrelloApiCache.ts'
 import {
   createTrelloImageCache,
   testTrelloImageCacheName,

@@ -10,9 +10,9 @@ import type {
 import type {
   TrelloViewActionContext,
   TrelloViewState,
-} from '../src/parts/TrelloView/state/TrelloViewState.ts'
-import { moveCardToList } from '../src/parts/TrelloView/actions/MoveCardToList/MoveCardToList.ts'
-import { createInitialState } from '../src/parts/TrelloView/state/CreateInitialState.ts'
+} from '../src/parts/TrelloViewState/TrelloViewState.ts'
+import { createInitialState } from '../src/parts/CreateInitialState/CreateInitialState.ts'
+import { moveCardToList } from '../src/parts/MoveCardToList/MoveCardToList.ts'
 
 const credentials: TrelloCredentials = {
   apiKey: 'api-key',

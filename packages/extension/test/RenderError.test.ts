@@ -1,6 +1,6 @@
 import { expect, test } from '@jest/globals'
 import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
-import { renderError } from '../src/parts/TrelloView/render/RenderError/RenderError.ts'
+import { renderError } from '../src/parts/RenderError/RenderError.ts'
 
 test('returns no nodes when the error is empty', () => {
   expect(renderError('')).toEqual([])

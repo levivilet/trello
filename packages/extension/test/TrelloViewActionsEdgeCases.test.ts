@@ -11,48 +11,48 @@ import type {
 import type {
   TrelloViewActionContext,
   TrelloViewState,
-} from '../src/parts/TrelloView/state/TrelloViewState.ts'
-import { createMemoryCredentialStorage } from '../src/parts/CredentialStorage/CredentialStorage.ts'
-import { createMemoryCurrentBoardStorage } from '../src/parts/CurrentBoardStorage/CurrentBoardStorage.ts'
-import { createMockTrelloClient } from '../src/parts/MockTrelloClient/MockTrelloClient.ts'
-import { createMemoryRecentBoardStorage } from '../src/parts/RecentBoardStorage/RecentBoardStorage.ts'
-import { submitAddCard } from '../src/parts/TrelloView/actions/AddCard.ts'
+} from '../src/parts/TrelloViewState/TrelloViewState.ts'
+import { submitAddCard } from '../src/parts/AddCard/AddCard.ts'
+import {
+  startWriteComment,
+  submitComment,
+} from '../src/parts/AddComment/AddComment.ts'
+import { submitAddList } from '../src/parts/AddList/AddList.ts'
+import { cancelCardDescriptionEdit } from '../src/parts/CancelCardDescriptionEdit/CancelCardDescriptionEdit.ts'
 import {
   addCardLabel,
   closeCardLabelPicker,
   openCardLabelPicker,
-} from '../src/parts/TrelloView/actions/AddCardLabel.ts'
-import {
-  startWriteComment,
-  submitComment,
-} from '../src/parts/TrelloView/actions/AddComment.ts'
-import { submitAddList } from '../src/parts/TrelloView/actions/AddList.ts'
-import { cancelCardDescriptionEdit } from '../src/parts/TrelloView/actions/CancelCardDescriptionEdit.ts'
+} from '../src/parts/CardLabelPicker/CardLabelPicker.ts'
 import {
   createCardLabel,
   openCardLabelCreate,
-} from '../src/parts/TrelloView/actions/CreateCardLabel.ts'
-import { findBoardCard } from '../src/parts/TrelloView/actions/FindBoardCard.ts'
+} from '../src/parts/CreateCardLabel/CreateCardLabel.ts'
+import { createInitialState } from '../src/parts/CreateInitialState/CreateInitialState.ts'
+import { createMemoryCredentialStorage } from '../src/parts/CredentialStorage/CredentialStorage.ts'
+import { createMemoryCurrentBoardStorage } from '../src/parts/CurrentBoardStorage/CurrentBoardStorage.ts'
+import { findBoardCard } from '../src/parts/FindBoardCard/FindBoardCard.ts'
 import {
   handleDragLeaveEvent,
   handleDragOverEvent,
   handleDragStartEvent,
   handleDropEvent,
-} from '../src/parts/TrelloView/actions/HandleDragEvent.ts'
-import { handleFocusEvent } from '../src/parts/TrelloView/actions/HandleFocusEvent.ts'
-import { handleImageErrorEvent } from '../src/parts/TrelloView/actions/HandleImageErrorEvent.ts'
-import { handleInputEvent } from '../src/parts/TrelloView/actions/HandleInputEvent.ts'
-import { handleKeyDownEvent } from '../src/parts/TrelloView/actions/HandleKeyDownEvent.ts'
-import { loadBoards } from '../src/parts/TrelloView/actions/LoadBoards.ts'
+} from '../src/parts/HandleDragEvent/HandleDragEvent.ts'
+import { handleFocusEvent } from '../src/parts/HandleFocusEvent/HandleFocusEvent.ts'
+import { handleImageErrorEvent } from '../src/parts/HandleImageErrorEvent/HandleImageErrorEvent.ts'
+import { handleInputEvent } from '../src/parts/HandleInputEvent/HandleInputEvent.ts'
+import { handleKeyDownEvent } from '../src/parts/HandleKeyDownEvent/HandleKeyDownEvent.ts'
+import { loadBoards } from '../src/parts/LoadBoards/LoadBoards.ts'
+import { createMockTrelloClient } from '../src/parts/MockTrelloClient/MockTrelloClient.ts'
+import { createMemoryRecentBoardStorage } from '../src/parts/RecentBoardStorage/RecentBoardStorage.ts'
 import {
   resizeCardDetail,
   startResizeCardDetail,
   stopResizeCardDetail,
-} from '../src/parts/TrelloView/actions/ResizeCardDetail.ts'
-import { restoreCurrentBoard } from '../src/parts/TrelloView/actions/RestoreCurrentBoard.ts'
-import { updateBoardDetailCard } from '../src/parts/TrelloView/actions/UpdateBoardDetailCard.ts'
-import { updateBoardDetailList } from '../src/parts/TrelloView/actions/UpdateBoardDetailList.ts'
-import { createInitialState } from '../src/parts/TrelloView/state/CreateInitialState.ts'
+} from '../src/parts/ResizeCardDetail/ResizeCardDetail.ts'
+import { restoreCurrentBoard } from '../src/parts/RestoreCurrentBoard/RestoreCurrentBoard.ts'
+import { updateBoardDetailCard } from '../src/parts/UpdateBoardDetailCard/UpdateBoardDetailCard.ts'
+import { updateBoardDetailList } from '../src/parts/UpdateBoardDetailList/UpdateBoardDetailList.ts'
 
 const credentials: TrelloCredentials = {
   apiKey: 'abcdefghijklmnopqrstuvwxyz123456',

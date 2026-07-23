@@ -3,8 +3,8 @@ import type {
   TrelloBoardDetail,
   TrelloCard,
 } from '../src/parts/TrelloTypes/TrelloTypes.ts'
-import { getCardListId } from '../src/parts/TrelloView/actions/GetCardListId/GetCardListId.ts'
-import { createInitialState } from '../src/parts/TrelloView/state/CreateInitialState.ts'
+import { createInitialState } from '../src/parts/CreateInitialState/CreateInitialState.ts'
+import { getCardListId } from '../src/parts/GetCardListId/GetCardListId.ts'
 
 const card: TrelloCard = {
   id: 'card-1',

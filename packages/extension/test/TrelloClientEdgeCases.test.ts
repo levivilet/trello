@@ -1,30 +1,30 @@
 import { expect, test } from '@jest/globals'
-import type { TrelloApiCache } from '../src/parts/TrelloClient/TrelloApiCache.ts'
+import type { TrelloApiCache } from '../src/parts/TrelloApiCache/TrelloApiCache.ts'
 import type {
   FetchLike,
   TrelloResponse,
-} from '../src/parts/TrelloClient/TrelloClientTypes.ts'
+} from '../src/parts/TrelloClientTypes/TrelloClientTypes.ts'
 import type {
   TrelloBoard,
   TrelloCard,
   TrelloCredentials,
 } from '../src/parts/TrelloTypes/TrelloTypes.ts'
-import { readCachedBoardDetail } from '../src/parts/TrelloClient/operations/GetBoardDetail.ts'
-import { readCachedCardDetail } from '../src/parts/TrelloClient/operations/GetCardDetail.ts'
-import { moveCard } from '../src/parts/TrelloClient/operations/MoveCard.ts'
-import { readCachedSearch } from '../src/parts/TrelloClient/operations/Search.ts'
+import { readCachedBoardDetail } from '../src/parts/GetBoardDetail/GetBoardDetail.ts'
+import { readCachedCardDetail } from '../src/parts/GetCardDetail/GetCardDetail.ts'
+import { moveCard } from '../src/parts/MoveCard/MoveCard.ts'
 import {
   createTrelloRequestUrl,
   deleteCachedJson,
   readCachedJson,
   requestJson,
-} from '../src/parts/TrelloClient/RequestJson.ts'
+} from '../src/parts/RequestJson/RequestJson.ts'
+import { readCachedSearch } from '../src/parts/Search/Search.ts'
 import {
   createMemoryTrelloApiCache,
   createCacheStorageTrelloApiCache,
   createTrelloApiCacheRequestUrl,
   getCredentialFingerprint,
-} from '../src/parts/TrelloClient/TrelloApiCache.ts'
+} from '../src/parts/TrelloApiCache/TrelloApiCache.ts'
 import { createTrelloClient } from '../src/parts/TrelloClient/TrelloClient.ts'
 
 const credentials: TrelloCredentials = {

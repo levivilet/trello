@@ -1,0 +1,48 @@
+import {
+  text,
+  VirtualDomElements,
+  type VirtualDomNode,
+} from '@lvce-editor/virtual-dom-worker'
+import type { TrelloViewState } from '../TrelloViewState/TrelloViewState.ts'
+import * as DomEventListenerFunctions from '../DomEventListenerFunctions/DomEventListenerFunctions.ts'
+import * as MergeClassNames from '../MergeClassNames/MergeClassNames.ts'
+import { renderError } from '../RenderError/RenderError.ts'
+import { renderField } from '../RenderField/RenderField.ts'
+import { renderWelcome } from '../RenderWelcome/RenderWelcome.ts'
+import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
+
+export const renderAuth = (
+  state: Readonly<TrelloViewState>,
+): readonly VirtualDomNode[] => {
+  const { draftApiKey, draftToken, error, loading } = state
+  const errorDom = renderError(error)
+  return [
+    {
+      childCount: 2,
+      className: MergeClassNames.mergeClassNames('TrelloView', 'TrelloAuth'),
+      type: VirtualDomElements.Div,
+    },
+    {
+      childCount: 2 + (errorDom.length > 0 ? 1 : 0),
+      className: 'TrelloAuthForm',
+      type: VirtualDomElements.Div,
+    },
+    {
+      childCount: 2,
+      className: 'TrelloAuthFields',
+      type: VirtualDomElements.Div,
+    },
+    ...renderField(TrelloStrings.apiKey(), 'apiKey', draftApiKey),
+    ...renderField(TrelloStrings.token(), 'token', draftToken, 'password'),
+    {
+      childCount: 1,
+      className: 'TrelloButton',
+      name: 'connect',
+      onClick: DomEventListenerFunctions.HandleClick,
+      type: VirtualDomElements.Button,
+    },
+    text(loading ? TrelloStrings.connecting() : TrelloStrings.connect()),
+    ...errorDom,
+    ...renderWelcome(),
+  ]
+}

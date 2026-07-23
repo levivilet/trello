@@ -1,7 +1,7 @@
 import { expect, test } from '@jest/globals'
 import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import * as DomEventListenerFunctions from '../src/parts/DomEventListenerFunctions/DomEventListenerFunctions.ts'
-import { renderField } from '../src/parts/TrelloView/render/RenderField/RenderField.ts'
+import { renderField } from '../src/parts/RenderField/RenderField.ts'
 
 const expectedField = [
   {

@@ -1,9 +1,9 @@
 import { expect, test } from '@jest/globals'
 import type { TrelloCardDetail } from '../src/parts/TrelloTypes/TrelloTypes.ts'
-import { renderAuth } from '../src/parts/TrelloView/render/RenderAuth.ts'
-import { renderBoards } from '../src/parts/TrelloView/render/RenderBoards.ts'
-import { renderCardDetailPanel } from '../src/parts/TrelloView/render/RenderCardDetailPanel/RenderCardDetailPanel.ts'
-import { createInitialState } from '../src/parts/TrelloView/state/CreateInitialState.ts'
+import { createInitialState } from '../src/parts/CreateInitialState/CreateInitialState.ts'
+import { renderAuth } from '../src/parts/RenderAuth/RenderAuth.ts'
+import { renderBoards } from '../src/parts/RenderBoards/RenderBoards.ts'
+import { renderCardDetailPanel } from '../src/parts/RenderCardDetailPanel/RenderCardDetailPanel.ts'
 
 const imageUrl = 'https://example.com/attachment.png'
 
