@@ -224,6 +224,36 @@ test('cache storages read legacy relative cache keys when available', async () =
   })
 })
 
+test('cache storages ignore malformed persisted values', async () => {
+  const values: unknown[] = [
+    null,
+    {
+      apiKey: 42,
+      token: validToken,
+    },
+    42,
+    [null],
+    {
+      unexpected: true,
+    },
+  ]
+  const cache = {
+    async match(): Promise<Response> {
+      return Response.json(values.shift())
+    },
+  } as unknown as Cache
+
+  await withMockCaches(cache, async () => {
+    await expect(createCacheCredentialStorage().read()).resolves.toBeUndefined()
+    await expect(createCacheCredentialStorage().read()).resolves.toBeUndefined()
+    await expect(
+      createCacheCurrentBoardStorage().read(),
+    ).resolves.toBeUndefined()
+    await expect(createCacheRecentBoardStorage().read()).resolves.toEqual([])
+    await expect(createCacheRecentBoardStorage().read()).resolves.toEqual([])
+  })
+})
+
 test('cache storages ignore unsupported legacy relative cache keys', async () => {
   const matched: string[] = []
   const put: string[] = []

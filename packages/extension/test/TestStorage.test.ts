@@ -23,3 +23,20 @@ test('clearTrelloTestCaches deletes only test cache names', async () => {
   expect(deleted).toContain(testCredentialCacheName)
   expect(deleted).not.toContain(credentialCacheName)
 })
+
+test('clearTrelloTestCaches does nothing when Cache Storage is unavailable', async () => {
+  const originalCaches = globalThis.caches
+  Object.defineProperty(globalThis, 'caches', {
+    configurable: true,
+    value: undefined,
+  })
+
+  try {
+    await expect(clearTrelloTestCaches()).resolves.toBeUndefined()
+  } finally {
+    Object.defineProperty(globalThis, 'caches', {
+      configurable: true,
+      value: originalCaches,
+    })
+  }
+})
