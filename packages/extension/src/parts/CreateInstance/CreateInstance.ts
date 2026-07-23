@@ -143,6 +143,18 @@ const becameActive = (
   return !oldContext[key] && newContext[key]
 }
 
+const getSavedFilterValue = (savedState: unknown): string => {
+  if (
+    !savedState ||
+    typeof savedState !== 'object' ||
+    !('filterValue' in savedState) ||
+    typeof savedState.filterValue !== 'string'
+  ) {
+    return ''
+  }
+  return savedState.filterValue
+}
+
 export const backToBoardsActiveTrelloViewInstance = async (): Promise<void> => {
   await getActiveInstance()?.backToBoards()
 }
@@ -246,6 +258,9 @@ export const createInstance = async (
   }
 
   const initialize = async (rerender: boolean): Promise<void> => {
+    const filterValue = rerender
+      ? state.draftBoardFilter
+      : getSavedFilterValue(context?.state)
     const dependencies = dependencyState.factory()
     const {
       client,
@@ -283,6 +298,7 @@ export const createInstance = async (
       await loadBoards(viewContext, false)
       await restoreCurrentBoard(viewContext)
     }
+    state.draftBoardFilter = filterValue
     updateContext(state)
     if (rerender) {
       requestRerender()
@@ -565,6 +581,7 @@ export const createInstance = async (
       return {
         boardId: state.boardDetail?.board.id,
         cardId: state.selectedCardDetail?.card.id,
+        filterValue: state.draftBoardFilter,
         isAuthenticated: Boolean(state.credentials),
       }
     },

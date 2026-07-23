@@ -26,6 +26,7 @@ import type {
   TrelloListUpdate,
 } from '../src/parts/TrelloTypes/TrelloTypes.ts'
 import { createMemoryCredentialStorage } from '../src/parts/CredentialStorage/CredentialStorage.ts'
+import { createMemoryCurrentBoardStorage } from '../src/parts/CurrentBoardStorage/CurrentBoardStorage.ts'
 import { createMockTrelloClient } from '../src/parts/MockTrelloClient/MockTrelloClient.ts'
 import {
   createMemoryRecentBoardStorage,
@@ -625,6 +626,64 @@ test('dependency reload resets authenticated user state without clearing user cr
     token: validToken,
   })
   await instance.dispose?.()
+  resetTrelloViewDependencyFactory()
+})
+
+test('saves and restores the board filter through view state', async () => {
+  const boards = [{ id: 'board-1', name: 'Roadmap' }]
+  const currentBoardStorage = createMemoryCurrentBoardStorage('board-1')
+  const boardDetails = {
+    'board-1': {
+      board: boards[0],
+      lists: [
+        {
+          cards: [
+            { id: 'card-1', name: 'Ship filtering' },
+            { id: 'card-2', name: 'Document commands' },
+          ],
+          id: 'list-1',
+          name: 'Todo',
+        },
+      ],
+    },
+  }
+  setTrelloViewDependencyFactory(() => ({
+    client: createMockTrelloClient({ boardDetails, boards }),
+    currentBoardStorage,
+    recentStorage: createMemoryRecentBoardStorage(),
+    storage: createMemoryCredentialStorage({
+      apiKey: validApiKey,
+      token: validToken,
+    }),
+  }))
+
+  const instance = await view.create()
+  await instance.handleEvent?.({ name: 'openBoardFilter', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'boardFilter',
+    type: 'input',
+    value: 'filtering',
+  })
+  const savedState = instance.saveState?.()
+
+  expect(savedState).toEqual({
+    boardId: 'board-1',
+    cardId: undefined,
+    filterValue: 'filtering',
+    isAuthenticated: true,
+  })
+
+  await instance.dispose?.()
+  const restoredInstance = await view.create({ state: savedState } as any)
+  const dom = await restoredInstance.render()
+
+  expect(getSubtreeTextByNodeName(dom, 'list:list-1')).toContain(
+    'Ship filtering',
+  )
+  expect(getSubtreeTextByNodeName(dom, 'list:list-1')).not.toContain(
+    'Document commands',
+  )
+  await restoredInstance.dispose?.()
   resetTrelloViewDependencyFactory()
 })
 
