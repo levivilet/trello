@@ -11,7 +11,7 @@ export default [
       'github-actions/ci-versions': 'off',
       'github-actions/action-versions': 'off',
       'sonarjs/void-use': 'off',
-      'e2e/no-imports':'off'
+      'e2e/no-imports': 'off',
     },
   },
 ]
