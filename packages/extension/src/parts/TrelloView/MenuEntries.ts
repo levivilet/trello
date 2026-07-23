@@ -1,4 +1,5 @@
 import type { TrelloViewState } from './state/TrelloViewState.ts'
+import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
 
 export const MenuIdBoard = 'trello.board'
 export const MenuIdCard = 'trello.card'
@@ -15,31 +16,31 @@ export interface MenuEntry {
 const menuEntryRefreshBoards: MenuEntry = {
   command: 'trello.refreshBoards',
   id: 'refreshBoards',
-  label: 'Refresh Boards',
+  label: TrelloStrings.refreshBoards(),
 }
 
 const menuEntrySignOut: MenuEntry = {
   command: 'trello.logout',
   id: 'signOut',
-  label: 'Sign Out',
+  label: TrelloStrings.signOut(),
 }
 
 const menuEntryBackToBoards: MenuEntry = {
   command: 'trello.backToBoards',
   id: 'backToBoards',
-  label: 'Back to Boards',
+  label: TrelloStrings.backToBoards(),
 }
 
 const menuEntrySaveCard: MenuEntry = {
   command: 'trello.saveCardDetail',
   id: 'saveCard',
-  label: 'Save Card',
+  label: TrelloStrings.saveCard(),
 }
 
 const menuEntryCloseCard: MenuEntry = {
   command: 'trello.closeCardDetail',
   id: 'closeCard',
-  label: 'Close Card',
+  label: TrelloStrings.closeCard(),
 }
 
 const getAddCardEntry = (
@@ -53,7 +54,7 @@ const getAddCardEntry = (
       args: [state.contextMenuListId],
       command: 'trello.startAddCard',
       id: 'addCard',
-      label: 'Add Card',
+      label: TrelloStrings.addCardMenu(),
     },
   ]
 }
@@ -69,7 +70,7 @@ const getOpenCardEntry = (
       args: [state.contextMenuCardId],
       command: 'trello.openCard',
       id: 'openCard',
-      label: 'Open Card',
+      label: TrelloStrings.openCard(),
     },
   ]
 }

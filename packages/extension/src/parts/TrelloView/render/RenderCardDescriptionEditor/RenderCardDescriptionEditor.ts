@@ -6,6 +6,7 @@ import {
 import type { TrelloViewState } from '../../state/TrelloViewState.ts'
 import * as DomEventListenerFunctions from '../../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../../MergeClassNames/MergeClassNames.ts'
+import * as TrelloStrings from '../../../TrelloStrings/TrelloStrings.ts'
 import { renderCardDescriptionCancelButton } from '../RenderCardDescriptionCancelButton/RenderCardDescriptionCancelButton.ts'
 
 export const renderCardDescriptionEditor = (
@@ -28,7 +29,7 @@ export const renderCardDescriptionEditor = (
       onBlur: DomEventListenerFunctions.HandleBlur,
       onFocus: DomEventListenerFunctions.HandleFocus,
       onInput: DomEventListenerFunctions.HandleInput,
-      placeholder: 'Add a more detailed description...',
+      placeholder: TrelloStrings.addDetailedDescription(),
       type: VirtualDomElements.TextArea,
       value: draftCardDescription,
     },
@@ -47,7 +48,7 @@ export const renderCardDescriptionEditor = (
       onClick: DomEventListenerFunctions.HandleClick,
       type: VirtualDomElements.Button,
     },
-    text(savingCardDetail ? 'Saving...' : 'Save'),
+    text(savingCardDetail ? TrelloStrings.saving() : TrelloStrings.save()),
     ...renderCardDescriptionCancelButton(savingCardDetail),
   ]
 }

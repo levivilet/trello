@@ -4,6 +4,7 @@ import {
   type VirtualDomNode,
 } from '@lvce-editor/virtual-dom-worker'
 import type { TrelloComment } from '../../../TrelloTypes/TrelloTypes.ts'
+import * as TrelloStrings from '../../../TrelloStrings/TrelloStrings.ts'
 import { renderCardDetailComment } from '../RenderCardDetailComment/RenderCardDetailComment.ts'
 
 export const renderCardDetailComments = (
@@ -17,7 +18,7 @@ export const renderCardDetailComments = (
         className: 'TrelloCardDetailEmpty',
         type: VirtualDomElements.Div,
       },
-      text('Loading comments...'),
+      text(TrelloStrings.loadingComments()),
     ]
   }
   if (comments.length === 0) {
@@ -27,7 +28,7 @@ export const renderCardDetailComments = (
         className: 'TrelloCardDetailEmpty',
         type: VirtualDomElements.Div,
       },
-      text('No comments'),
+      text(TrelloStrings.noComments()),
     ]
   }
   return [

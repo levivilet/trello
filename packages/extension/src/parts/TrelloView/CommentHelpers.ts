@@ -1,4 +1,5 @@
 import type { TrelloComment } from '../TrelloTypes/TrelloTypes.ts'
+import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
 
 const getCommentDateFormatter = (() => {
   let commentDateFormatter: Intl.DateTimeFormat | undefined
@@ -37,12 +38,12 @@ export const getCommentAuthor = (comment: Readonly<TrelloComment>): string => {
   return (
     comment.memberCreator?.fullName?.trim() ||
     comment.memberCreator?.username?.trim() ||
-    'Unknown member'
+    TrelloStrings.unknownMember()
   )
 }
 
 export const getCommentText = (comment: Readonly<TrelloComment>): string => {
-  return comment.data.text?.trim() || 'No comment text'
+  return comment.data.text?.trim() || TrelloStrings.noCommentText()
 }
 
 export const getCommentInitials = (

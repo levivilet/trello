@@ -6,6 +6,7 @@ import {
 import type { TrelloViewState } from '../../state/TrelloViewState.ts'
 import * as DomEventListenerFunctions from '../../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../../MergeClassNames/MergeClassNames.ts'
+import * as TrelloStrings from '../../../TrelloStrings/TrelloStrings.ts'
 import { getLabelColorClassName, labelColors } from '../../LabelHelpers.ts'
 import { renderCardLabelColorChoice } from '../RenderCardLabelColorChoice/RenderCardLabelColorChoice.ts'
 import { renderCardLabelCreateHeader } from '../RenderCardLabelCreateHeader/RenderCardLabelCreateHeader.ts'
@@ -29,7 +30,7 @@ export const renderCardLabelCreate = (
       ),
       type: VirtualDomElements.Div,
     },
-    text(draftNewLabelName || 'Label title'),
+    text(draftNewLabelName || TrelloStrings.labelTitle()),
     {
       childCount: 5,
       className: 'TrelloCardLabelCreateFields',
@@ -39,7 +40,7 @@ export const renderCardLabelCreate = (
       childCount: 1,
       type: VirtualDomElements.Label,
     },
-    text('Title'),
+    text(TrelloStrings.title()),
     {
       autocomplete: 'off',
       childCount: 0,
@@ -48,7 +49,7 @@ export const renderCardLabelCreate = (
       name: 'newLabelName',
       onFocus: DomEventListenerFunctions.HandleFocus,
       onInput: DomEventListenerFunctions.HandleInput,
-      placeholder: 'Label title',
+      placeholder: TrelloStrings.labelTitle(),
       type: VirtualDomElements.Input,
       value: draftNewLabelName,
     },
@@ -56,7 +57,7 @@ export const renderCardLabelCreate = (
       childCount: 1,
       type: VirtualDomElements.Label,
     },
-    text('Select a color'),
+    text(TrelloStrings.selectAColor()),
     {
       childCount: labelColors.length,
       className: 'TrelloCardLabelColorGrid',
@@ -74,6 +75,6 @@ export const renderCardLabelCreate = (
       onClick: DomEventListenerFunctions.HandleClick,
       type: VirtualDomElements.Button,
     },
-    text(savingNewLabel ? 'Creating...' : 'Create'),
+    text(savingNewLabel ? TrelloStrings.creating() : TrelloStrings.create()),
   ]
 }

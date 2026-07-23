@@ -3,6 +3,7 @@ import type {
   TrelloViewActionContext,
   TrelloViewState,
 } from '../state/TrelloViewState.ts'
+import * as TrelloStrings from '../../TrelloStrings/TrelloStrings.ts'
 import { getErrorMessage } from '../GetErrorMessage.ts'
 
 const addCardPrefix = 'addCard:'
@@ -83,7 +84,7 @@ export const submitAddCard = async (
   const name = state.draftNewCardTitle.trim()
   state.addingCardListId = listId
   if (!name) {
-    state.error = 'Card title is required.'
+    state.error = TrelloStrings.cardTitleRequired()
     requestRerender()
     return
   }

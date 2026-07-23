@@ -3,6 +3,7 @@ import {
   VirtualDomElements,
   type VirtualDomNode,
 } from '@lvce-editor/virtual-dom-worker'
+import * as TrelloStrings from '../../../TrelloStrings/TrelloStrings.ts'
 
 export const renderCardDetailLink = (
   url: string,
@@ -15,6 +16,6 @@ export const renderCardDetailLink = (
       target: '_blank',
       type: VirtualDomElements.A,
     },
-    text('Open in Trello'),
+    text(TrelloStrings.openInTrello()),
   ]
 }

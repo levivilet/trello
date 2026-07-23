@@ -1,6 +1,7 @@
 import type { RecentBoardView } from '../RecentBoardStorage/RecentBoardStorage.ts'
 import type { TrelloBoard } from '../TrelloTypes/TrelloTypes.ts'
 import type { TrelloViewState } from './state/TrelloViewState.ts'
+import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
 
 export interface WorkspaceSection {
   readonly boards: readonly TrelloBoard[]
@@ -66,7 +67,7 @@ export const getWorkspaceName = (board: TrelloBoard): string => {
   return (
     board.organization?.displayName ||
     board.organization?.name ||
-    'Personal boards'
+    TrelloStrings.personalBoards()
   )
 }
 

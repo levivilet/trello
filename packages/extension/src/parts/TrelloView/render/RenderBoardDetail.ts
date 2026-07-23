@@ -11,6 +11,7 @@ import type {
 import type { TrelloViewState } from '../state/TrelloViewState.ts'
 import * as DomEventListenerFunctions from '../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../MergeClassNames/MergeClassNames.ts'
+import * as TrelloStrings from '../../TrelloStrings/TrelloStrings.ts'
 import { getBoardBackgroundClassName } from './BoardBackground.ts'
 import { renderCardDetailPanel } from './RenderCardDetailPanel/RenderCardDetailPanel.ts'
 import { renderCards } from './RenderCards.ts'
@@ -64,7 +65,7 @@ const renderAddCardButton = (
       onClick: DomEventListenerFunctions.HandleClick,
       type: VirtualDomElements.Button,
     },
-    text('+ Add a card'),
+    text(TrelloStrings.addACard()),
   ]
 }
 
@@ -92,16 +93,16 @@ const renderAddCardActions = (
       onPointerDown: DomEventListenerFunctions.HandleAddCardActionPointerDown,
       type: VirtualDomElements.Button,
     },
-    text('Add card'),
+    text(TrelloStrings.addCard()),
     {
-      'aria-label': 'Close',
+      'aria-label': TrelloStrings.close(),
       childCount: 1,
       className: 'TrelloAddCardCloseButton',
       inputType: 'button',
       name: 'cancelAddCard',
       onClick: DomEventListenerFunctions.HandleClick,
       onPointerDown: DomEventListenerFunctions.HandleAddCardActionPointerDown,
-      title: 'Close',
+      title: TrelloStrings.close(),
       type: VirtualDomElements.Button,
     },
     text('X'),
@@ -131,7 +132,7 @@ const renderAddCardInput = (
       onFocus: DomEventListenerFunctions.HandleFocus,
       onInput: DomEventListenerFunctions.HandleInput,
       onKeyDown: DomEventListenerFunctions.HandleKeyDown,
-      placeholder: 'Enter a title for this card',
+      placeholder: TrelloStrings.enterCardTitle(),
       rows: 2,
       type: VirtualDomElements.TextArea,
       value: draftNewCardTitle,
@@ -174,7 +175,7 @@ const renderAddListControl = (
         onFocus: DomEventListenerFunctions.HandleFocus,
         onInput: DomEventListenerFunctions.HandleInput,
         onKeyDown: DomEventListenerFunctions.HandleKeyDown,
-        placeholder: 'Enter list title',
+        placeholder: TrelloStrings.enterListTitle(),
         type: VirtualDomElements.Input,
         value: draftNewListTitle,
       },
@@ -188,7 +189,7 @@ const renderAddListControl = (
       onClick: DomEventListenerFunctions.HandleClick,
       type: VirtualDomElements.Button,
     },
-    text('Create New list'),
+    text(TrelloStrings.createNewList()),
   ]
 }
 
@@ -252,7 +253,7 @@ const renderBoardDetailContent = (
 ): readonly VirtualDomNode[] => {
   const { loading } = state
   if (loading) {
-    return [text('Loading board...')]
+    return [text(TrelloStrings.loadingBoard())]
   }
   const cardDetailPanel = renderCardDetailPanel(state)
   const cardDetailPanelChildCount = getCardDetailPanelChildCount(state)

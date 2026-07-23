@@ -3,6 +3,7 @@ import type {
   TrelloViewActionContext,
   TrelloViewState,
 } from '../state/TrelloViewState.ts'
+import * as TrelloStrings from '../../TrelloStrings/TrelloStrings.ts'
 import { getErrorMessage } from '../GetErrorMessage.ts'
 import { cancelAddCard } from './AddCard.ts'
 import { closeCardLabelPicker } from './AddCardLabel.ts'
@@ -26,7 +27,7 @@ const handleCardTitleBlur = async (
   state.editingCardTitle = false
   if (!name) {
     state.draftCardTitle = card.name
-    state.error = 'Card title is required.'
+    state.error = TrelloStrings.cardTitleRequired()
     requestRerender()
     return
   }
@@ -89,7 +90,7 @@ const handleListTitleBlur = async (
       ...state.draftListTitles,
       [listId]: list.name,
     }
-    state.error = 'List title is required.'
+    state.error = TrelloStrings.listTitleRequired()
     requestRerender()
     return
   }

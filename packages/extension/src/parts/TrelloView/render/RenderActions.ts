@@ -1,4 +1,5 @@
 import type { TrelloViewState } from '../state/TrelloViewState.ts'
+import * as TrelloStrings from '../../TrelloStrings/TrelloStrings.ts'
 
 export interface ViewAction {
   readonly command: string
@@ -9,19 +10,19 @@ export interface ViewAction {
 const actionBackToBoards: ViewAction = {
   command: 'trello.backToBoards',
   icon: 'ArrowLeft',
-  title: 'Back to Boards',
+  title: TrelloStrings.backToBoards(),
 }
 
 const actionRefreshBoards: ViewAction = {
   command: 'trello.refreshBoards',
   icon: 'Refresh',
-  title: 'Refresh Boards',
+  title: TrelloStrings.refreshBoards(),
 }
 
 const actionSignOut: ViewAction = {
   command: 'trello.logout',
   icon: 'Account',
-  title: 'Sign Out',
+  title: TrelloStrings.signOut(),
 }
 
 export const renderActions = (

@@ -5,6 +5,7 @@ import {
 } from '@lvce-editor/virtual-dom-worker'
 import type { TrelloViewState } from '../../state/TrelloViewState.ts'
 import * as DomEventListenerFunctions from '../../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
+import * as TrelloStrings from '../../../TrelloStrings/TrelloStrings.ts'
 import { renderCardCommentComposer } from '../RenderCardCommentComposer/RenderCardCommentComposer.ts'
 import { renderCardDescription } from '../RenderCardDescription/RenderCardDescription.ts'
 import { renderCardDetailComments } from '../RenderCardDetailComments/RenderCardDetailComments.ts'
@@ -33,8 +34,8 @@ export const renderCardDetailPanel = (
         className: 'TrelloCardDetailPanel',
         type: VirtualDomElements.Div,
       },
-      ...renderListTitle('Card details'),
-      text('Loading card...'),
+      ...renderListTitle(TrelloStrings.cardDetails()),
+      text(TrelloStrings.loadingCard()),
     ]
   }
   if (!selectedCardDetail) {
@@ -70,7 +71,7 @@ export const renderCardDetailPanel = (
     ...renderCardDetailLabels(state, card.labels),
     ...listSelect.dom,
     ...renderCardDescription(state, card.desc || ''),
-    ...renderListTitle('Comments'),
+    ...renderListTitle(TrelloStrings.comments()),
     ...renderCardDetailComments(cardCommentsLoading, comments),
     ...renderCardCommentComposer(state),
     ...images.dom,

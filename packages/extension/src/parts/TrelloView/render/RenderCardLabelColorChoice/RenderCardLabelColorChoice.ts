@@ -5,6 +5,7 @@ import {
 import type { TrelloViewState } from '../../state/TrelloViewState.ts'
 import * as DomEventListenerFunctions from '../../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../../MergeClassNames/MergeClassNames.ts'
+import * as TrelloStrings from '../../../TrelloStrings/TrelloStrings.ts'
 import { getLabelColorClassName } from '../../LabelHelpers.ts'
 
 export const renderCardLabelColorChoice = (
@@ -14,8 +15,9 @@ export const renderCardLabelColorChoice = (
   const { draftNewLabelColor, savingNewLabel } = state
   const selected = draftNewLabelColor === color
   const colorClassName = getLabelColorClassName(color)
+  const colorLabel = TrelloStrings.selectLabelColor(color.replace('_', ' '))
   return {
-    'aria-label': `Select ${color.replace('_', ' ')} label color`,
+    'aria-label': colorLabel,
     'aria-pressed': selected,
     childCount: 0,
     className: selected
@@ -31,7 +33,7 @@ export const renderCardLabelColorChoice = (
     disabled: savingNewLabel,
     name: `selectCardLabelColor:${color}`,
     onClick: DomEventListenerFunctions.HandleClick,
-    title: color.replace('_', ' '),
+    title: colorLabel,
     type: VirtualDomElements.Button,
   }
 }

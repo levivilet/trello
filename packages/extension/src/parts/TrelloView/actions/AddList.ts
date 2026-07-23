@@ -3,6 +3,7 @@ import type {
   TrelloViewActionContext,
   TrelloViewState,
 } from '../state/TrelloViewState.ts'
+import * as TrelloStrings from '../../TrelloStrings/TrelloStrings.ts'
 import { getErrorMessage } from '../GetErrorMessage.ts'
 
 const addListFormName = 'addList'
@@ -61,7 +62,7 @@ export const submitAddList = async (
   const name = state.draftNewListTitle.trim()
   state.addingList = true
   if (!name) {
-    state.error = 'List title is required.'
+    state.error = TrelloStrings.listTitleRequired()
     requestRerender()
     return true
   }

@@ -6,6 +6,7 @@ import {
 } from '@lvce-editor/virtual-dom-worker'
 import * as DomEventListenerFunctions from '../../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../../MergeClassNames/MergeClassNames.ts'
+import * as TrelloStrings from '../../../TrelloStrings/TrelloStrings.ts'
 import { renderMarkdown } from '../RenderMarkdown.ts'
 
 export const renderCardDescriptionPreview = (
@@ -25,7 +26,7 @@ export const renderCardDescriptionPreview = (
         role: AriaRoles.None,
         type: VirtualDomElements.Div,
       },
-      text('Add a more detailed description...'),
+      text(TrelloStrings.addDetailedDescription()),
     ]
   }
   const markdown = renderMarkdown(description)

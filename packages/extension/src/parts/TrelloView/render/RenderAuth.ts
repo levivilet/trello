@@ -6,6 +6,7 @@ import {
 import type { TrelloViewState } from '../state/TrelloViewState.ts'
 import * as DomEventListenerFunctions from '../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../MergeClassNames/MergeClassNames.ts'
+import * as TrelloStrings from '../../TrelloStrings/TrelloStrings.ts'
 import { renderError } from './RenderError/RenderError.ts'
 import { renderField } from './RenderField/RenderField.ts'
 import { renderWelcome } from './RenderWelcome.ts'
@@ -31,8 +32,8 @@ export const renderAuth = (
       className: 'TrelloAuthFields',
       type: VirtualDomElements.Div,
     },
-    ...renderField('API key', 'apiKey', draftApiKey),
-    ...renderField('Token', 'token', draftToken, 'password'),
+    ...renderField(TrelloStrings.apiKey(), 'apiKey', draftApiKey),
+    ...renderField(TrelloStrings.token(), 'token', draftToken, 'password'),
     {
       childCount: 1,
       className: 'TrelloButton',
@@ -40,7 +41,7 @@ export const renderAuth = (
       onClick: DomEventListenerFunctions.HandleClick,
       type: VirtualDomElements.Button,
     },
-    text(loading ? 'Connecting...' : 'Connect'),
+    text(loading ? TrelloStrings.connecting() : TrelloStrings.connect()),
     ...errorDom,
     ...renderWelcome(),
   ]

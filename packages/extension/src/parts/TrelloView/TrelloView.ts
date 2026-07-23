@@ -1,4 +1,5 @@
 import type { View } from '@lvce-editor/api'
+import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
 import { viewId } from './Constants.ts'
 import {
   type ActiveTrelloViewInstance,
@@ -30,12 +31,12 @@ export const view: TrelloView = {
   },
   create: createInstance,
   // @ts-ignore
-  displayName: 'Trello',
+  displayName: TrelloStrings.trello(),
   eventListeners: renderEventListeners(),
   icon: 'list-tree',
   id: viewId,
   kind: 'virtualDom',
-  title: 'Trello',
+  title: TrelloStrings.trello(),
 }
 
 export {

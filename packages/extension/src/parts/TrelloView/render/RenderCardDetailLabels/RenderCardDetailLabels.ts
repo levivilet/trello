@@ -7,6 +7,7 @@ import type { TrelloLabel } from '../../../TrelloTypes/TrelloTypes.ts'
 import type { TrelloViewState } from '../../state/TrelloViewState.ts'
 import * as DomEventListenerFunctions from '../../../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../../../MergeClassNames/MergeClassNames.ts'
+import * as TrelloStrings from '../../../TrelloStrings/TrelloStrings.ts'
 import { renderCardDetailLabel } from '../RenderCardDetailLabel/RenderCardDetailLabel.ts'
 import { renderCardLabelPicker } from '../RenderCardLabelPicker/RenderCardLabelPicker.ts'
 
@@ -58,7 +59,7 @@ export const renderCardDetailLabels = (
             onClick: DomEventListenerFunctions.HandleClick,
             type: VirtualDomElements.Button,
           },
-          text('Labels'),
+          text(TrelloStrings.labels()),
         ]),
     ...(cardLabelPickerOpen ? renderCardLabelPicker(state, labels) : []),
   ]

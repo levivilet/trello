@@ -1,7 +1,8 @@
 import type { TrelloLabel } from '../TrelloTypes/TrelloTypes.ts'
+import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
 
 export const getLabelText = (label: Readonly<TrelloLabel>): string => {
-  return label.name?.trim() || label.color?.trim() || 'Label'
+  return label.name?.trim() || label.color?.trim() || TrelloStrings.label()
 }
 
 export const labelColors = [

@@ -3,6 +3,7 @@ import {
   VirtualDomElements,
   type VirtualDomNode,
 } from '@lvce-editor/virtual-dom-worker'
+import * as TrelloStrings from '../../TrelloStrings/TrelloStrings.ts'
 import { trelloPowerUpsUrl } from '../Constants.ts'
 
 const renderWelcomeText = (value: string): readonly VirtualDomNode[] => {
@@ -75,27 +76,11 @@ const renderWelcomeSteps = (): readonly VirtualDomNode[] => {
     },
     ...renderWelcomeStep(
       '1',
-      [
-        text('Create or open a Trello Power-Up at '),
-        ...renderWelcomeLink(),
-        text('.'),
-      ],
+      [text(TrelloStrings.welcomePowerUp()), ...renderWelcomeLink(), text('.')],
       3,
     ),
-    ...renderWelcomeStep(
-      '2',
-      [text('Open the API Key tab and generate an API key.')],
-      1,
-    ),
-    ...renderWelcomeStep(
-      '3',
-      [
-        text(
-          "Use that key to generate a token from Trello's authorization page, then paste both values here.",
-        ),
-      ],
-      1,
-    ),
+    ...renderWelcomeStep('2', [text(TrelloStrings.welcomeApiKey())], 1),
+    ...renderWelcomeStep('3', [text(TrelloStrings.welcomeToken())], 1),
   ]
 }
 
@@ -111,13 +96,9 @@ export const renderWelcome = (): readonly VirtualDomNode[] => {
       className: 'TrelloWelcomeTitle',
       type: VirtualDomElements.H3,
     },
-    text('Welcome to Trello'),
-    ...renderWelcomeText(
-      'Connect your Trello account to browse your boards from Lvce Editor.',
-    ),
+    text(TrelloStrings.welcome()),
+    ...renderWelcomeText(TrelloStrings.welcomeDescription()),
     ...renderWelcomeSteps(),
-    ...renderWelcomeNote(
-      'The API key identifies the app. The token grants access to your Trello account, so keep the token private.',
-    ),
+    ...renderWelcomeNote(TrelloStrings.welcomeSecurity()),
   ]
 }

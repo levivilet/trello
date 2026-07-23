@@ -2,6 +2,7 @@ import type {
   TrelloViewActionContext,
   TrelloViewState,
 } from '../state/TrelloViewState.ts'
+import * as TrelloStrings from '../../TrelloStrings/TrelloStrings.ts'
 import { getErrorMessage } from '../GetErrorMessage.ts'
 import { addCardLabel } from './AddCardLabel.ts'
 
@@ -59,7 +60,7 @@ export const createCardLabel = async (
     return
   }
   if (!name) {
-    state.error = 'Label title is required.'
+    state.error = TrelloStrings.labelTitleRequired()
     requestRerender()
     return
   }
