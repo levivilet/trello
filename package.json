@@ -16,7 +16,7 @@
     "e2e:headless": "npm run e2e:headless --workspace=packages/e2e",
     "format": "prettier --write .",
     "install:extension": "node packages/build/src/install-extension.ts",
-    "lint": "eslint . && prettier --check .",
+    "lint": "eslint . && prettier --check . && knip --no-config-hints",
     "test": "npm test --workspaces --if-present",
     "test:watch": "node --unhandled-rejections=warn --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch",
     "type-check": "tsc -b"
@@ -25,7 +25,9 @@
   "license": "MIT",
   "devDependencies": {
     "@lvce-editor/eslint-config": "^17.1.0",
+    "@lvce-editor/eslint-plugin-github-actions": "^17.1.0",
     "eslint": "^10.7.0",
+    "knip": "^6.27.0",
     "prettier": "^4.0.0-alpha.10",
     "typescript": "^6.0.3"
   },
