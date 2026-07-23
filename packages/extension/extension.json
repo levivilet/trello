@@ -104,7 +104,7 @@
   ],
   "views": [
     {
-      "css": "trello.css",
+      "css": "media/trello.css",
       "displayName": "Trello",
       "eventListeners": [
         {
@@ -172,7 +172,7 @@
       ],
       "id": "trello.views.boards",
       "title": "Trello",
-      "icon": "trello.svg",
+      "icon": "media/trello.svg",
       "kind": "virtualDom"
     }
   ],

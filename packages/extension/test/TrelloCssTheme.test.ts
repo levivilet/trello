@@ -13,7 +13,7 @@ const lightLabelTextColorPattern =
 const authFormMaxWidthPattern = /\.TrelloAuthForm\s*\{[^}]*max-width: 760px;/
 
 const readTrelloCss = async (): Promise<string> => {
-  return readFile(new URL('../trello.css', import.meta.url), 'utf8')
+  return readFile(new URL('../media/trello.css', import.meta.url), 'utf8')
 }
 
 const getCssAfterTokenLayer = (css: string): string => {
