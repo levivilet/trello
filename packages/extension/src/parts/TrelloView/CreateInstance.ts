@@ -58,6 +58,7 @@ import { createInitialState } from './state/CreateInitialState.ts'
 import { dependencyState } from './state/DependencyFactory.ts'
 import {
   contextKeyCardDescriptionFocus,
+  contextKeyCardLabelCreateFocus,
   contextKeyCardLabelPickerFocus,
   contextKeyNewCardInputFocus,
   contextKeyNewListInputFocus,
@@ -461,6 +462,11 @@ export const createInstance = async (
       oldContext: Readonly<Record<string, boolean>>,
       newContext: Readonly<Record<string, boolean>>,
     ): string {
+      if (
+        becameActive(oldContext, newContext, contextKeyCardLabelCreateFocus)
+      ) {
+        return '[name="newLabelName"]'
+      }
       if (
         becameActive(oldContext, newContext, contextKeyCardLabelPickerFocus)
       ) {

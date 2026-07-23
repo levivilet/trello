@@ -11,6 +11,7 @@ import type {
   TrelloComment,
   TrelloCredentials,
   TrelloLabel,
+  TrelloLabelCreate,
   TrelloList,
   TrelloListCreate,
   TrelloListUpdate,
@@ -65,12 +66,16 @@ export const createMockTrelloClient = (
   let listBoardsCallCount = 0
   let addCommentCallCount = 0
   let createCardCallCount = 0
+  let createLabelCallCount = 0
   let createListCallCount = 0
   const cardDetails: Record<string, TrelloCardDetail> = {
     ...data.cardDetails,
   }
   const boardDetails: Record<string, TrelloBoardDetail> = {
     ...data.boardDetails,
+  }
+  const boardLabels: Record<string, readonly TrelloLabel[]> = {
+    ...data.boardLabels,
   }
   const findCard = (cardId: string): TrelloCard | undefined => {
     const details = Object.values(boardDetails)
@@ -208,6 +213,23 @@ export const createMockTrelloClient = (
       }
       return createdCard
     },
+    async createLabel(
+      board: TrelloBoard,
+      create: TrelloLabelCreate,
+    ): Promise<TrelloLabel> {
+      if (data.error) {
+        throw new Error(data.error)
+      }
+      createLabelCallCount++
+      const createdLabel: TrelloLabel = {
+        color: create.color,
+        id: `created-label-${createLabelCallCount}`,
+        idBoard: board.id,
+        name: create.name,
+      }
+      boardLabels[board.id] = [...(boardLabels[board.id] || []), createdLabel]
+      return createdLabel
+    },
     async createList(
       board: TrelloBoard,
       create: TrelloListCreate,
@@ -312,7 +334,7 @@ export const createMockTrelloClient = (
       if (data.error) {
         throw new Error(data.error)
       }
-      return data.boardLabels?.[board.id] || []
+      return boardLabels[board.id] || []
     },
     async listBoards(): Promise<readonly TrelloBoard[]> {
       if (data.error) {

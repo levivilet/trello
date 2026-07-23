@@ -1096,8 +1096,87 @@ button.TrelloSearchResult:hover {
   line-height: 1;
 }
 
+.TrelloCardLabelPickerBackButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+  font-size: 18px;
+  line-height: 1;
+}
+
 .TrelloCardLabelSearchInput {
   width: 100%;
+}
+
+.TrelloCardLabelCreateButton {
+  width: 100%;
+}
+
+.TrelloCardLabelCreate {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  contain: content;
+}
+
+.TrelloCardLabelCreatePreview {
+  box-sizing: border-box;
+  min-height: 32px;
+  contain: content;
+  padding: 7px 12px;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 4px;
+}
+
+.TrelloCardLabelCreateFields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  contain: content;
+}
+
+.TrelloCardLabelCreateFields label {
+  contain: content;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--TrelloForeground);
+}
+
+.TrelloCardLabelColorGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  contain: content;
+}
+
+.TrelloCardLabelColorChoice {
+  box-sizing: border-box;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 4px;
+}
+
+.TrelloCardLabelColorChoice:hover {
+  filter: brightness(1.08);
+}
+
+.TrelloCardLabelColorChoiceSelected {
+  border-color: var(--TrelloForeground);
+  box-shadow: inset 0 0 0 1px var(--TrelloSurfaceAlt);
 }
 
 .TrelloCardLabelPickerList {
