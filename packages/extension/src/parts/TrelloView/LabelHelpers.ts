@@ -4,38 +4,40 @@ export const getLabelText = (label: Readonly<TrelloLabel>): string => {
   return label.name?.trim() || label.color?.trim() || 'Label'
 }
 
-const knownLabelColors = new Set([
-  'black',
-  'black_dark',
+export const labelColors = [
+  'green_light',
+  'yellow_light',
+  'orange_light',
+  'red_light',
+  'purple_light',
+  'green',
+  'yellow',
+  'orange',
+  'red',
+  'purple',
+  'green_dark',
+  'yellow_dark',
+  'orange_dark',
+  'red_dark',
+  'purple_dark',
+  'blue_light',
+  'sky_light',
+  'lime_light',
+  'pink_light',
   'black_light',
   'blue',
-  'blue_dark',
-  'blue_light',
-  'green',
-  'green_dark',
-  'green_light',
-  'lime',
-  'lime_dark',
-  'lime_light',
-  'orange',
-  'orange_dark',
-  'orange_light',
-  'pink',
-  'pink_dark',
-  'pink_light',
-  'purple',
-  'purple_dark',
-  'purple_light',
-  'red',
-  'red_dark',
-  'red_light',
   'sky',
+  'lime',
+  'pink',
+  'black',
+  'blue_dark',
   'sky_dark',
-  'sky_light',
-  'yellow',
-  'yellow_dark',
-  'yellow_light',
-])
+  'lime_dark',
+  'pink_dark',
+  'black_dark',
+] as const
+
+const knownLabelColors = new Set<string>(labelColors)
 
 const toLabelColorClassSuffix = (color: string): string => {
   return color

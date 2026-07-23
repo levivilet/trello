@@ -40,7 +40,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await openBoard(Locator, expect)
   await openCard(Locator, expect)
 
-  const openPicker = Locator('button[name="openCardLabelPicker"]')
+  const openPicker = Locator('button[name="openCardLabelPicker"]').first()
   await expect(openPicker).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await openPicker.click()
@@ -55,6 +55,24 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await expect(ready).toHaveText('Ready')
   await expect(needsReview).toHaveText('Needs review')
   await expect(closePicker).toBeVisible()
+
+  await search.type('Documentation')
+  const openCreate = Locator('button[name="openCardLabelCreate"]')
+  await expect(openCreate).toHaveText('Create a new label')
+  // eslint-disable-next-line e2e/no-direct-click
+  await openCreate.click()
+
+  const title = Locator('input[name="newLabelName"]')
+  const purple = Locator('button[name="selectCardLabelColor:purple"]')
+  const create = Locator('button[name="createCardLabel"]')
+  await expect(title).toHaveValue('Documentation')
+  // eslint-disable-next-line e2e/no-direct-click
+  await purple.click()
+  // eslint-disable-next-line e2e/no-direct-click
+  await create.click()
+
+  const createdLabel = Locator('button[name="addCardLabel:created-label-1"]')
+  await expect(createdLabel).toHaveText('Documentation')
 
   // eslint-disable-next-line e2e/no-direct-click
   await closePicker.click()

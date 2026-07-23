@@ -16,6 +16,7 @@ import type {
 import { addCardComment } from './operations/AddCardComment.ts'
 import { addCardLabel } from './operations/AddCardLabel.ts'
 import { createCard } from './operations/CreateCard.ts'
+import { createLabel } from './operations/CreateLabel.ts'
 import { createList } from './operations/CreateList.ts'
 import {
   getBoardDetail,
@@ -66,6 +67,13 @@ export const createTrelloClient = (
       credentials,
     ): ReturnType<TrelloClient['createCard']> {
       return createCard(fetchLike, list, create, credentials, cache)
+    },
+    createLabel(
+      board: TrelloBoard,
+      create,
+      credentials,
+    ): ReturnType<TrelloClient['createLabel']> {
+      return createLabel(fetchLike, board, create, credentials, cache)
     },
     createList(
       board: TrelloBoard,

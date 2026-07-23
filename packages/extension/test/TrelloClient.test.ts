@@ -669,6 +669,50 @@ test('listBoardLabels requests board labels with credentials', async () => {
   expect(url.searchParams.get('limit')).toBe('1000')
 })
 
+test('createLabel creates a board label with a title and color', async () => {
+  const requests: string[] = []
+  const requestInits: ({ readonly method?: string } | undefined)[] = []
+  const client = createTrelloClient(async (url, init) => {
+    requests.push(url)
+    requestInits.push(init)
+    return jsonResponse({
+      color: 'purple',
+      id: 'label-1',
+      idBoard: 'board-1',
+      name: 'Documentation',
+    })
+  })
+
+  await expect(
+    client.createLabel(
+      { id: 'board-1', name: 'Roadmap' },
+      {
+        color: 'purple',
+        name: 'Documentation',
+      },
+      {
+        apiKey: validApiKey,
+        token: validToken,
+      },
+    ),
+  ).resolves.toEqual({
+    color: 'purple',
+    id: 'label-1',
+    idBoard: 'board-1',
+    name: 'Documentation',
+  })
+
+  expect(requests).toHaveLength(1)
+  const url = new URL(requests[0])
+  expect(url.pathname).toBe('/1/labels')
+  expect(url.searchParams.get('key')).toBe(validApiKey)
+  expect(url.searchParams.get('token')).toBe(validToken)
+  expect(url.searchParams.get('idBoard')).toBe('board-1')
+  expect(url.searchParams.get('name')).toBe('Documentation')
+  expect(url.searchParams.get('color')).toBe('purple')
+  expect(requestInits[0]?.method).toBe('POST')
+})
+
 test('addCardLabel sends label id to trello', async () => {
   const requests: string[] = []
   const requestInits: ({ readonly method?: string } | undefined)[] = []

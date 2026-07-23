@@ -383,6 +383,14 @@ const createStagedCardClient = (options: {
         name: 'Created card',
       }
     },
+    async createLabel(board, create): Promise<TrelloLabel> {
+      return {
+        color: create.color,
+        id: 'created-label-1',
+        idBoard: board.id,
+        name: create.name,
+      }
+    },
     async createList(
       _board: Readonly<TrelloBoard>,
       create: Readonly<TrelloListCreate>,
@@ -3130,6 +3138,98 @@ test('card detail label picker adds an existing board label', async () => {
   resetTrelloViewDependencyFactory()
 })
 
+test('card detail label picker creates and assigns a new label', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', labels: [], name: 'Ship Trello view' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      boardLabels: {
+        'board-1': [],
+      },
+      cardDetails: {
+        'card-1': {
+          attachments: [],
+          card: {
+            desc: '',
+            id: 'card-1',
+            labels: [],
+            name: 'Ship Trello view',
+          },
+          comments: [],
+        },
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'openCardLabelPicker', type: 'click' })
+  await instance.handleEvent?.({
+    name: 'cardLabelSearch',
+    type: 'input',
+    value: 'Documentation',
+  })
+
+  const unmatchedDom = await instance.render()
+  expect(getSubtreeTextByNodeName(unmatchedDom, 'cardLabelPicker')).toContain(
+    'Create a new label',
+  )
+  expect(getNodeByName(unmatchedDom, 'openCardLabelCreate')).toBeDefined()
+
+  await instance.handleEvent?.({ name: 'openCardLabelCreate', type: 'click' })
+  await instance.handleEvent?.({ name: 'cardLabelSearch', type: 'blur' })
+
+  const createDom = await instance.render()
+  expect(getNodeByName(createDom, 'cardLabelSearch')).toBeUndefined()
+  expect(getNodeByName(createDom, 'newLabelName')).toMatchObject({
+    value: 'Documentation',
+  })
+  expect(getNodeByName(createDom, 'selectCardLabelColor:green')).toMatchObject({
+    'aria-pressed': true,
+  })
+  expect(getNodeByName(createDom, 'selectCardLabelColor:purple')).toMatchObject(
+    {
+      'aria-pressed': false,
+    },
+  )
+  await instance.handleEvent?.({
+    name: 'selectCardLabelColor:purple',
+    type: 'click',
+  })
+  await instance.handleEvent?.({ name: 'createCardLabel', type: 'click' })
+
+  const createdDom = await instance.render()
+  expect(getNodeByName(createdDom, 'cardLabelPicker')).toBeDefined()
+  expect(
+    getNodeByName(createdDom, 'addCardLabel:created-label-1'),
+  ).toBeDefined()
+  expect(
+    getNodeByName(createdDom, 'cardLabelCheckbox:created-label-1'),
+  ).toMatchObject({
+    checked: true,
+  })
+  expect(
+    hasNode(createdDom, (node) => {
+      return (
+        node.name === 'openCardLabelPicker' &&
+        hasClass(node, 'TrelloCardLabelColorPurple')
+      )
+    }),
+  ).toBe(true)
+  resetTrelloViewDependencyFactory()
+})
+
 test('card detail label picker checks assigned labels and keeps open on failure', async () => {
   const labels: readonly TrelloLabel[] = [
     {
@@ -3322,6 +3422,14 @@ test('clicking card renders cached detail before fresh detail resolves', async (
         id: 'created-card-1',
         idList: list.id,
         name: 'Created card',
+      }
+    },
+    async createLabel(board, create): Promise<TrelloLabel> {
+      return {
+        color: create.color,
+        id: 'created-label-1',
+        idBoard: board.id,
+        name: create.name,
       }
     },
     async createList(_board: TrelloBoard, create: TrelloListCreate) {

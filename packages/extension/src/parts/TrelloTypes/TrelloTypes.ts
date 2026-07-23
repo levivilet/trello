@@ -44,6 +44,11 @@ export interface TrelloLabel {
   readonly name?: string
 }
 
+export interface TrelloLabelCreate {
+  readonly color: string
+  readonly name: string
+}
+
 export interface TrelloCardBadges {
   readonly comments?: number
 }
