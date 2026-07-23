@@ -59,7 +59,7 @@ export {
   openMockBoard,
 } from '../CreateInstance/CreateInstance.ts'
 export { getMenuEntries } from '../MenuEntries/MenuEntries.ts'
-export { renderActions } from '../RenderActions/RenderActions.ts'
+export { renderActionsDom } from '../RenderActionsDom/RenderActionsDom.ts'
 export {
   boardBackgroundEnabledPreference,
   searchEnabledPreference,
