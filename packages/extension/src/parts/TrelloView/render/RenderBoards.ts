@@ -15,12 +15,10 @@ import {
   getWorkspaceSections,
   type WorkspaceSection,
 } from '../BoardSections.ts'
-import {
-  renderError,
-  renderListTitle,
-  renderTitle,
-  renderToolbar,
-} from './RenderShared.ts'
+import { renderError } from './RenderError/RenderError.ts'
+import { renderListTitle } from './RenderListTitle/RenderListTitle.ts'
+import { renderTitle } from './RenderTitle/RenderTitle.ts'
+import { renderToolbar } from './RenderToolbar/RenderToolbar.ts'
 
 interface VirtualDomSegment {
   readonly childCount: number

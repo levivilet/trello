@@ -31,7 +31,7 @@ import {
   labelColors,
 } from '../LabelHelpers.ts'
 import { renderMarkdown } from './RenderMarkdown.ts'
-import { renderListTitle } from './RenderShared.ts'
+import { renderListTitle } from './RenderListTitle/RenderListTitle.ts'
 
 interface VirtualDomSegment {
   readonly childCount: number
