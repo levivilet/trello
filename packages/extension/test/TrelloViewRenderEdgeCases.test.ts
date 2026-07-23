@@ -2,7 +2,7 @@ import { expect, test } from '@jest/globals'
 import type { TrelloCardDetail } from '../src/parts/TrelloTypes/TrelloTypes.ts'
 import { renderAuth } from '../src/parts/TrelloView/render/RenderAuth.ts'
 import { renderBoards } from '../src/parts/TrelloView/render/RenderBoards.ts'
-import { renderCardDetailPanel } from '../src/parts/TrelloView/render/RenderCardDetailPanel.ts'
+import { renderCardDetailPanel } from '../src/parts/TrelloView/render/RenderCardDetailPanel/RenderCardDetailPanel.ts'
 import { createInitialState } from '../src/parts/TrelloView/state/CreateInitialState.ts'
 
 const imageUrl = 'https://example.com/attachment.png'

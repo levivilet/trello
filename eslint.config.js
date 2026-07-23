@@ -14,7 +14,7 @@ export default [
     },
   },
   {
-    files: ['packages/extension/src/parts/TrelloView/render/*.ts'],
+    files: ['packages/extension/src/parts/TrelloView/render/**/*.ts'],
     rules: {
       'virtual-dom/hoist-static-nodes': 'off',
       'virtual-dom/prefer-state-destructuring': 'error',
@@ -23,7 +23,7 @@ export default [
   {
     files: [
       'packages/extension/src/parts/TrelloView/render/RenderBoardDetail.ts',
-      'packages/extension/src/parts/TrelloView/render/RenderCardDetailPanel.ts',
+      'packages/extension/src/parts/TrelloView/render/RenderCardDetailPanel/RenderCardDetailPanel.ts',
     ],
     rules: {
       'virtual-dom/no-inline-style': 'off',
