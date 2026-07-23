@@ -1,11 +1,11 @@
 import type { View } from '@lvce-editor/api'
-import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
-import { viewId } from './Constants.ts'
+import { viewId } from '../Constants/Constants.ts'
 import {
   type ActiveTrelloViewInstance,
   createInstance,
-} from './CreateInstance.ts'
-import { renderEventListeners } from './render/RenderEventListeners.ts'
+} from '../CreateInstance/CreateInstance.ts'
+import { renderEventListeners } from '../RenderEventListeners/RenderEventListeners.ts'
+import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
 
 type TrelloView = Omit<View<ActiveTrelloViewInstance>, 'commands'> & {
   readonly commands: NonNullable<View<ActiveTrelloViewInstance>['commands']>
@@ -42,7 +42,7 @@ export const view: TrelloView = {
 export {
   resetTrelloViewDependencyFactory,
   setTrelloViewDependencyFactory,
-} from './state/DependencyFactory.ts'
+} from '../DependencyFactory/DependencyFactory.ts'
 export {
   backToBoardsActiveTrelloViewInstance,
   cancelNewCardActiveTrelloViewInstance,
@@ -57,11 +57,11 @@ export {
   addList,
   addCard,
   openMockBoard,
-} from './CreateInstance.ts'
-export { getMenuEntries } from './MenuEntries.ts'
-export { renderActions } from './render/RenderActions.ts'
+} from '../CreateInstance/CreateInstance.ts'
+export { getMenuEntries } from '../MenuEntries/MenuEntries.ts'
+export { renderActions } from '../RenderActions/RenderActions.ts'
 export {
   boardBackgroundEnabledPreference,
   searchEnabledPreference,
   viewId,
-} from './Constants.ts'
+} from '../Constants/Constants.ts'

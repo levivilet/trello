@@ -1,35 +1,35 @@
 import { expect, test } from '@jest/globals'
+import { getAssetBaseUrl } from '../src/parts/AssetBaseUrl/AssetBaseUrl.ts'
 import {
   getAttachmentImageUrl,
   isImageAttachment,
-} from '../src/parts/TrelloView/AttachmentHelpers.ts'
+} from '../src/parts/AttachmentHelpers/AttachmentHelpers.ts'
 import {
   getRecentlyViewedBoards,
   getWorkspaceSections,
   sortBoardsByViewedAt,
-} from '../src/parts/TrelloView/BoardSections.ts'
-import { getCardCoverImageUrl } from '../src/parts/TrelloView/CardCoverHelpers.ts'
+} from '../src/parts/BoardSections/BoardSections.ts'
+import { getCardCoverImageUrl } from '../src/parts/CardCoverHelpers/CardCoverHelpers.ts'
 import {
   getCommentAuthor,
   getCommentAvatarUrl,
   getCommentDateText,
   getCommentInitials,
   getCommentText,
-} from '../src/parts/TrelloView/CommentHelpers.ts'
-import { getErrorMessage } from '../src/parts/TrelloView/GetErrorMessage.ts'
+} from '../src/parts/CommentHelpers/CommentHelpers.ts'
+import { createInitialState } from '../src/parts/CreateInitialState/CreateInitialState.ts'
+import { getErrorMessage } from '../src/parts/GetErrorMessage/GetErrorMessage.ts'
 import {
   getLabelColorClassName,
   getLabelText,
-} from '../src/parts/TrelloView/LabelHelpers.ts'
+} from '../src/parts/LabelHelpers/LabelHelpers.ts'
 import {
   getMenuEntries,
   MenuIdCard,
   MenuIdList,
-} from '../src/parts/TrelloView/MenuEntries.ts'
-import { renderMarkdown } from '../src/parts/TrelloView/render/RenderMarkdown.ts'
-import { getAssetBaseUrl } from '../src/parts/TrelloView/state/AssetBaseUrl.ts'
-import { createInitialState } from '../src/parts/TrelloView/state/CreateInitialState.ts'
-import { validateCredentials } from '../src/parts/TrelloView/ValidateCredentials.ts'
+} from '../src/parts/MenuEntries/MenuEntries.ts'
+import { renderMarkdown } from '../src/parts/RenderMarkdown/RenderMarkdown.ts'
+import { validateCredentials } from '../src/parts/ValidateCredentials/ValidateCredentials.ts'
 
 const validApiKey = 'abcdefghijklmnopqrstuvwxyz123456'
 const validToken =
@@ -296,9 +296,7 @@ test('error, menu, asset, and virtual dom helpers handle fallbacks', () => {
     'https://example.com/',
   )
   expect(
-    getAssetBaseUrl(
-      'file:///workspace/src/parts/TrelloView/state/AssetBaseUrl.ts',
-    ),
+    getAssetBaseUrl('file:///workspace/src/parts/AssetBaseUrl/AssetBaseUrl.ts'),
   ).toBe('/remote/workspace/')
 })
 

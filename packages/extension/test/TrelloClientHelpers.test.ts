@@ -1,5 +1,5 @@
 import { expect, test } from '@jest/globals'
-import { normalizeSearchResponse } from '../src/parts/TrelloClient/NormalizeSearchResponse.ts'
+import { normalizeSearchResponse } from '../src/parts/NormalizeSearchResponse/NormalizeSearchResponse.ts'
 
 test('normalizeSearchResponse adds result types and preserves card-first order', () => {
   expect(

@@ -1,6 +1,6 @@
 import { expect, test } from '@jest/globals'
 import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
-import { renderListTitle } from '../src/parts/TrelloView/render/RenderListTitle/RenderListTitle.ts'
+import { renderListTitle } from '../src/parts/RenderListTitle/RenderListTitle.ts'
 
 test('renders the list title', () => {
   expect(renderListTitle('Recently viewed')).toEqual([

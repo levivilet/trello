@@ -7,6 +7,7 @@ import type {
 } from '@lvce-editor/api'
 import { expect, test } from '@jest/globals'
 import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
+import type { ActiveTrelloViewInstance } from '../src/parts/CreateInstance/CreateInstance.ts'
 import type { TrelloClient } from '../src/parts/TrelloClient/TrelloClient.ts'
 import type { TrelloImageCache } from '../src/parts/TrelloImageCache/TrelloImageCache.ts'
 import type {
@@ -24,7 +25,6 @@ import type {
   TrelloListCreate,
   TrelloListUpdate,
 } from '../src/parts/TrelloTypes/TrelloTypes.ts'
-import type { ActiveTrelloViewInstance } from '../src/parts/TrelloView/CreateInstance.ts'
 import { createMemoryCredentialStorage } from '../src/parts/CredentialStorage/CredentialStorage.ts'
 import { createMockTrelloClient } from '../src/parts/MockTrelloClient/MockTrelloClient.ts'
 import {

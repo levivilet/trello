@@ -1,4 +1,9 @@
 import type {
+  FetchLike,
+  TrelloCacheFirstResult,
+  TrelloClient,
+} from '../TrelloClientTypes/TrelloClientTypes.ts'
+import type {
   TrelloBoard,
   TrelloBoardDetail,
   TrelloCard,
@@ -8,39 +13,37 @@ import type {
   TrelloLabel,
   TrelloSearchResult,
 } from '../TrelloTypes/TrelloTypes.ts'
-import type {
-  FetchLike,
-  TrelloCacheFirstResult,
-  TrelloClient,
-} from './TrelloClientTypes.ts'
-import { addCardComment } from './operations/AddCardComment.ts'
-import { addCardLabel } from './operations/AddCardLabel.ts'
-import { createCard } from './operations/CreateCard.ts'
-import { createLabel } from './operations/CreateLabel.ts'
-import { createList } from './operations/CreateList.ts'
+import { addCardComment } from '../AddCardComment/AddCardComment.ts'
+import { addCardLabel } from '../AddCardLabel/AddCardLabel.ts'
+import { createCard } from '../CreateCard/CreateCard.ts'
+import { createLabel } from '../CreateLabel/CreateLabel.ts'
+import { createList } from '../CreateList/CreateList.ts'
 import {
   getBoardDetail,
   readCachedBoardDetail,
-} from './operations/GetBoardDetail.ts'
+} from '../GetBoardDetail/GetBoardDetail.ts'
 import {
   getCardDetail,
   getCardDetailAttachments,
   getCardDetailCard,
   getCardDetailComments,
   readCachedCardDetail,
-} from './operations/GetCardDetail.ts'
-import { listBoardLabels } from './operations/ListBoardLabels.ts'
-import { listBoards, readCachedListBoards } from './operations/ListBoards.ts'
-import { moveCard } from './operations/MoveCard.ts'
-import { readCachedSearch, search } from './operations/Search.ts'
-import { updateCard } from './operations/UpdateCard.ts'
-import { updateList } from './operations/UpdateList.ts'
+} from '../GetCardDetail/GetCardDetail.ts'
+import { listBoardLabels } from '../ListBoardLabels/ListBoardLabels.ts'
+import { listBoards, readCachedListBoards } from '../ListBoards/ListBoards.ts'
+import { moveCard } from '../MoveCard/MoveCard.ts'
+import { readCachedSearch, search } from '../Search/Search.ts'
 import {
   createCacheStorageTrelloApiCache,
   type TrelloApiCache,
-} from './TrelloApiCache.ts'
+} from '../TrelloApiCache/TrelloApiCache.ts'
+import { updateCard } from '../UpdateCard/UpdateCard.ts'
+import { updateList } from '../UpdateList/UpdateList.ts'
 
-export type { FetchLike, TrelloClient } from './TrelloClientTypes.ts'
+export type {
+  FetchLike,
+  TrelloClient,
+} from '../TrelloClientTypes/TrelloClientTypes.ts'
 
 export const createTrelloClient = (
   fetchLike: FetchLike = fetch,

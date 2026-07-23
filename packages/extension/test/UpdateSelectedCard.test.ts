@@ -1,7 +1,7 @@
 import { expect, test } from '@jest/globals'
 import type { TrelloCardDetail } from '../src/parts/TrelloTypes/TrelloTypes.ts'
-import { updateSelectedCard } from '../src/parts/TrelloView/actions/UpdateSelectedCard/UpdateSelectedCard.ts'
-import { createInitialState } from '../src/parts/TrelloView/state/CreateInitialState.ts'
+import { createInitialState } from '../src/parts/CreateInitialState/CreateInitialState.ts'
+import { updateSelectedCard } from '../src/parts/UpdateSelectedCard/UpdateSelectedCard.ts'
 
 const selectedCardDetail: TrelloCardDetail = {
   attachments: [

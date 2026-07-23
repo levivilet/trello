@@ -1,5 +1,5 @@
 import type { TrelloClient } from '../TrelloClient/TrelloClient.ts'
-import type { TrelloCacheFirstResult } from '../TrelloClient/TrelloClientTypes.ts'
+import type { TrelloCacheFirstResult } from '../TrelloClientTypes/TrelloClientTypes.ts'
 import type {
   TrelloBoard,
   TrelloBoardDetail,

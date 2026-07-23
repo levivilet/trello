@@ -1,6 +1,6 @@
 import { expect, test } from '@jest/globals'
 import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
-import { renderTitle } from '../src/parts/TrelloView/render/RenderTitle/RenderTitle.ts'
+import { renderTitle } from '../src/parts/RenderTitle/RenderTitle.ts'
 
 test('renders the title', () => {
   expect(renderTitle('Boards')).toEqual([

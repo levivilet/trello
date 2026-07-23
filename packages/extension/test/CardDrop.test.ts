@@ -8,9 +8,9 @@ import type {
 import type {
   TrelloViewActionContext,
   TrelloViewState,
-} from '../src/parts/TrelloView/state/TrelloViewState.ts'
-import { handleDropEvent } from '../src/parts/TrelloView/actions/HandleDragEvent.ts'
-import { createInitialState } from '../src/parts/TrelloView/state/CreateInitialState.ts'
+} from '../src/parts/TrelloViewState/TrelloViewState.ts'
+import { createInitialState } from '../src/parts/CreateInitialState/CreateInitialState.ts'
+import { handleDropEvent } from '../src/parts/HandleDragEvent/HandleDragEvent.ts'
 
 const credentials = {
   apiKey: 'api-key',
