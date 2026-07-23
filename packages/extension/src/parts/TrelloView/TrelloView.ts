@@ -46,6 +46,7 @@ export {
 export {
   backToBoardsActiveTrelloViewInstance,
   cancelNewCardActiveTrelloViewInstance,
+  closeBoardFilterActiveTrelloViewInstance,
   closeCardDetailActiveTrelloViewInstance,
   logoutActiveTrelloViewInstance,
   openCardActiveTrelloViewInstance,

@@ -15,8 +15,9 @@ export const test: Test = async ({ Command, expect, KeyBoard, Locator }) => {
   await input.type('ready')
   await expect(cards).toHaveCount(1)
 
-  await KeyBoard.press('Control+a')
-  await KeyBoard.press('Backspace')
+  for (let i = 0; i < 'ready'.length; i++) {
+    await KeyBoard.press('Backspace')
+  }
 
   await expect(input).toHaveValue('')
   await expect(cards).toHaveCount(5)

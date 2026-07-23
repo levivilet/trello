@@ -14,7 +14,7 @@ export const updateContext = (state: Readonly<TrelloViewState>): void => {
   if (state.credentials && state.boardDetail) {
     context[contextKeyBoardDetailFocus] = true
   }
-  if (state.boardFilterOpen && state.focusedName === 'boardFilter') {
+  if (state.boardFilterOpen) {
     context[contextKeyBoardFilterFocus] = true
   }
   if (state.credentials && !state.boardDetail) {

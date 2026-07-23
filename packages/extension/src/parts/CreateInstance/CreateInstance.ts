@@ -19,6 +19,7 @@ import {
   startAddCard,
   submitAddCard,
 } from '../AddCard/AddCard.ts'
+import { closeBoardFilter as closeBoardFilterAction } from '../BoardFilter/BoardFilter.ts'
 import { closeCardDetail as closeCardDetailAction } from '../CloseCardDetail/CloseCardDetail.ts'
 import { createInitialState } from '../CreateInitialState/CreateInitialState.ts'
 import { createMemoryCurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
@@ -74,6 +75,7 @@ export interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly addList: (options: any) => Promise<void>
   readonly backToBoards: () => Promise<void>
   readonly cancelNewCard: () => void
+  readonly closeBoardFilter: () => void
   readonly closeCardDetail: () => void
   readonly getContext: () => Readonly<Record<string, boolean>>
   readonly getCss: () => string
@@ -161,6 +163,10 @@ export const openMockBoard = async (options: any): Promise<void> => {
 
 export const closeCardDetailActiveTrelloViewInstance = (): void => {
   getActiveInstance()?.closeCardDetail()
+}
+
+export const closeBoardFilterActiveTrelloViewInstance = (): void => {
+  getActiveInstance()?.closeBoardFilter()
 }
 
 export const logoutActiveTrelloViewInstance = async (): Promise<void> => {
@@ -343,6 +349,10 @@ export const createInstance = async (
     },
     cancelNewCard(): void {
       cancelAddCard(viewContext)
+      updateContext(state)
+    },
+    closeBoardFilter(): void {
+      closeBoardFilterAction(viewContext)
       updateContext(state)
     },
     closeCardDetail(): void {

@@ -26,6 +26,7 @@
     "onView:trello.views.boards",
     "onCommand:trello.backToBoards",
     "onCommand:trello.cancelNewCard",
+    "onCommand:trello.closeBoardFilter",
     "onCommand:trello.closeCardDetail",
     "onCommand:trello.logout",
     "onCommand:trello.openCard",
@@ -64,6 +65,10 @@
     {
       "id": "trello.cancelNewCard",
       "label": "Trello: Cancel New Card"
+    },
+    {
+      "id": "trello.closeBoardFilter",
+      "label": "Trello: Close Board Filter"
     },
     {
       "id": "trello.closeCardDetail",
@@ -176,8 +181,13 @@
     },
     {
       "key": "Escape",
+      "command": "trello.closeBoardFilter",
+      "when": "trello.boardFilterFocus"
+    },
+    {
+      "key": "Escape",
       "command": "trello.closeCardDetail",
-      "when": "trello.cardDetailFocus"
+      "when": "trello.cardDetailFocus && !trello.boardFilterFocus"
     },
     {
       "key": "Enter",
