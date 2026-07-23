@@ -951,7 +951,9 @@ button.TrelloSearchResult:hover {
   gap: 4px;
   contain: content;
   margin: 0;
-  padding-left: 18px;
+  padding-left: 4px;
+  list-style-position: inside;
+  list-style-type: disc;
 }
 
 .TrelloMarkdownListItem {
