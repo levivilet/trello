@@ -145,7 +145,8 @@
             "pointerdown",
             "event.target.name",
             "event.clientX"
-          ]
+          ],
+          "trackPointerEvents": ["handlePointerMove", "handlePointerUp"]
         },
         {
           "name": "handleCardLabelPickerPointerDown",

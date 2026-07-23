@@ -946,6 +946,7 @@ test('cards and lists render drag and drop attributes', async () => {
         'event.target.name',
         'event.clientX',
       ],
+      trackPointerEvents: ['handlePointerMove', 'handlePointerUp'],
     },
     {
       name: 'handleCardLabelPickerPointerDown',

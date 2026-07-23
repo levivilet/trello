@@ -2,6 +2,7 @@ interface DomEventListener {
   readonly name: string | number
   readonly params: readonly string[]
   readonly preventDefault?: boolean
+  readonly trackPointerEvents?: readonly (string | number)[]
 }
 
 export const renderEventListeners = (): readonly DomEventListener[] => {
@@ -44,6 +45,7 @@ export const renderEventListeners = (): readonly DomEventListener[] => {
         'event.target.name',
         'event.clientX',
       ],
+      trackPointerEvents: ['handlePointerMove', 'handlePointerUp'],
     },
     {
       name: 'handleCardLabelPickerPointerDown',
