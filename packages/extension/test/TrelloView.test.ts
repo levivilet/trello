@@ -325,7 +325,7 @@ const createSearchEnabledInstance = async (
   options: {
     readonly boardBackgroundEnabled?: boolean
   } = {},
-): Promise<VirtualDomViewInstance> => {
+): Promise<ActiveTrelloViewInstance> => {
   setTrelloViewDependencyFactory(() => ({
     client: createMockTrelloClient(data),
     readBoardBackgroundEnabled: async (): Promise<boolean> => {
@@ -336,7 +336,7 @@ const createSearchEnabledInstance = async (
     storage: createMemoryCredentialStorage(),
   }))
 
-  const instance = (await view.create()) as VirtualDomViewInstance
+  const instance = await view.create()
   await instance.handleEvent?.({
     name: 'apiKey',
     type: 'input',
@@ -2668,9 +2668,8 @@ test('card detail panel resizes from the left sash', async () => {
     'TrelloCardDetailResizeSash',
     'TrelloCardDetailPanel',
   ])
-  expect(getNodeByName(initialDom, 'cardDetail')?.style).toBe(
-    '--TrelloCardDetailWidth: 360px',
-  )
+  expect(getNodeByName(initialDom, 'cardDetail')?.style).toBeUndefined()
+  expect(instance.getCss()).toContain('--TrelloCardDetailWidth: 360px')
 
   await instance.handleEvent?.({
     clientX: 100,
@@ -2683,10 +2682,7 @@ test('card detail panel resizes from the left sash', async () => {
     type: 'pointermove',
   } as unknown as ViewEvent)
 
-  const resizedDom = await instance.render()
-  expect(getNodeByName(resizedDom, 'cardDetail')?.style).toBe(
-    '--TrelloCardDetailWidth: 400px',
-  )
+  expect(instance.getCss()).toContain('--TrelloCardDetailWidth: 400px')
 
   await instance.handleEvent?.({
     clientX: 500,
@@ -2695,10 +2691,7 @@ test('card detail panel resizes from the left sash', async () => {
   } as unknown as ViewEvent)
   await instance.handleEvent?.({ name: 'cardDetail', type: 'pointerup' })
 
-  const clampedDom = await instance.render()
-  expect(getNodeByName(clampedDom, 'cardDetail')?.style).toBe(
-    '--TrelloCardDetailWidth: 200px',
-  )
+  expect(instance.getCss()).toContain('--TrelloCardDetailWidth: 200px')
   resetTrelloViewDependencyFactory()
 })
 
@@ -4537,13 +4530,13 @@ test('uses largest trello board background image when flag is enabled', async ()
     'TrelloBoardDetail',
   )
   expect(hasClass(boardDetail, 'TrelloBoardDetailWithBackground')).toBe(true)
-  expect(boardDetail.style).toContain(
+  expect(boardDetail.style).toBeUndefined()
+  const css = instance.getCss()
+  expect(css).toContain(
     '--TrelloBoardBackgroundImage: url("https://example.com/large.jpg")',
   )
-  expect(boardDetail.style).toContain(
-    '--TrelloBoardBackgroundRepeat: no-repeat',
-  )
-  expect(boardDetail.style).toContain('--TrelloBoardBackgroundSize: cover')
+  expect(css).toContain('--TrelloBoardBackgroundRepeat: no-repeat')
+  expect(css).toContain('--TrelloBoardBackgroundSize: cover')
   resetTrelloViewDependencyFactory()
 })
 
@@ -4571,7 +4564,8 @@ test('uses trello board background color when no image exists', async () => {
     'TrelloBoardDetail',
   )
   expect(hasClass(boardDetail, 'TrelloBoardDetailWithBackground')).toBe(true)
-  expect(boardDetail.style).toBe('--TrelloBoardBackgroundColor: #0c66e4')
+  expect(boardDetail.style).toBeUndefined()
+  expect(instance.getCss()).toContain('--TrelloBoardBackgroundColor: #0c66e4')
   resetTrelloViewDependencyFactory()
 })
 
@@ -4751,10 +4745,12 @@ test('uses trello background for board opened from search', async () => {
     'TrelloBoardDetail',
   )
   expect(hasClass(boardDetail, 'TrelloBoardDetailWithBackground')).toBe(true)
-  expect(boardDetail.style).toContain(
+  expect(boardDetail.style).toBeUndefined()
+  const css = instance.getCss()
+  expect(css).toContain(
     '--TrelloBoardBackgroundImage: url("https://example.com/search-board.jpg")',
   )
-  expect(boardDetail.style).toContain('--TrelloBoardBackgroundRepeat: repeat')
-  expect(boardDetail.style).toContain('--TrelloBoardBackgroundSize: auto')
+  expect(css).toContain('--TrelloBoardBackgroundRepeat: repeat')
+  expect(css).toContain('--TrelloBoardBackgroundSize: auto')
   resetTrelloViewDependencyFactory()
 })

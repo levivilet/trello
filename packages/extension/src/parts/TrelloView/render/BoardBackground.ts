@@ -69,12 +69,12 @@ export const getBoardBackgroundClassName = (
   return 'TrelloView TrelloBoardDetail TrelloBoardDetailWithBackground'
 }
 
-export const getBoardBackgroundStyle = (
+export const getBoardBackgroundCss = (
   board: Readonly<TrelloBoard>,
   enabled: boolean,
-): string | undefined => {
+): string => {
   if (!enabled) {
-    return undefined
+    return ''
   }
   const properties: string[] = []
   const image = getBackgroundImage(board)
@@ -98,7 +98,9 @@ export const getBoardBackgroundStyle = (
     properties.push(`--TrelloBoardBackgroundColor: ${color}`)
   }
   if (properties.length === 0) {
-    return undefined
+    return ''
   }
-  return properties.join('; ')
+  return `.TrelloBoardDetailWithBackground {
+  ${properties.join(';\n  ')};
+}`
 }
