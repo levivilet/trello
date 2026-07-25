@@ -4,6 +4,7 @@ import {
   VirtualDomElements,
 } from '@lvce-editor/virtual-dom-worker'
 import type { TrelloViewState } from '../TrelloViewState/TrelloViewState.ts'
+import * as MergeClassNames from '../MergeClassNames/MergeClassNames.ts'
 import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
 
 interface ViewAction {
@@ -33,15 +34,18 @@ const actionSignOut: ViewAction = {
 const renderAction = (action: ViewAction): readonly VirtualDomNode[] => {
   return [
     {
-      'data-command': action.command,
       childCount: 1,
       className: 'IconButton',
+      'data-command': action.command,
       title: action.title,
       type: VirtualDomElements.Button,
     },
     {
       childCount: 0,
-      className: `MaskIcon MaskIcon${action.icon}`,
+      className: MergeClassNames.mergeClassNames(
+        'MaskIcon',
+        `MaskIcon${action.icon}`,
+      ),
       role: AriaRoles.None,
       type: VirtualDomElements.Div,
     },

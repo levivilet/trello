@@ -6,7 +6,7 @@ import type {
   VirtualDomViewInstance,
 } from '@lvce-editor/api'
 import { expect, test } from '@jest/globals'
-import { VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
+import { AriaRoles, VirtualDomElements } from '@lvce-editor/virtual-dom-worker'
 import type { ActiveTrelloViewInstance } from '../src/parts/CreateInstance/CreateInstance.ts'
 import type { TrelloClient } from '../src/parts/TrelloClient/TrelloClient.ts'
 import type { TrelloImageCache } from '../src/parts/TrelloImageCache/TrelloImageCache.ts'
@@ -1226,33 +1226,33 @@ test('renderActionsDom returns board list actions', async () => {
     {
       childCount: 2,
       className: 'Actions',
-      role: 'toolbar',
+      role: AriaRoles.ToolBar,
       type: VirtualDomElements.Div,
     },
     {
-      'data-command': 'trello.refreshBoards',
       childCount: 1,
       className: 'IconButton',
+      'data-command': 'trello.refreshBoards',
       title: 'Refresh Boards',
       type: VirtualDomElements.Button,
     },
     {
       childCount: 0,
       className: 'MaskIcon MaskIconRefresh',
-      role: 'none',
+      role: AriaRoles.None,
       type: VirtualDomElements.Div,
     },
     {
-      'data-command': 'trello.logout',
       childCount: 1,
       className: 'IconButton',
+      'data-command': 'trello.logout',
       title: 'Sign Out',
       type: VirtualDomElements.Button,
     },
     {
       childCount: 0,
       className: 'MaskIcon MaskIconAccount',
-      role: 'none',
+      role: AriaRoles.None,
       type: VirtualDomElements.Div,
     },
   ])
@@ -1281,46 +1281,46 @@ test('renderActionsDom returns board detail actions', async () => {
     {
       childCount: 3,
       className: 'Actions',
-      role: 'toolbar',
+      role: AriaRoles.ToolBar,
       type: VirtualDomElements.Div,
     },
     {
-      'data-command': 'trello.backToBoards',
       childCount: 1,
       className: 'IconButton',
+      'data-command': 'trello.backToBoards',
       title: 'Back to Boards',
       type: VirtualDomElements.Button,
     },
     {
       childCount: 0,
       className: 'MaskIcon MaskIconArrowLeft',
-      role: 'none',
+      role: AriaRoles.None,
       type: VirtualDomElements.Div,
     },
     {
-      'data-command': 'trello.refreshBoards',
       childCount: 1,
       className: 'IconButton',
+      'data-command': 'trello.refreshBoards',
       title: 'Refresh Boards',
       type: VirtualDomElements.Button,
     },
     {
       childCount: 0,
       className: 'MaskIcon MaskIconRefresh',
-      role: 'none',
+      role: AriaRoles.None,
       type: VirtualDomElements.Div,
     },
     {
-      'data-command': 'trello.logout',
       childCount: 1,
       className: 'IconButton',
+      'data-command': 'trello.logout',
       title: 'Sign Out',
       type: VirtualDomElements.Button,
     },
     {
       childCount: 0,
       className: 'MaskIcon MaskIconAccount',
-      role: 'none',
+      role: AriaRoles.None,
       type: VirtualDomElements.Div,
     },
   ])
