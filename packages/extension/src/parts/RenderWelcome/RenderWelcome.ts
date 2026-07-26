@@ -34,6 +34,7 @@ const renderWelcomeLink = (): readonly VirtualDomNode[] => {
       childCount: 1,
       className: 'TrelloWelcomeLink',
       href: trelloPowerUpsUrl,
+      rel: 'noopener noreferrer',
       target: '_blank',
       type: VirtualDomElements.A,
     },

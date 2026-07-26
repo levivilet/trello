@@ -20,7 +20,7 @@ export const updateContext = (state: Readonly<TrelloViewState>): void => {
   if (state.credentials && !state.boardDetail) {
     context[contextKeyBoardsFocus] = true
   }
-  if (state.selectedCardDetail) {
+  if (state.selectedCardDetail && !state.boardFilterOpen) {
     context[contextKeyCardDetailFocus] = true
   }
   if (state.cardLabelPickerOpen && state.focusedName === 'cardLabelSearch') {

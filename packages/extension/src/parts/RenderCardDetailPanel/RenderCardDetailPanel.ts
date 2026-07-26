@@ -16,6 +16,13 @@ import { renderCardListSelect } from '../RenderCardListSelect/RenderCardListSele
 import { renderListTitle } from '../RenderListTitle/RenderListTitle.ts'
 import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
 
+const renderCardLink = (url: string | undefined): readonly VirtualDomNode[] => {
+  if (!url) {
+    return []
+  }
+  return renderCardDetailLink(url)
+}
+
 export const renderCardDetailPanel = (
   state: Readonly<TrelloViewState>,
 ): readonly VirtualDomNode[] => {
@@ -49,6 +56,7 @@ export const renderCardDetailPanel = (
     attachmentImageUrls,
     failedCardAttachmentImageIds,
   )
+  const cardLink = renderCardLink(card.url)
   return [
     {
       childCount: 0,
@@ -59,7 +67,10 @@ export const renderCardDetailPanel = (
     },
     {
       childCount:
-        6 + listSelect.childCount + images.childCount + (card.url ? 1 : 0),
+        6 +
+        listSelect.childCount +
+        images.childCount +
+        (cardLink.length > 0 ? 1 : 0),
       className: 'TrelloCardDetailPanel',
       name: 'cardDetail',
       onContextMenu: DomEventListenerFunctions.HandleContextMenu,
@@ -75,6 +86,6 @@ export const renderCardDetailPanel = (
     ...renderCardDetailComments(cardCommentsLoading, comments),
     ...renderCardCommentComposer(state),
     ...images.dom,
-    ...(card.url ? renderCardDetailLink(card.url) : []),
+    ...cardLink,
   ]
 }

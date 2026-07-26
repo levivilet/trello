@@ -192,7 +192,7 @@
     {
       "key": "Escape",
       "command": "trello.closeCardDetail",
-      "when": "trello.cardDetailFocus && !trello.boardFilterFocus"
+      "when": "trello.cardDetailFocus"
     },
     {
       "key": "Enter",

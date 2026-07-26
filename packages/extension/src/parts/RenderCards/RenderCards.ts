@@ -100,6 +100,24 @@ const renderCardLabels = (
   ]
 }
 
+const renderCardCover = (
+  coverImageUrl: string,
+  cardName: string,
+): readonly VirtualDomNode[] => {
+  if (!coverImageUrl) {
+    return []
+  }
+  return [
+    {
+      alt: TrelloStrings.cardCover(cardName),
+      childCount: 0,
+      className: 'TrelloCardCoverImage',
+      src: coverImageUrl,
+      type: VirtualDomElements.Img,
+    },
+  ]
+}
+
 const renderCard = (
   baseUrl: string,
   coverImageUrls: Readonly<Record<string, string>>,
@@ -109,11 +127,12 @@ const renderCard = (
   const coverImageUrl = coverSourceUrl ? coverImageUrls[coverSourceUrl] : ''
   const labelDom = renderCardLabels(card)
   const commentDom = renderCardCommentCount(baseUrl, card)
+  const coverDom = renderCardCover(coverImageUrl, card.name)
   const bodyChildCount =
     1 + (labelDom.length > 0 ? 1 : 0) + (commentDom.length > 0 ? 1 : 0)
   return [
     {
-      childCount: coverImageUrl ? 2 : 1,
+      childCount: coverDom.length > 0 ? 2 : 1,
       className: coverImageUrl
         ? MergeClassNames.mergeClassNames('TrelloCard', 'TrelloCardWithCover')
         : 'TrelloCard',
@@ -124,17 +143,7 @@ const renderCard = (
       onDragStart: DomEventListenerFunctions.HandleDragStart,
       type: VirtualDomElements.Button,
     },
-    ...(coverImageUrl
-      ? [
-          {
-            alt: TrelloStrings.cardCover(card.name),
-            childCount: 0,
-            className: 'TrelloCardCoverImage',
-            src: coverImageUrl,
-            type: VirtualDomElements.Img,
-          },
-        ]
-      : []),
+    ...coverDom,
     {
       childCount: bodyChildCount,
       className: 'TrelloCardBody',
