@@ -294,7 +294,7 @@ export const renderBoardDetail = (
   const errorDom = renderError(error)
   return [
     {
-      childCount: 2 + (boardFilterOpen ? 1 : 0) + (errorDom.length > 0 ? 1 : 0),
+      childCount: 2 + (boardFilterOpen ? 2 : 0) + (errorDom.length > 0 ? 1 : 0),
       className: getBoardBackgroundClassName(
         detail.board,
         boardBackgroundEnabled,

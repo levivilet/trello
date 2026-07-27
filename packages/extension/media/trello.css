@@ -456,6 +456,12 @@ button.TrelloSearchResult:hover {
   border-color: transparent;
 }
 
+.TrelloBoardFilterOverlay {
+  position: absolute;
+  z-index: 9;
+  inset: 0;
+}
+
 .TrelloBoardFilterPopup {
   position: absolute;
   z-index: 10;

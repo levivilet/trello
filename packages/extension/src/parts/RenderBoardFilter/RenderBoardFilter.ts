@@ -104,9 +104,27 @@ const renderBoardFilterPopup = (
   ]
 }
 
+const renderBoardFilterOverlay = (
+  state: Readonly<TrelloViewState>,
+): readonly VirtualDomNode[] => {
+  if (!state.boardFilterOpen) {
+    return []
+  }
+  return [
+    {
+      childCount: 0,
+      className: 'TrelloBoardFilterOverlay',
+      name: 'closeBoardFilter',
+      onClick: DomEventListenerFunctions.HandleClick,
+      type: VirtualDomElements.Div,
+    },
+  ]
+}
+
 export const renderBoardFilter = (
   state: Readonly<TrelloViewState>,
 ): readonly VirtualDomNode[] => {
+  const overlay = renderBoardFilterOverlay(state)
   const popup = renderBoardFilterPopup(state)
   return [
     {
@@ -115,6 +133,7 @@ export const renderBoardFilter = (
       type: VirtualDomElements.Div,
     },
     ...renderBoardFilterButton(state),
+    ...overlay,
     ...popup,
   ]
 }
