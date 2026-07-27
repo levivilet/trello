@@ -22,6 +22,7 @@ export interface TrelloViewDependencies {
   readonly imageCache?: TrelloImageCache
   readonly isTest?: boolean
   readonly readBoardBackgroundEnabled?: () => Promise<boolean>
+  readonly readCardDetailPopupEnabled?: () => Promise<boolean>
   readonly readSearchEnabled?: () => Promise<boolean>
   readonly recentStorage: RecentBoardStorage
   readonly storage: CredentialStorage
@@ -45,6 +46,7 @@ export interface TrelloViewState {
   cardCommentsLoading: boolean
   cardDetailLoading: boolean
   cardDetailLoadingCardId: string
+  cardDetailPopupEnabled: boolean
   cardDetailResizeStartWidth: number
   cardDetailResizeStartX: number
   cardDetailWidth: number

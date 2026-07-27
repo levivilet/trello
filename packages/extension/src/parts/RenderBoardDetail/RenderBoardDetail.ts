@@ -247,9 +247,10 @@ const renderList = (
 const getCardDetailPanelChildCount = (
   state: Readonly<TrelloViewState>,
 ): number => {
-  const { cardDetailLoading, selectedCardDetail } = state
+  const { cardDetailLoading, cardDetailPopupEnabled, selectedCardDetail } =
+    state
   if (selectedCardDetail) {
-    return 2
+    return cardDetailPopupEnabled ? 1 : 2
   }
   if (cardDetailLoading) {
     return 1

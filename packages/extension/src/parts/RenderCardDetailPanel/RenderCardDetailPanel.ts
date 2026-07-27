@@ -23,6 +23,37 @@ const renderCardLink = (url: string | undefined): readonly VirtualDomNode[] => {
   return renderCardDetailLink(url)
 }
 
+const getPanelClassName = (popupEnabled: boolean): string => {
+  return popupEnabled
+    ? 'TrelloCardDetailPanel TrelloCardDetailPanelPopup'
+    : 'TrelloCardDetailPanel'
+}
+
+const renderCardDetailPopup = (
+  panel: readonly VirtualDomNode[],
+): readonly VirtualDomNode[] => {
+  return [
+    {
+      childCount: 1,
+      className: 'TrelloCardDetailPopup',
+      type: VirtualDomElements.Div,
+    },
+    ...panel,
+  ]
+}
+
+const renderCardDetailResizeSash = (): readonly VirtualDomNode[] => {
+  return [
+    {
+      childCount: 0,
+      className: 'TrelloCardDetailResizeSash',
+      name: 'resizeCardDetail',
+      onPointerDown: DomEventListenerFunctions.HandleSashPointerDown,
+      type: VirtualDomElements.Div,
+    },
+  ]
+}
+
 export const renderCardDetailPanel = (
   state: Readonly<TrelloViewState>,
 ): readonly VirtualDomNode[] => {
@@ -31,19 +62,21 @@ export const renderCardDetailPanel = (
     cardAttachmentsLoading,
     cardCommentsLoading,
     cardDetailLoading,
+    cardDetailPopupEnabled,
     failedCardAttachmentImageIds,
     selectedCardDetail,
   } = state
   if (cardDetailLoading && !selectedCardDetail) {
-    return [
+    const panel = [
       {
         childCount: 2,
-        className: 'TrelloCardDetailPanel',
+        className: getPanelClassName(cardDetailPopupEnabled),
         type: VirtualDomElements.Div,
       },
       ...renderListTitle(TrelloStrings.cardDetails()),
       text(TrelloStrings.loadingCard()),
     ]
+    return cardDetailPopupEnabled ? renderCardDetailPopup(panel) : panel
   }
   if (!selectedCardDetail) {
     return []
@@ -57,21 +90,14 @@ export const renderCardDetailPanel = (
     failedCardAttachmentImageIds,
   )
   const cardLink = renderCardLink(card.url)
-  return [
-    {
-      childCount: 0,
-      className: 'TrelloCardDetailResizeSash',
-      name: 'resizeCardDetail',
-      onPointerDown: DomEventListenerFunctions.HandleSashPointerDown,
-      type: VirtualDomElements.Div,
-    },
+  const panel = [
     {
       childCount:
         6 +
         listSelect.childCount +
         images.childCount +
         (cardLink.length > 0 ? 1 : 0),
-      className: 'TrelloCardDetailPanel',
+      className: getPanelClassName(cardDetailPopupEnabled),
       name: 'cardDetail',
       onContextMenu: DomEventListenerFunctions.HandleContextMenu,
       onPointerMove: DomEventListenerFunctions.HandleSashPointerMove,
@@ -88,4 +114,8 @@ export const renderCardDetailPanel = (
     ...images.dom,
     ...cardLink,
   ]
+  if (cardDetailPopupEnabled) {
+    return renderCardDetailPopup(panel)
+  }
+  return [...renderCardDetailResizeSash(), ...panel]
 }

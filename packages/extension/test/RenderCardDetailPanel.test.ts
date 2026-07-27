@@ -500,3 +500,24 @@ test('renderCardDetailPanel handles loading, absent, and complete details', () =
   expect(findByName(dom, 'cardList:card-1')).toBeDefined()
   expect(hasText(dom, 'Open in Trello')).toBe(true)
 })
+
+test('renderCardDetailPanel renders popup mode without a resize sash', () => {
+  const dom = renderCardDetailPanel({
+    ...createInitialState(),
+    cardDetailPopupEnabled: true,
+    selectedCardDetail: {
+      attachments: [],
+      card,
+      comments: [],
+    },
+  })
+
+  expect(dom[0]).toMatchObject({
+    childCount: 1,
+    className: 'TrelloCardDetailPopup',
+  })
+  expect(findByName(dom, 'resizeCardDetail')).toBeUndefined()
+  expect(findByName(dom, 'cardDetail')).toMatchObject({
+    className: 'TrelloCardDetailPanel TrelloCardDetailPanelPopup',
+  })
+})

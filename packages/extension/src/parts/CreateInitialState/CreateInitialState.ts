@@ -20,6 +20,7 @@ export const createInitialState = (): TrelloViewState => {
     cardCommentsLoading: false,
     cardDetailLoading: false,
     cardDetailLoadingCardId: '',
+    cardDetailPopupEnabled: false,
     cardDetailResizeStartWidth: 360,
     cardDetailResizeStartX: 0,
     cardDetailWidth: 360,

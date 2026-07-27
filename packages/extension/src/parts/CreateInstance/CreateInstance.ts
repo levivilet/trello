@@ -263,6 +263,7 @@ export const createInstance = async (
       client,
       imageCache,
       readBoardBackgroundEnabled,
+      readCardDetailPopupEnabled,
       readSearchEnabled,
       recentStorage,
       storage,
@@ -285,6 +286,9 @@ export const createInstance = async (
     }
     if (readBoardBackgroundEnabled) {
       state.boardBackgroundEnabled = await readBoardBackgroundEnabled()
+    }
+    if (readCardDetailPopupEnabled) {
+      state.cardDetailPopupEnabled = await readCardDetailPopupEnabled()
     }
     state.recentBoardViews = await recentStorage.read()
     const storedCredentials = await storage.read()

@@ -250,6 +250,7 @@ const createAuthenticatedInstance = async (
     readonly boardBackgroundEnabled?: boolean
     readonly boardDetails?: Readonly<Record<string, TrelloBoardDetail>>
     readonly boardLabels?: Readonly<Record<string, readonly TrelloLabel[]>>
+    readonly cardDetailPopupEnabled?: boolean
     readonly cardCreateErrors?: Readonly<Record<string, string>>
     readonly cardDetails?: Readonly<Record<string, TrelloCardDetail>>
     readonly cardLabelAddErrors?: Readonly<Record<string, string>>
@@ -290,6 +291,9 @@ const createAuthenticatedInstance = async (
     ...(imageCache && { imageCache }),
     readBoardBackgroundEnabled: async (): Promise<boolean> => {
       return options.boardBackgroundEnabled === true
+    },
+    readCardDetailPopupEnabled: async (): Promise<boolean> => {
+      return options.cardDetailPopupEnabled === true
     },
     recentStorage: createMemoryRecentBoardStorage(recentBoardViews),
     storage: createMemoryCredentialStorage(),
@@ -2872,6 +2876,51 @@ test('card detail panel resizes from the left sash', async () => {
   await instance.handleSashPointerUp()
 
   expect(instance.getCss()).toContain('--TrelloCardDetailWidth: 200px')
+  resetTrelloViewDependencyFactory()
+})
+
+test('card detail opens in a popup when enabled', async () => {
+  const instance = await createAuthenticatedInstance(
+    [{ id: 'board-1', name: 'Roadmap' }],
+    [],
+    {
+      boardDetails: {
+        'board-1': {
+          board: { id: 'board-1', name: 'Roadmap' },
+          lists: [
+            {
+              cards: [{ id: 'card-1', name: 'Ship Trello view' }],
+              id: 'list-1',
+              name: 'Todo',
+            },
+          ],
+        },
+      },
+      cardDetailPopupEnabled: true,
+      cardDetails: {
+        'card-1': {
+          attachments: [],
+          card: {
+            desc: '',
+            id: 'card-1',
+            name: 'Ship Trello view',
+          },
+          comments: [],
+        },
+      },
+    },
+  )
+  await instance.handleEvent?.({ name: 'board:board-1', type: 'click' })
+  await instance.handleEvent?.({ name: 'card:card-1', type: 'click' })
+
+  const dom = await instance.render()
+  expect(getNodeByName(dom, 'resizeCardDetail')).toBeUndefined()
+  expect(
+    getDirectChildClassNamesByClassName(dom, 'TrelloBoardDetailContent'),
+  ).toEqual(['TrelloLists', 'TrelloCardDetailPopup'])
+  expect(
+    getDirectChildClassNamesByClassName(dom, 'TrelloCardDetailPopup'),
+  ).toEqual(['TrelloCardDetailPanel TrelloCardDetailPanelPopup'])
   resetTrelloViewDependencyFactory()
 })
 

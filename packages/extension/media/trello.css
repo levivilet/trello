@@ -824,6 +824,28 @@ button.TrelloSearchResult:hover {
   border-radius: 8px;
 }
 
+.TrelloCardDetailPopup {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  contain: strict;
+  padding: 24px;
+  background: rgb(0 0 0 / 64%);
+}
+
+.TrelloCardDetailPanelPopup {
+  flex: 0 1 900px;
+  width: min(900px, 100%);
+  height: min(720px, 100%);
+  max-height: 100%;
+  min-width: 0;
+  box-shadow: 0 16px 48px var(--TrelloShadow);
+}
+
 .TrelloCardDetailResizeSash {
   flex: 0 0 8px;
   contain: strict;
@@ -832,6 +854,12 @@ button.TrelloSearchResult:hover {
 
 .TrelloCardDetailResizeSash:hover {
   background: color-mix(in srgb, var(--TrelloFocus) 28%, transparent);
+}
+
+@media (max-width: 520px) {
+  .TrelloCardDetailPopup {
+    padding: 12px;
+  }
 }
 
 .TrelloCardDetailHeader {

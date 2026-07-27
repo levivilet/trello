@@ -21,6 +21,11 @@
       "type": "boolean",
       "default": false
     },
+    "trello.cardDetailPopupEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Open card details in a centered popup instead of a right-side panel."
+    },
     "trello.batchRequestsEnabled": {
       "type": "boolean",
       "default": false,
