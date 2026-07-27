@@ -40,6 +40,7 @@ export const view: TrelloView = {
 }
 
 export {
+  readCardDetailPopupEnabledPreference,
   resetTrelloViewDependencyFactory,
   setTrelloViewDependencyFactory,
 } from '../DependencyFactory/DependencyFactory.ts'

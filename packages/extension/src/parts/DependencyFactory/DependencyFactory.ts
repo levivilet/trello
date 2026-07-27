@@ -28,12 +28,15 @@ const readBoardBackgroundEnabledPreference = async (): Promise<boolean> => {
   return (await api.getPreference?.(boardBackgroundEnabledPreference)) === true
 }
 
-const readCardDetailPopupEnabledPreference = async (): Promise<boolean> => {
-  const api = ExtensionApi as unknown as {
-    readonly getPreference?: (key: string) => Promise<unknown>
+export const readCardDetailPopupEnabledPreference =
+  async (): Promise<boolean> => {
+    const api = ExtensionApi as unknown as {
+      readonly getPreference?: (key: string) => Promise<unknown>
+    }
+    return (
+      (await api.getPreference?.(cardDetailPopupEnabledPreference)) === true
+    )
   }
-  return (await api.getPreference?.(cardDetailPopupEnabledPreference)) === true
-}
 
 const readBatchRequestsEnabledPreference = async (): Promise<boolean> => {
   const api = ExtensionApi as unknown as {

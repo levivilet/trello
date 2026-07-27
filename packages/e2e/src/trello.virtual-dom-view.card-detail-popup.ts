@@ -44,4 +44,8 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await expect(popup).toBeVisible()
   await expect(popupPanel).toBeVisible()
   await expect(resizeSash).toHaveCount(0)
+
+  await Command.execute('Preferences.update', {
+    'trello.cardDetailPopupEnabled': false,
+  })
 }

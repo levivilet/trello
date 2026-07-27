@@ -109,6 +109,8 @@ export const activate = async (): Promise<void> => {
           testCurrentBoardCacheName,
         ),
         isTest: true,
+        readCardDetailPopupEnabled:
+          TrelloView.readCardDetailPopupEnabledPreference,
         recentStorage: createCacheRecentBoardStorage(testRecentBoardCacheName),
         storage: createCacheCredentialStorage(testCredentialCacheName),
       }))
