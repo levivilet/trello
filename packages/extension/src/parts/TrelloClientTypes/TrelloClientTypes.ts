@@ -1,6 +1,7 @@
 import type {
   TrelloBoard,
   TrelloBoardDetail,
+  TrelloAttachment,
   TrelloCard,
   TrelloCardCreate,
   TrelloCardDetail,
@@ -31,6 +32,11 @@ export interface TrelloCardDetailPartsResult {
 }
 
 export interface TrelloClient {
+  readonly addCardAttachment: (
+    card: TrelloCard,
+    file: File,
+    credentials: TrelloCredentials,
+  ) => Promise<TrelloAttachment>
   readonly addCardComment: (
     card: TrelloCard,
     text: string,
@@ -120,6 +126,7 @@ export interface TrelloResponse {
 }
 
 export interface TrelloRequestInit {
+  readonly body?: Readonly<FormData>
   readonly method?: string
 }
 

@@ -8,6 +8,7 @@ import type {
   TrelloList,
 } from '../src/parts/TrelloTypes/TrelloTypes.ts'
 import { createInitialState } from '../src/parts/CreateInitialState/CreateInitialState.ts'
+import * as DomEventListenerFunctions from '../src/parts/DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import { getCardListId } from '../src/parts/GetCardListId/GetCardListId.ts'
 import { getMatchingLabels } from '../src/parts/GetMatchingLabels/GetMatchingLabels.ts'
 import { hasCardLabel } from '../src/parts/HasCardLabel/HasCardLabel.ts'
@@ -497,6 +498,12 @@ test('renderCardDetailPanel handles loading, absent, and complete details', () =
     },
   })
   expect(findByName(dom, 'cardDetail')).toBeDefined()
+  expect(findByName(dom, 'cardDetail')).toMatchObject({
+    'data-id': 'cardDetail',
+    onDragLeave: DomEventListenerFunctions.HandleDragLeave,
+    onDragOver: DomEventListenerFunctions.HandleDragOver,
+    onDrop: DomEventListenerFunctions.HandleDrop,
+  })
   expect(findByName(dom, 'cardList:card-1')).toBeDefined()
   expect(hasText(dom, 'Open in Trello')).toBe(true)
 })

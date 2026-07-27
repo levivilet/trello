@@ -54,12 +54,43 @@ const renderCardDetailResizeSash = (): readonly VirtualDomNode[] => {
   ]
 }
 
+const renderCardAttachmentDropArea = (
+  uploading: boolean,
+): readonly VirtualDomNode[] => {
+  return [
+    {
+      childCount: 1,
+      className: 'TrelloCardAttachmentDropArea',
+      type: VirtualDomElements.Div,
+    },
+    text(
+      uploading
+        ? TrelloStrings.uploadingFiles()
+        : TrelloStrings.dropFilesToUpload(),
+    ),
+  ]
+}
+
+const getCardDetailPanelChildCount = (
+  showDropArea: boolean,
+  listSelectChildCount: number,
+  imagesChildCount: number,
+  hasCardLink: boolean,
+): number => {
+  if (showDropArea) {
+    return 1
+  }
+  return 6 + listSelectChildCount + imagesChildCount + (hasCardLink ? 1 : 0)
+}
+
 export const renderCardDetailPanel = (
   state: Readonly<TrelloViewState>,
 ): readonly VirtualDomNode[] => {
   const {
     attachmentImageUrls,
+    cardAttachmentDropActive,
     cardAttachmentsLoading,
+    cardAttachmentsUploading,
     cardCommentsLoading,
     cardDetailLoading,
     cardDetailPopupEnabled,
@@ -82,6 +113,10 @@ export const renderCardDetailPanel = (
     return []
   }
   const { attachments, card, comments } = selectedCardDetail
+  const showDropArea = cardAttachmentDropActive || cardAttachmentsUploading
+  const dropArea = showDropArea
+    ? renderCardAttachmentDropArea(cardAttachmentsUploading)
+    : []
   const listSelect = renderCardListSelect(state, card)
   const images = renderCardDetailImages(
     cardAttachmentsLoading,
@@ -90,20 +125,7 @@ export const renderCardDetailPanel = (
     failedCardAttachmentImageIds,
   )
   const cardLink = renderCardLink(card.url)
-  const panel = [
-    {
-      childCount:
-        6 +
-        listSelect.childCount +
-        images.childCount +
-        (cardLink.length > 0 ? 1 : 0),
-      className: getPanelClassName(cardDetailPopupEnabled),
-      name: 'cardDetail',
-      onContextMenu: DomEventListenerFunctions.HandleContextMenu,
-      onPointerMove: DomEventListenerFunctions.HandleSashPointerMove,
-      onPointerUp: DomEventListenerFunctions.HandleSashPointerUp,
-      type: VirtualDomElements.Div,
-    },
+  const content = [
     ...renderCardDetailHeader(state),
     ...renderCardDetailLabels(state, card.labels),
     ...listSelect.dom,
@@ -113,6 +135,28 @@ export const renderCardDetailPanel = (
     ...renderCardCommentComposer(state),
     ...images.dom,
     ...cardLink,
+  ]
+  const visibleContent = showDropArea ? dropArea : content
+  const panel = [
+    {
+      childCount: getCardDetailPanelChildCount(
+        showDropArea,
+        listSelect.childCount,
+        images.childCount,
+        cardLink.length > 0,
+      ),
+      className: getPanelClassName(cardDetailPopupEnabled),
+      'data-id': 'cardDetail',
+      name: 'cardDetail',
+      onContextMenu: DomEventListenerFunctions.HandleContextMenu,
+      onDragLeave: DomEventListenerFunctions.HandleDragLeave,
+      onDragOver: DomEventListenerFunctions.HandleDragOver,
+      onDrop: DomEventListenerFunctions.HandleDrop,
+      onPointerMove: DomEventListenerFunctions.HandleSashPointerMove,
+      onPointerUp: DomEventListenerFunctions.HandleSashPointerUp,
+      type: VirtualDomElements.Div,
+    },
+    ...visibleContent,
   ]
   if (cardDetailPopupEnabled) {
     return renderCardDetailPopup(panel)

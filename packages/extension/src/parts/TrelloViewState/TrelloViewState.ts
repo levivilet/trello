@@ -42,7 +42,9 @@ export interface TrelloViewState {
   boardLabelsLoaded: boolean
   boardLabelsLoading: boolean
   boards: readonly TrelloBoard[]
+  cardAttachmentDropActive: boolean
   cardAttachmentsLoading: boolean
+  cardAttachmentsUploading: boolean
   cardCommentsLoading: boolean
   cardDetailLoading: boolean
   cardDetailLoadingCardId: string

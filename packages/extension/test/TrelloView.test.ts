@@ -11,6 +11,7 @@ import type { ActiveTrelloViewInstance } from '../src/parts/CreateInstance/Creat
 import type { TrelloClient } from '../src/parts/TrelloClient/TrelloClient.ts'
 import type { TrelloImageCache } from '../src/parts/TrelloImageCache/TrelloImageCache.ts'
 import type {
+  TrelloAttachment,
   TrelloBoard,
   TrelloBoardDetail,
   TrelloCard,
@@ -395,6 +396,16 @@ const createStagedCardClient = (options: {
   readonly getCardDetailPartsCacheFirst: TrelloClient['getCardDetailPartsCacheFirst']
 }): TrelloClient => {
   return {
+    async addCardAttachment(
+      _card: Readonly<TrelloCard>,
+      file: File,
+    ): Promise<TrelloAttachment> {
+      return {
+        id: 'created-attachment-1',
+        mimeType: file.type,
+        name: file.name,
+      }
+    },
     async addCardComment(
       _card: Readonly<TrelloCard>,
       text: string,
@@ -1024,7 +1035,7 @@ test('cards and lists render drag and drop attributes', async () => {
     },
     {
       name: 'handleDragOver',
-      params: ['handleDragOver', 'event.currentTarget.name'],
+      params: ['handleDragOver', 'event.currentTarget.dataset.id'],
       preventDefault: true,
     },
     {
@@ -1033,7 +1044,11 @@ test('cards and lists render drag and drop attributes', async () => {
     },
     {
       name: 'handleDrop',
-      params: ['handleDrop', 'event.currentTarget.name'],
+      params: [
+        'handleDrop',
+        'event.currentTarget.dataset.id',
+        'event.dataTransfer.files',
+      ],
       preventDefault: true,
     },
     {
@@ -1117,6 +1132,7 @@ test('cards and lists render drag and drop attributes', async () => {
   expect(getNodeByName(dom, 'list:list-1')).toEqual(
     expect.objectContaining({
       className: 'TrelloList',
+      'data-id': 'list:list-1',
       name: 'list:list-1',
       onClick: 'handleClick',
       onContextMenu: 'handleContextMenu',
@@ -3652,6 +3668,13 @@ test('clicking card renders cached detail before fresh detail resolves', async (
   const freshCardDeferred = createDeferred<TrelloCardDetail>()
   const boards = [{ id: 'board-1', name: 'Roadmap' }]
   const client: TrelloClient = {
+    async addCardAttachment(_card: TrelloCard, file: File) {
+      return {
+        id: 'created-attachment-1',
+        mimeType: file.type,
+        name: file.name,
+      }
+    },
     async addCardComment(_card: TrelloCard, text: string) {
       return {
         data: { text },

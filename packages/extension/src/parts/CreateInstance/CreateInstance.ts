@@ -84,7 +84,7 @@ export interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly handleDragLeave: () => Promise<void>
   readonly handleDragOver: (name: string) => Promise<void>
   readonly handleDragStart: (name: string) => Promise<void>
-  readonly handleDrop: (name: string) => Promise<void>
+  readonly handleDrop: (name: string, fileList?: FileList) => Promise<void>
   readonly handleImageError: (name: string) => Promise<void>
   readonly handleKeyDown: (
     name: string,
@@ -414,9 +414,9 @@ export const createInstance = async (
         handleDragStartEvent(viewContext, { name, type: 'dragstart' }),
       )
     },
-    async handleDrop(name: string): Promise<void> {
+    async handleDrop(name: string, fileList?: FileList): Promise<void> {
       await runEventHandler(() =>
-        handleDropEvent(viewContext, { name, type: 'drop' }),
+        handleDropEvent(viewContext, { name, type: 'drop' }, fileList),
       )
     },
     async handleEvent(event: Readonly<ViewEvent>): Promise<void> {

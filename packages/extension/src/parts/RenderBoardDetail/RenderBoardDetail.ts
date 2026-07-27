@@ -224,6 +224,7 @@ const renderList = (
     {
       childCount: 3,
       className: getListClassName(state, list),
+      'data-id': `list:${list.id}`,
       name: `list:${list.id}`,
       onClick: DomEventListenerFunctions.HandleClick,
       onContextMenu: DomEventListenerFunctions.HandleContextMenu,

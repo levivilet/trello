@@ -862,6 +862,22 @@ button.TrelloSearchResult:hover {
   background: color-mix(in srgb, var(--TrelloFocus) 28%, transparent);
 }
 
+.TrelloCardAttachmentDropArea {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  contain: strict;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--TrelloForegroundStrong);
+  background: color-mix(in srgb, var(--TrelloFocus) 8%, var(--TrelloSurface));
+  border: 2px dashed var(--TrelloFocus);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
 @media (max-width: 520px) {
   .TrelloCardDetailPopup {
     padding: 12px;

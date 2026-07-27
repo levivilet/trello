@@ -14,6 +14,7 @@ import type {
   TrelloLabel,
   TrelloSearchResult,
 } from '../TrelloTypes/TrelloTypes.ts'
+import { addCardAttachment } from '../AddCardAttachment/AddCardAttachment.ts'
 import { addCardComment } from '../AddCardComment/AddCardComment.ts'
 import { addCardLabel } from '../AddCardLabel/AddCardLabel.ts'
 import { createCard } from '../CreateCard/CreateCard.ts'
@@ -77,6 +78,13 @@ export const createTrelloClient = (
     )
   }
   return {
+    addCardAttachment(
+      card,
+      file,
+      credentials,
+    ): ReturnType<TrelloClient['addCardAttachment']> {
+      return addCardAttachment(fetchLike, card, file, credentials, cache)
+    },
     addCardComment(
       card: TrelloCard,
       text: string,

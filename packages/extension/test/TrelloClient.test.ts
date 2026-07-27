@@ -1082,6 +1082,58 @@ test('createList sends title and board to trello', async () => {
   expect(requestInits[0]?.method).toBe('POST')
 })
 
+test('addCardAttachment uploads a file as form data', async () => {
+  const requests: string[] = []
+  const requestInits: (
+    | {
+        readonly body?: Readonly<FormData>
+        readonly method?: string
+      }
+    | undefined
+  )[] = []
+  const client = createTrelloClient(async (url, init) => {
+    requests.push(url)
+    requestInits.push(init)
+    return jsonResponse({
+      id: 'attachment-1',
+      mimeType: 'image/png',
+      name: 'screenshot.png',
+      url: 'https://example.com/screenshot.png',
+    })
+  })
+  const file = new File(['image'], 'screenshot.png', {
+    type: 'image/png',
+  })
+
+  await expect(
+    client.addCardAttachment({ id: 'card-1', name: 'Ship uploads' }, file, {
+      apiKey: validApiKey,
+      token: validToken,
+    }),
+  ).resolves.toEqual({
+    id: 'attachment-1',
+    mimeType: 'image/png',
+    name: 'screenshot.png',
+    url: 'https://example.com/screenshot.png',
+  })
+
+  expect(requests).toHaveLength(1)
+  const url = new URL(requests[0])
+  expect(url.pathname).toBe('/1/cards/card-1/attachments')
+  expect(url.searchParams.get('key')).toBe(validApiKey)
+  expect(url.searchParams.get('token')).toBe(validToken)
+  expect(requestInits[0]?.method).toBe('POST')
+  const body = requestInits[0]?.body
+  expect(body).toBeInstanceOf(FormData)
+  const formData = body as FormData
+  const uploadedFile = formData.get('file') as File
+  expect(uploadedFile.name).toBe('screenshot.png')
+  expect(uploadedFile.type).toBe('image/png')
+  await expect(uploadedFile.text()).resolves.toBe('image')
+  expect(formData.get('name')).toBe('screenshot.png')
+  expect(formData.get('mimeType')).toBe('image/png')
+})
+
 test('search requests trello search with card and board params', async () => {
   const requests: string[] = []
   const client = createTrelloClient(async (url) => {

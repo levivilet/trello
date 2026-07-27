@@ -89,6 +89,39 @@ test('card label rendering covers empty picker and create fallbacks', () => {
   expect(createPicker.some((node) => node.text === 'Creating...')).toBe(true)
 })
 
+test('card attachment drop area covers the open card while dragging and uploading', () => {
+  const dragging = renderCardDetailPanel({
+    ...createInitialState(),
+    cardAttachmentDropActive: true,
+    cardDetailPopupEnabled: true,
+    selectedCardDetail: cardDetail,
+  })
+  expect(
+    dragging.some((node) => node.className === 'TrelloCardAttachmentDropArea'),
+  ).toBe(true)
+  expect(dragging.some((node) => node.text === 'Drop files to upload')).toBe(
+    true,
+  )
+  expect(
+    dragging.some(
+      (node) =>
+        node.className === 'TrelloCardDetailPanel TrelloCardDetailPanelPopup',
+    ),
+  ).toBe(true)
+  expect(
+    dragging.some((node) => node.className === 'TrelloCardDetailHeader'),
+  ).toBe(false)
+
+  const uploading = renderCardDetailPanel({
+    ...createInitialState(),
+    cardAttachmentsUploading: true,
+    selectedCardDetail: cardDetail,
+  })
+  expect(uploading.some((node) => node.text === 'Uploading files...')).toBe(
+    true,
+  )
+})
+
 test('auth and board rendering show their loading labels', () => {
   expect(
     renderAuth({

@@ -58,6 +58,8 @@ export const createNewLabel = (): string => getString(UiStrings.CreateNewLabel)
 export const createNewList = (): string => getString(UiStrings.CreateNewList)
 export const creating = (): string => getString(UiStrings.Creating)
 export const description = (): string => getString(UiStrings.Description)
+export const dropFilesToUpload = (): string =>
+  getString(UiStrings.DropFilesToUpload)
 export const edit = (): string => getString(UiStrings.Edit)
 export const enterCardTitle = (): string => getString(UiStrings.EnterCardTitle)
 export const enterListTitle = (): string => getString(UiStrings.EnterListTitle)
@@ -115,6 +117,7 @@ export const trello = (): string => getString(UiStrings.Trello)
 export const trelloBoard = (name: string): string =>
   getStringWithPlaceholder(UiStrings.TrelloBoard, name)
 export const unknownMember = (): string => getString(UiStrings.UnknownMember)
+export const uploadingFiles = (): string => getString(UiStrings.UploadingFiles)
 export const welcome = (): string => getString(UiStrings.Welcome)
 export const welcomeDescription = (): string =>
   getString(UiStrings.WelcomeDescription)

@@ -110,6 +110,19 @@ export const deleteCachedCardComments = async (
   )
 }
 
+export const deleteCachedCardAttachments = async (
+  cache: TrelloApiCache | undefined,
+  card: TrelloCard,
+  credentials: TrelloCredentials,
+): Promise<void> => {
+  await deleteCachedJson(
+    cache,
+    `/cards/${card.id}/attachments`,
+    credentials,
+    attachmentsParams,
+  )
+}
+
 export const getCardDetailCard = (
   fetchLike: FetchLike,
   card: TrelloCard,
