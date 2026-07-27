@@ -47,6 +47,17 @@ const parseCredentials = (
   }
 }
 
+const isSecretStorageUnsupported = (error: unknown): boolean => {
+  if (!(error instanceof Error)) {
+    return false
+  }
+  return [
+    'Extensions.deleteSecret',
+    'Extensions.getSecret',
+    'Extensions.storeSecret',
+  ].some((command) => error.message.includes(`Command not found ${command}`))
+}
+
 export const createCacheCredentialStorage = (
   selectedCacheName = cacheName,
 ): CredentialStorage => {
@@ -103,15 +114,39 @@ export const createSecretCredentialStorage = (
   secretStorage: SecretStorageApi,
   legacyStorage: CredentialStorage = createCacheCredentialStorage(),
 ): CredentialStorage => {
+  let secretStorageSupported = true
+
+  const handleSecretStorageError = (error: unknown): void => {
+    if (!isSecretStorageUnsupported(error)) {
+      throw error
+    }
+    secretStorageSupported = false
+  }
+
   return {
     async delete(): Promise<void> {
-      await secretStorage.deleteSecret(credentialsSecretKey)
+      if (secretStorageSupported) {
+        try {
+          await secretStorage.deleteSecret(credentialsSecretKey)
+        } catch (error) {
+          handleSecretStorageError(error)
+        }
+      }
       await legacyStorage.delete()
     },
     async read(): Promise<TrelloCredentials | undefined> {
-      const storedCredentials = parseCredentials(
-        await secretStorage.getSecret(credentialsSecretKey),
-      )
+      if (!secretStorageSupported) {
+        return legacyStorage.read()
+      }
+      let storedCredentials: TrelloCredentials | undefined
+      try {
+        storedCredentials = parseCredentials(
+          await secretStorage.getSecret(credentialsSecretKey),
+        )
+      } catch (error) {
+        handleSecretStorageError(error)
+        return legacyStorage.read()
+      }
       if (storedCredentials) {
         return storedCredentials
       }
@@ -119,19 +154,34 @@ export const createSecretCredentialStorage = (
       if (!legacyCredentials) {
         return undefined
       }
-      await secretStorage.storeSecret(
-        credentialsSecretKey,
-        JSON.stringify(legacyCredentials),
-      )
+      try {
+        await secretStorage.storeSecret(
+          credentialsSecretKey,
+          JSON.stringify(legacyCredentials),
+        )
+      } catch (error) {
+        handleSecretStorageError(error)
+        return legacyCredentials
+      }
       await legacyStorage.delete()
       return legacyCredentials
     },
     async write(credentials: TrelloCredentials): Promise<void> {
-      await secretStorage.storeSecret(
-        credentialsSecretKey,
-        JSON.stringify(credentials),
-      )
-      await legacyStorage.delete()
+      if (secretStorageSupported) {
+        try {
+          await secretStorage.storeSecret(
+            credentialsSecretKey,
+            JSON.stringify(credentials),
+          )
+        } catch (error) {
+          handleSecretStorageError(error)
+        }
+      }
+      if (secretStorageSupported) {
+        await legacyStorage.delete()
+      } else {
+        await legacyStorage.write(credentials)
+      }
     },
   }
 }

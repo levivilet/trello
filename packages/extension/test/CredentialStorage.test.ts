@@ -185,6 +185,57 @@ test('secret credential storage ignores malformed values', async () => {
   await expect(storage.read()).resolves.toBeUndefined()
 })
 
+test('secret credential storage falls back when the host does not support the api', async () => {
+  const legacyStorage = createMemoryCredentialStorage({
+    apiKey: validApiKey,
+    token: validToken,
+  })
+  const storage = createSecretCredentialStorage(
+    {
+      async deleteSecret(): Promise<void> {
+        throw new Error('Command not found Extensions.deleteSecret')
+      },
+      async getSecret(): Promise<string> {
+        throw new Error('Command not found Extensions.getSecret')
+      },
+      async storeSecret(): Promise<void> {
+        throw new Error('Command not found Extensions.storeSecret')
+      },
+    },
+    legacyStorage,
+  )
+
+  await expect(storage.read()).resolves.toEqual({
+    apiKey: validApiKey,
+    token: validToken,
+  })
+  await storage.write({
+    apiKey: 'updated-api-key',
+    token: 'updated-token',
+  })
+  await expect(legacyStorage.read()).resolves.toEqual({
+    apiKey: 'updated-api-key',
+    token: 'updated-token',
+  })
+  await storage.delete()
+  await expect(legacyStorage.read()).resolves.toBeUndefined()
+})
+
+test('secret credential storage preserves unexpected errors', async () => {
+  const storage = createSecretCredentialStorage(
+    {
+      async deleteSecret(): Promise<void> {},
+      async getSecret(): Promise<string> {
+        throw new Error('Secret storage failed')
+      },
+      async storeSecret(): Promise<void> {},
+    },
+    createMemoryCredentialStorage(),
+  )
+
+  await expect(storage.read()).rejects.toThrow('Secret storage failed')
+})
+
 test('cache credential storage uses the production cache name by default', async () => {
   const openedCacheNames: string[] = []
   const originalCaches = globalThis.caches
