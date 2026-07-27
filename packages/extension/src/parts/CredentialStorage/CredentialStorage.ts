@@ -11,8 +11,15 @@ export interface CredentialStorage {
   readonly write: (credentials: TrelloCredentials) => Promise<void>
 }
 
+export interface SecretStorageApi {
+  readonly deleteSecret: (key: string) => Promise<void>
+  readonly getSecret: (key: string) => Promise<string | undefined>
+  readonly storeSecret: (key: string, value: string) => Promise<void>
+}
+
 export const cacheName = 'builtin.trello.credentials'
 export const testCacheName = 'test.builtin.trello.credentials'
+export const credentialsSecretKey = 'credentials'
 const legacyCredentialsRequestUrl = '/credentials.json'
 export const credentialsRequestUrl = createLocalCacheRequestUrl(
   legacyCredentialsRequestUrl,
@@ -24,6 +31,20 @@ const isCredentials = (value: unknown): value is TrelloCredentials => {
   }
   const record = value as Record<string, unknown>
   return typeof record.apiKey === 'string' && typeof record.token === 'string'
+}
+
+const parseCredentials = (
+  value: string | undefined,
+): TrelloCredentials | undefined => {
+  if (value === undefined) {
+    return undefined
+  }
+  try {
+    const parsed = JSON.parse(value)
+    return isCredentials(parsed) ? parsed : undefined
+  } catch {
+    return undefined
+  }
 }
 
 export const createCacheCredentialStorage = (
@@ -74,6 +95,43 @@ export const createMemoryCredentialStorage = (
     },
     async write(credentials: TrelloCredentials): Promise<void> {
       value = credentials
+    },
+  }
+}
+
+export const createSecretCredentialStorage = (
+  secretStorage: SecretStorageApi,
+  legacyStorage: CredentialStorage = createCacheCredentialStorage(),
+): CredentialStorage => {
+  return {
+    async delete(): Promise<void> {
+      await secretStorage.deleteSecret(credentialsSecretKey)
+      await legacyStorage.delete()
+    },
+    async read(): Promise<TrelloCredentials | undefined> {
+      const storedCredentials = parseCredentials(
+        await secretStorage.getSecret(credentialsSecretKey),
+      )
+      if (storedCredentials) {
+        return storedCredentials
+      }
+      const legacyCredentials = await legacyStorage.read()
+      if (!legacyCredentials) {
+        return undefined
+      }
+      await secretStorage.storeSecret(
+        credentialsSecretKey,
+        JSON.stringify(legacyCredentials),
+      )
+      await legacyStorage.delete()
+      return legacyCredentials
+    },
+    async write(credentials: TrelloCredentials): Promise<void> {
+      await secretStorage.storeSecret(
+        credentialsSecretKey,
+        JSON.stringify(credentials),
+      )
+      await legacyStorage.delete()
     },
   }
 }
