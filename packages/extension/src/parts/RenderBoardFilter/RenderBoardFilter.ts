@@ -1,4 +1,5 @@
 import {
+  AriaRoles,
   text,
   VirtualDomElements,
   type VirtualDomNode,
@@ -107,7 +108,8 @@ const renderBoardFilterPopup = (
 const renderBoardFilterOverlay = (
   state: Readonly<TrelloViewState>,
 ): readonly VirtualDomNode[] => {
-  if (!state.boardFilterOpen) {
+  const { boardFilterOpen } = state
+  if (!boardFilterOpen) {
     return []
   }
   return [
@@ -116,6 +118,7 @@ const renderBoardFilterOverlay = (
       className: 'TrelloBoardFilterOverlay',
       name: 'closeBoardFilter',
       onClick: DomEventListenerFunctions.HandleClick,
+      role: AriaRoles.None,
       type: VirtualDomElements.Div,
     },
   ]

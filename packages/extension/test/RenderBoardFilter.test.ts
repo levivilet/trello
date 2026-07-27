@@ -11,9 +11,9 @@ test('renders a closed board filter button', () => {
   expect(dom.some((node) => node.className === 'TrelloBoardFilterPopup')).toBe(
     false,
   )
-  expect(dom.some((node) => node.className === 'TrelloBoardFilterOverlay')).toBe(
-    false,
-  )
+  expect(
+    dom.some((node) => node.className === 'TrelloBoardFilterOverlay'),
+  ).toBe(false)
 })
 
 test('renders an open board filter popup with its current value', () => {
@@ -35,6 +35,7 @@ test('renders an open board filter popup with its current value', () => {
       childCount: 0,
       name: 'closeBoardFilter',
       onClick: 'handleClick',
+      role: 'none',
     }),
   )
   expect(
