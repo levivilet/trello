@@ -36,6 +36,7 @@ export const view: TrelloView = {
   icon: 'list-tree',
   id: viewId,
   kind: 'virtualDom',
+  preferredLocation: 'preview',
   title: TrelloStrings.trello(),
 }
 
