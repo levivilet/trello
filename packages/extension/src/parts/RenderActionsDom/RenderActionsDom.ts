@@ -3,6 +3,7 @@ import {
   type VirtualDomNode,
   VirtualDomElements,
 } from '@lvce-editor/virtual-dom-worker'
+import * as DomEventListenerFunctions from '../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import type { TrelloViewState } from '../TrelloViewState/TrelloViewState.ts'
 import * as MergeClassNames from '../MergeClassNames/MergeClassNames.ts'
 import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
@@ -52,6 +53,35 @@ const renderAction = (action: ViewAction): readonly VirtualDomNode[] => {
   ]
 }
 
+const renderBoardFilterAction = (
+  state: Readonly<TrelloViewState>,
+): readonly VirtualDomNode[] => {
+  const { boardFilterOpen, draftBoardFilter } = state
+  return [
+    {
+      'aria-expanded': boardFilterOpen,
+      'aria-label': TrelloStrings.filterCards(),
+      childCount: 1,
+      className: draftBoardFilter
+        ? MergeClassNames.mergeClassNames(
+            'IconButton',
+            'TrelloBoardFilterActionActive',
+          )
+        : 'IconButton',
+      name: 'openBoardFilter',
+      onClick: DomEventListenerFunctions.HandleClick,
+      title: TrelloStrings.filterCards(),
+      type: VirtualDomElements.Button,
+    },
+    {
+      childCount: 0,
+      className: 'MaskIcon MaskIconFilter',
+      role: AriaRoles.None,
+      type: VirtualDomElements.Div,
+    },
+  ]
+}
+
 export const renderActionsDom = (
   state: Readonly<TrelloViewState>,
 ): readonly VirtualDomNode[] => {
@@ -60,8 +90,13 @@ export const renderActionsDom = (
     return []
   }
   const actions = boardDetail
-    ? [actionBackToBoards, actionRefreshBoards, actionSignOut]
-    : [actionRefreshBoards, actionSignOut]
+    ? [
+        renderAction(actionBackToBoards),
+        renderAction(actionRefreshBoards),
+        renderBoardFilterAction(state),
+        renderAction(actionSignOut),
+      ]
+    : [renderAction(actionRefreshBoards), renderAction(actionSignOut)]
   return [
     {
       childCount: actions.length,
@@ -69,6 +104,6 @@ export const renderActionsDom = (
       role: AriaRoles.ToolBar,
       type: VirtualDomElements.Div,
     },
-    ...actions.flatMap(renderAction),
+    ...actions.flat(),
   ]
 }

@@ -1372,7 +1372,7 @@ test('renderActionsDom returns board detail actions', async () => {
 
   expect(instance.renderActionsDom()).toEqual([
     {
-      childCount: 3,
+      childCount: 4,
       className: 'Actions',
       role: AriaRoles.ToolBar,
       type: VirtualDomElements.Div,
@@ -1404,6 +1404,22 @@ test('renderActionsDom returns board detail actions', async () => {
       type: VirtualDomElements.Div,
     },
     {
+      'aria-expanded': false,
+      'aria-label': 'Filter cards',
+      childCount: 1,
+      className: 'IconButton',
+      name: 'openBoardFilter',
+      onClick: 'handleClick',
+      title: 'Filter cards',
+      type: VirtualDomElements.Button,
+    },
+    {
+      childCount: 0,
+      className: 'MaskIcon MaskIconFilter',
+      role: AriaRoles.None,
+      type: VirtualDomElements.Div,
+    },
+    {
       childCount: 1,
       className: 'IconButton',
       'data-command': 'trello.logout',
@@ -1417,6 +1433,39 @@ test('renderActionsDom returns board detail actions', async () => {
       type: VirtualDomElements.Div,
     },
   ])
+
+  await instance.handleEvent?.({ name: 'openBoardFilter', type: 'click' })
+
+  const viewDom = await instance.render()
+  expect(
+    viewDom.some((node) => node.className === 'TrelloBoardFilterPopup'),
+  ).toBe(true)
+  expect(
+    instance
+      .renderActionsDom()
+      .find((node: any) => node.name === 'openBoardFilter'),
+  ).toEqual(
+    expect.objectContaining({
+      'aria-expanded': true,
+      className: 'IconButton',
+    }),
+  )
+
+  await instance.handleEvent?.({
+    name: 'boardFilter',
+    type: 'input',
+    value: 'ready',
+  })
+
+  expect(
+    instance
+      .renderActionsDom()
+      .find((node: any) => node.name === 'openBoardFilter'),
+  ).toEqual(
+    expect.objectContaining({
+      className: 'IconButton TrelloBoardFilterActionActive',
+    }),
+  )
   resetTrelloViewDependencyFactory()
 })
 

@@ -2,18 +2,10 @@ import { expect, test } from '@jest/globals'
 import { createInitialState } from '../src/parts/CreateInitialState/CreateInitialState.ts'
 import { renderBoardFilter } from '../src/parts/RenderBoardFilter/RenderBoardFilter.ts'
 
-test('renders a closed board filter button', () => {
+test('renders no board filter popup when closed', () => {
   const dom = renderBoardFilter(createInitialState())
 
-  expect(
-    dom.find((node) => node.name === 'openBoardFilter')?.['aria-expanded'],
-  ).toBe(false)
-  expect(dom.some((node) => node.className === 'TrelloBoardFilterPopup')).toBe(
-    false,
-  )
-  expect(
-    dom.some((node) => node.className === 'TrelloBoardFilterOverlay'),
-  ).toBe(false)
+  expect(dom).toEqual([])
 })
 
 test('renders an open board filter popup with its current value', () => {
@@ -38,9 +30,5 @@ test('renders an open board filter popup with its current value', () => {
       role: 'none',
     }),
   )
-  expect(
-    dom
-      .find((node) => node.name === 'openBoardFilter')
-      ?.className?.includes('TrelloBoardFilterButtonActive'),
-  ).toBe(true)
+  expect(dom.some((node) => node.name === 'openBoardFilter')).toBe(false)
 })

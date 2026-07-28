@@ -73,14 +73,16 @@ export const openBoardFilter = async ({
   expect,
   Locator,
 }: Readonly<Pick<TestApi, 'expect' | 'Locator'>>): Promise<void> => {
-  const openFilter = Locator('button[name="openBoardFilter"]')
+  const openFilter = Locator('.Actions button[name="openBoardFilter"]')
   await expect(openFilter).toBeVisible()
-  await expect(openFilter).toHaveText('Filter')
+  await expect(openFilter).toHaveAttribute('aria-expanded', 'false')
+  await expect(openFilter).toHaveAttribute('title', 'Filter cards')
   // eslint-disable-next-line e2e/no-direct-click
   await openFilter.click()
 
   const popup = Locator('.TrelloBoardFilterPopup')
   const input = Locator('input[name="boardFilter"]')
+  await expect(openFilter).toHaveAttribute('aria-expanded', 'true')
   await expect(popup).toBeVisible()
   await expect(input).toBeFocused()
 }

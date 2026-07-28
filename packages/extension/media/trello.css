@@ -435,22 +435,7 @@ button.TrelloSearchResult:hover {
   overflow: hidden;
 }
 
-.TrelloBoardHeader {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: flex-end;
-  contain: content;
-}
-
-.TrelloBoardFilterButton {
-  min-width: 76px;
-  color: var(--TrelloForegroundStrong);
-  background: var(--TrelloSurface);
-  border-color: var(--TrelloBorder);
-}
-
-.TrelloBoardFilterButtonActive {
+.TrelloBoardFilterActionActive {
   color: var(--TrelloButtonForeground);
   background: var(--TrelloButtonBackground);
   border-color: transparent;
@@ -465,7 +450,7 @@ button.TrelloSearchResult:hover {
 .TrelloBoardFilterPopup {
   position: absolute;
   z-index: 10;
-  top: 52px;
+  top: 16px;
   right: 16px;
   box-sizing: border-box;
   display: flex;

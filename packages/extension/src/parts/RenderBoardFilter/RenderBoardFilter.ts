@@ -9,27 +9,6 @@ import * as DomEventListenerFunctions from '../DomEventListenerFunctions/DomEven
 import * as MergeClassNames from '../MergeClassNames/MergeClassNames.ts'
 import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
 
-const renderBoardFilterButton = (
-  state: Readonly<TrelloViewState>,
-): readonly VirtualDomNode[] => {
-  const { boardFilterOpen, draftBoardFilter } = state
-  return [
-    {
-      'aria-expanded': boardFilterOpen,
-      childCount: 1,
-      className: MergeClassNames.mergeClassNames(
-        'TrelloButton',
-        'TrelloBoardFilterButton',
-        draftBoardFilter ? 'TrelloBoardFilterButtonActive' : '',
-      ),
-      name: 'openBoardFilter',
-      onClick: DomEventListenerFunctions.HandleClick,
-      type: VirtualDomElements.Button,
-    },
-    text(TrelloStrings.filter()),
-  ]
-}
-
 const renderBoardFilterPopup = (
   state: Readonly<TrelloViewState>,
 ): readonly VirtualDomNode[] => {
@@ -129,14 +108,5 @@ export const renderBoardFilter = (
 ): readonly VirtualDomNode[] => {
   const overlay = renderBoardFilterOverlay(state)
   const popup = renderBoardFilterPopup(state)
-  return [
-    {
-      childCount: 1,
-      className: 'TrelloBoardHeader',
-      type: VirtualDomElements.Div,
-    },
-    ...renderBoardFilterButton(state),
-    ...overlay,
-    ...popup,
-  ]
+  return [...overlay, ...popup]
 }
