@@ -34,9 +34,9 @@ export const test: Test = async ({ Command, expect, Locator }) => {
       },
     },
   })
-  await connectWithCredentials({ expect, Locator })
-  await openBoard(Locator, expect)
-  await openCard(Locator, expect)
+  await connectWithCredentials({ Command, expect, Locator })
+  await openBoard(Command, Locator, expect)
+  await openCard(Command, Locator, expect)
 
   const list = Locator('.TrelloMarkdownList')
   const items = Locator('.TrelloMarkdownListItem')

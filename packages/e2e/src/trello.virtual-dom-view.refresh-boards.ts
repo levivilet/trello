@@ -20,7 +20,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
     boards: refreshedBoards,
     listBoardsResponses: [firstBoards, refreshedBoards],
   })
-  await connectWithCredentials({ expect, Locator })
+  await connectWithCredentials({ Command, expect, Locator })
 
   const firstBoard = Locator('button[name="board:board-1"]')
   await expect(firstBoard).toBeVisible()

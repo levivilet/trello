@@ -25,7 +25,7 @@ const useMockDataAndShowTrello = async (Command, mockData) => {
   await Command.executeExtensionCommand('trello.show')
 }
 
-const connectWithCredentials = async ({ expect, Locator }) => {
+const connectWithCredentials = async ({ Command, expect, Locator }) => {
   const apiKey = Locator('input[name="apiKey"]')
   const token = Locator('input[name="token"]')
   await expect(apiKey).toBeVisible()
@@ -38,13 +38,15 @@ const connectWithCredentials = async ({ expect, Locator }) => {
   await expect(connect).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await connect.click()
+  await Command.execute('Timeout.sleep', 200)
 }
 
-const openBoard = async (Locator, expect, boardId = 'board-1') => {
+const openBoard = async (Command, Locator, expect, boardId = 'board-1') => {
   const board = Locator(`button[name="board:${boardId}"]`)
   await expect(board).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await board.click()
+  await Command.execute('Timeout.sleep', 200)
 }
 
 const openCard = async (Locator, expect, cardId = 'card-1') => {
@@ -70,8 +72,8 @@ export const test: Test = async ({ Command, expect, Locator }) => {
     boards: [board],
     cardDetails: {},
   })
-  await connectWithCredentials({ expect, Locator })
-  await openBoard(Locator, expect)
+  await connectWithCredentials({ Command, expect, Locator })
+  await openBoard(Command, Locator, expect)
 
   // act
   await Command.executeExtensionCommand('trello.addList', {

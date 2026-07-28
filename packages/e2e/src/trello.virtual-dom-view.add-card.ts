@@ -23,13 +23,14 @@ export const test: Test = async ({ Command, expect, Locator }) => {
       'board-1': createBoardDetail(boards[0], listsData),
     }),
   )
-  await connectWithCredentials({ expect, Locator })
-  await openBoard(Locator, expect)
+  await connectWithCredentials({ Command, expect, Locator })
+  await openBoard(Command, Locator, expect)
 
   const addCard = Locator('button[name="addCard:list-1"]')
   await expect(addCard).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await addCard.click()
+  await Command.execute('Timeout.sleep', 100)
 
   const title = Locator('textarea[name="newCardTitle:list-1"]')
   const submit = Locator('button[name="submitAddCard:list-1"]')
@@ -42,22 +43,27 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await expect(title).toHaveCSS('height', '56px')
 
   await title.type('abc')
+  await Command.execute('Timeout.sleep', 100)
   // eslint-disable-next-line e2e/no-direct-click
   await close.click()
+  await Command.execute('Timeout.sleep', 100)
   await expect(title).toHaveCount(0)
 
   const addCardInOtherList = Locator('button[name="addCard:list-2"]')
   await expect(addCardInOtherList).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await addCardInOtherList.click()
+  await Command.execute('Timeout.sleep', 100)
   const titleInOtherList = Locator('textarea[name="newCardTitle:list-2"]')
   await expect(titleInOtherList).toHaveValue('abc')
 
   await titleInOtherList.type('W'.repeat(47))
+  await Command.execute('Timeout.sleep', 100)
 
   await expect(titleInOtherList).toHaveCSS('height', '76px')
 
   // eslint-disable-next-line e2e/no-direct-click
   await close.click()
+  await Command.execute('Timeout.sleep', 100)
   await expect(titleInOtherList).toHaveCount(0)
 }

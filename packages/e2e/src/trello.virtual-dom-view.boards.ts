@@ -13,7 +13,7 @@ export const test: Test = async ({ Command, expect, Locator, Main }) => {
   await Main.closeAllEditors()
   const boards = createBoards(1)
   await useMockDataAndShowTrello(Command, createMockData(boards))
-  await connectWithCredentials({ expect, Locator })
+  await connectWithCredentials({ Command, expect, Locator })
 
   const board = Locator('button[name="board:board-1"]')
   await expect(board).toBeVisible()

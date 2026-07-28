@@ -21,9 +21,9 @@ export const test: Test = async ({ Command, expect, Locator }) => {
     ]),
   }
   await useMockDataAndShowTrello(Command, createMockData(boards, boardDetails))
-  await connectWithCredentials({ expect, Locator })
-  await openBoard(Locator, expect)
-  await openCard(Locator, expect)
+  await connectWithCredentials({ Command, expect, Locator })
+  await openBoard(Command, Locator, expect)
+  await openCard(Command, Locator, expect)
 
   const panel = Locator('.TrelloCardDetailPanel')
   const title = Locator('textarea[name="cardTitle"]')
@@ -35,6 +35,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
 
   // eslint-disable-next-line e2e/no-direct-click
   await close.click()
+  await Command.execute('Timeout.sleep', 100)
 
   await expect(panel).toHaveCount(0)
   await expect(title).toHaveCount(0)

@@ -118,9 +118,12 @@ export const useMockDataAndShowTrello = async (
 }
 
 export const connectWithCredentials = async ({
+  Command,
   expect,
   Locator,
-}: Readonly<Pick<TestApi, 'expect' | 'Locator'>>): Promise<void> => {
+}: Readonly<
+  Pick<TestApi, 'Command' | 'expect' | 'Locator'>
+>): Promise<void> => {
   const apiKey = Locator('input[name="apiKey"]')
   const token = Locator('input[name="token"]')
   await expect(apiKey).toBeVisible()
@@ -133,9 +136,11 @@ export const connectWithCredentials = async ({
   await expect(connect).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await connect.click()
+  await Command.execute('Timeout.sleep', 200)
 }
 
 export const openBoard = async (
+  Command: Command,
   Locator: Locator,
   expect: Expect,
   boardId = 'board-1',
@@ -144,9 +149,11 @@ export const openBoard = async (
   await expect(board).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await board.click()
+  await Command.execute('Timeout.sleep', 200)
 }
 
 export const openCard = async (
+  Command: Command,
   Locator: Locator,
   expect: Expect,
   cardId = 'card-1',
@@ -155,4 +162,5 @@ export const openCard = async (
   await expect(card).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await card.click()
+  await Command.execute('Timeout.sleep', 200)
 }

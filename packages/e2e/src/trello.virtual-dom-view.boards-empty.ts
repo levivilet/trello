@@ -10,7 +10,7 @@ export const name = 'trello.virtual-dom-view.boards-empty'
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   await useMockDataAndShowTrello(Command, createMockData([]))
-  await connectWithCredentials({ expect, Locator })
+  await connectWithCredentials({ Command, expect, Locator })
 
   const noBoards = Locator('text=No boards found')
   const boardButtons = Locator('.TrelloBoardButton')

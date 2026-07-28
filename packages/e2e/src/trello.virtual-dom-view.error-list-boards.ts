@@ -14,7 +14,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
     boards,
     listBoardsError: 'Cannot list boards',
   })
-  await connectWithCredentials({ expect, Locator })
+  await connectWithCredentials({ Command, expect, Locator })
 
   const error = Locator('text=Cannot list boards')
   const board = Locator('button[name="board:board-1"]')

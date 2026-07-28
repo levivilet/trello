@@ -12,7 +12,7 @@ export const name = 'trello.virtual-dom-view.boards-many'
 export const test: Test = async ({ Command, expect, Locator }) => {
   const boards = createBoards(100)
   await useMockDataAndShowTrello(Command, createMockData(boards))
-  await connectWithCredentials({ expect, Locator })
+  await connectWithCredentials({ Command, expect, Locator })
 
   const boardButtons = Locator('.TrelloBoardButton')
   const roadmap = Locator('button[name="board:board-1"]')

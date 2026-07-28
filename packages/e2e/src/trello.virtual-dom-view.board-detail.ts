@@ -21,8 +21,8 @@ export const test: Test = async ({ Command, expect, Locator }) => {
     },
   })
   await useMockDataAndShowTrello(Command, mockData)
-  await connectWithCredentials({ expect, Locator })
-  await openBoard(Locator, expect)
+  await connectWithCredentials({ Command, expect, Locator })
+  await openBoard(Command, Locator, expect)
 
   const todo = Locator('input[name="listTitle:list-1"]')
   const card = Locator('text=Card 1')

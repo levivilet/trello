@@ -13,8 +13,8 @@ export const skip = true
 export const test: Test = async ({ Command, expect, Locator }) => {
   const boards = createBoards(1)
   await useMockDataAndShowTrello(Command, createMockData(boards))
-  await connectWithCredentials({ expect, Locator })
-  await openBoard(Locator, expect)
+  await connectWithCredentials({ Command, expect, Locator })
+  await openBoard(Command, Locator, expect)
 
   const back = Locator('button[title="Back to Boards"]')
   await expect(back).toBeVisible()

@@ -36,14 +36,15 @@ export const test: Test = async ({ Command, expect, Locator }) => {
       },
     },
   })
-  await connectWithCredentials({ expect, Locator })
-  await openBoard(Locator, expect)
-  await openCard(Locator, expect)
+  await connectWithCredentials({ Command, expect, Locator })
+  await openBoard(Command, Locator, expect)
+  await openCard(Command, Locator, expect)
 
   const openPicker = Locator('button[name="openCardLabelPicker"]').first()
   await expect(openPicker).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await openPicker.click()
+  await Command.execute('Timeout.sleep', 100)
 
   const picker = Locator('.TrelloCardLabelPicker')
   const search = Locator('input[name="cardLabelSearch"]')
@@ -57,10 +58,12 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await expect(closePicker).toBeVisible()
 
   await search.type('Documentation')
+  await Command.execute('Timeout.sleep', 100)
   const openCreate = Locator('button[name="openCardLabelCreate"]')
   await expect(openCreate).toHaveText('Create a new label')
   // eslint-disable-next-line e2e/no-direct-click
   await openCreate.click()
+  await Command.execute('Timeout.sleep', 100)
 
   const title = Locator('input[name="newLabelName"]')
   const purple = Locator('button[name="selectCardLabelColor:purple"]')
@@ -70,12 +73,14 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await purple.click()
   // eslint-disable-next-line e2e/no-direct-click
   await create.click()
+  await Command.execute('Timeout.sleep', 100)
 
   const createdLabel = Locator('button[name="addCardLabel:created-label-1"]')
   await expect(createdLabel).toHaveText('Documentation')
 
   // eslint-disable-next-line e2e/no-direct-click
   await closePicker.click()
+  await Command.execute('Timeout.sleep', 100)
 
   await expect(picker).toHaveCount(0)
   await expect(openPicker).toBeVisible()

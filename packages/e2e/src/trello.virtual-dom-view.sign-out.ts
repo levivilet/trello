@@ -12,7 +12,7 @@ export const skip = true
 export const test: Test = async ({ Command, expect, Locator }) => {
   const boards = createBoards(1)
   await useMockDataAndShowTrello(Command, createMockData(boards))
-  await connectWithCredentials({ expect, Locator })
+  await connectWithCredentials({ Command, expect, Locator })
 
   const logout = Locator('button[title="Sign Out"]')
   await expect(logout).toBeVisible()

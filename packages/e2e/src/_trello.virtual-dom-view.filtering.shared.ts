@@ -65,10 +65,8 @@ export const showFilteringBoard = async ({
       'board-1': createBoardDetail(boards[0], lists),
     }),
   )
-  await connectWithCredentials({ expect, Locator })
-  await Command.execute('Timeout.sleep', 100)
-  await openBoard(Locator, expect)
-  await Command.execute('Timeout.sleep', 100)
+  await connectWithCredentials({ Command, expect, Locator })
+  await openBoard(Command, Locator, expect)
 }
 
 export const openBoardFilter = async ({

@@ -16,6 +16,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await expect(connect).toBeVisible()
   // eslint-disable-next-line e2e/no-direct-click
   await connect.click()
+  await Command.execute('Timeout.sleep', 100)
 
   const error = Locator('text=Enter an API key and token.')
   await expect(error).toBeVisible()

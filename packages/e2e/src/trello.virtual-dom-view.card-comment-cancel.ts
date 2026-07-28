@@ -30,9 +30,9 @@ export const test: Test = async ({ Command, expect, Locator }) => {
       },
     },
   })
-  await connectWithCredentials({ expect, Locator })
-  await openBoard(Locator, expect)
-  await openCard(Locator, expect)
+  await connectWithCredentials({ Command, expect, Locator })
+  await openBoard(Command, Locator, expect)
+  await openCard(Command, Locator, expect)
 
   const emptyComments = Locator('text=No comments')
   const writeComment = Locator('button[name="startWriteComment"]')
@@ -41,6 +41,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
 
   // eslint-disable-next-line e2e/no-direct-click
   await writeComment.click()
+  await Command.execute('Timeout.sleep', 100)
 
   const comment = Locator('textarea[name="cardComment"]')
   const save = Locator('button[name="submitComment"]')
@@ -52,6 +53,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
 
   // eslint-disable-next-line e2e/no-direct-click
   await cancel.click()
+  await Command.execute('Timeout.sleep', 100)
 
   await expect(comment).toHaveCount(0)
   await expect(writeComment).toBeVisible()

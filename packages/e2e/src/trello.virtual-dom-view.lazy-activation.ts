@@ -29,8 +29,13 @@ export const test: Test = async ({ Command, expect, Locator }) => {
     )
   }
 
-  // eslint-disable-next-line e2e/no-direct-click
-  await item.click()
+  await Command.execute(
+    'ActivityBar.handleClick',
+    0,
+    0,
+    0,
+    'trello.views.boards',
+  )
 
   const apiKey = Locator('input[name="apiKey"]')
   await expect(item).toHaveAttribute('aria-selected', 'true')
