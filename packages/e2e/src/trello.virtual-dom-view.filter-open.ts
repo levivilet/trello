@@ -8,7 +8,7 @@ export const name = 'trello.virtual-dom-view.filter-open'
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   await showFilteringBoard({ Command, expect, Locator })
-  await openBoardFilter({ expect, Locator })
+  await openBoardFilter({ Command, expect, Locator })
 
   const popup = Locator('.TrelloBoardFilterPopup')
   const input = Locator('input[name="boardFilter"]')

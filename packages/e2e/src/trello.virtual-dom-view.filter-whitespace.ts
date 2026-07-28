@@ -8,7 +8,7 @@ export const name = 'trello.virtual-dom-view.filter-whitespace'
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   await showFilteringBoard({ Command, expect, Locator })
-  await openBoardFilter({ expect, Locator })
+  await openBoardFilter({ Command, expect, Locator })
 
   await Locator('input[name="boardFilter"]').type(' '.repeat(3))
 

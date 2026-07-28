@@ -8,9 +8,10 @@ export const name = 'trello.virtual-dom-view.filter-no-matches'
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   await showFilteringBoard({ Command, expect, Locator })
-  await openBoardFilter({ expect, Locator })
+  await openBoardFilter({ Command, expect, Locator })
 
   await Locator('input[name="boardFilter"]').type('no such card')
+  await Command.execute('Timeout.sleep', 100)
 
   const cards = Locator('.TrelloCard')
   const lists = Locator('.TrelloList')

@@ -8,10 +8,11 @@ export const name = 'trello.virtual-dom-view.filter-description'
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   await showFilteringBoard({ Command, expect, Locator })
-  await openBoardFilter({ expect, Locator })
+  await openBoardFilter({ Command, expect, Locator })
 
   const input = Locator('input[name="boardFilter"]')
   await input.type('PRODUCTION')
+  await Command.execute('Timeout.sleep', 100)
 
   const cards = Locator('.TrelloCard')
   const matchingCard = Locator('button[name="card:card-description"]')
