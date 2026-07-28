@@ -205,25 +205,36 @@ const renderBoardContent = (
   }
 }
 
+const renderSearchToolbar = (
+  state: Readonly<TrelloViewState>,
+): readonly VirtualDomNode[] => {
+  const { searchEnabled } = state
+  if (!searchEnabled) {
+    return []
+  }
+  return renderToolbar([renderSearchForm(state)])
+}
+
 export const renderBoards = (
   state: Readonly<TrelloViewState>,
 ): readonly VirtualDomNode[] => {
-  const { error, searchEnabled } = state
+  const { error } = state
   const boardContent = renderBoardContent(state)
   const errorDom = renderError(error)
+  const searchToolbar = renderSearchToolbar(state)
   return [
     {
       childCount:
         1 +
         boardContent.childCount +
-        (searchEnabled ? 1 : 0) +
+        (searchToolbar.length > 0 ? 1 : 0) +
         (errorDom.length > 0 ? 1 : 0),
       className: MergeClassNames.mergeClassNames('TrelloView', 'TrelloBoards'),
       name: 'boards',
       onContextMenu: DomEventListenerFunctions.HandleContextMenu,
       type: VirtualDomElements.Div,
     },
-    ...(searchEnabled ? renderToolbar([renderSearchForm(state)]) : []),
+    ...searchToolbar,
     ...renderTitle(TrelloStrings.boards()),
     ...boardContent.dom,
     ...errorDom,

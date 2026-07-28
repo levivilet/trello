@@ -1,4 +1,4 @@
-// cspell:ignore prefs
+// cspell:ignore prefs subrequests
 
 import { expect, test } from '@jest/globals'
 import { createMemoryTrelloApiCache } from '../src/parts/TrelloApiCache/TrelloApiCache.ts'
@@ -8,6 +8,7 @@ const validApiKey = 'abcdefghijklmnopqrstuvwxyz123456'
 const validToken =
   'abcdefghijklmnopqrstuvwxyz123456abcdefghijklmnopqrstuvwxyz123456'
 const credentialFingerprintPattern = /^[a-f0-9]{64}$/
+const listCardsPathPattern = /^\/lists\/([^/]+)/
 
 const jsonResponse = (value: unknown): Response => {
   return Response.json(value, {
@@ -272,12 +273,67 @@ test('getBoardDetail requests lists and cards', async () => {
   ])
   const cardsUrl = new URL(requests[1])
   expect(cardsUrl.searchParams.get('fields')).toBe(
-    'name,url,idBoard,idList,badges,cover,labels',
+    'name,desc,url,idBoard,idList,badges,cover,labels',
   )
   expect(cardsUrl.searchParams.get('attachments')).toBe('cover')
   expect(cardsUrl.searchParams.get('attachment_fields')).toBe(
     'name,url,mimeType,previews',
   )
+})
+
+test('getBoardDetail batches card requests in groups of ten when enabled', async () => {
+  const requests: string[] = []
+  const lists = Array.from({ length: 11 }, (_, index) => {
+    return {
+      id: `list-${index + 1}`,
+      name: `List ${index + 1}`,
+    }
+  })
+  const client = createTrelloClient(
+    async (url) => {
+      requests.push(url)
+      const requestUrl = new URL(url)
+      if (requestUrl.pathname === '/1/boards/board-1/lists') {
+        return jsonResponse(lists)
+      }
+      const paths = requestUrl.searchParams.get('urls')?.split(',') || []
+      return jsonResponse(
+        paths.map((path) => {
+          const listId = path.match(listCardsPathPattern)?.[1]
+          return {
+            200: [{ id: `card-${listId}`, idList: listId, name: 'Card' }],
+          }
+        }),
+      )
+    },
+    undefined,
+    {
+      readBatchRequestsEnabled: () => Promise.resolve(true),
+    },
+  )
+
+  const result = await client.getBoardDetail(
+    { id: 'board-1', name: 'Roadmap' },
+    {
+      apiKey: validApiKey,
+      token: validToken,
+    },
+  )
+
+  expect(result.lists).toHaveLength(11)
+  expect(result.lists[0].cards).toEqual([
+    { id: 'card-list-1', idList: 'list-1', name: 'Card' },
+  ])
+  expect(requests.map((request) => new URL(request).pathname)).toEqual([
+    '/1/boards/board-1/lists',
+    '/1/batch',
+    '/1/batch',
+  ])
+  expect(
+    requests.slice(1).map((request) => {
+      return new URL(request).searchParams.get('urls')?.split(',').length
+    }),
+  ).toEqual([10, 1])
 })
 
 test('getCardDetail requests card detail, attachments, and comments', async () => {
@@ -420,6 +476,99 @@ test('getCardDetail requests card detail, attachments, and comments', async () =
   expect(
     new URL(commentsRequest || '').searchParams.get('memberCreator_fields'),
   ).toBe('avatarHash,avatarUrl,fullName,initials,username')
+})
+
+test('getCardDetail uses one batch request when enabled', async () => {
+  const cache = createMemoryTrelloApiCache()
+  const requests: string[] = []
+  const client = createTrelloClient(
+    async (url) => {
+      requests.push(url)
+      return jsonResponse([
+        {
+          200: {
+            desc: 'Detailed card description',
+            id: 'card-1',
+            name: 'Ship Trello view',
+          },
+        },
+        {
+          200: [{ id: 'attachment-1', name: 'Screenshot' }],
+        },
+        {
+          200: [{ data: { text: 'Looks good' }, id: 'comment-1' }],
+        },
+      ])
+    },
+    cache,
+    {
+      readBatchRequestsEnabled: () => Promise.resolve(true),
+    },
+  )
+
+  await expect(
+    client.getCardDetail(
+      { id: 'card-1', name: 'Ship Trello view' },
+      {
+        apiKey: validApiKey,
+        token: validToken,
+      },
+    ),
+  ).resolves.toEqual({
+    attachments: [{ id: 'attachment-1', name: 'Screenshot' }],
+    card: {
+      desc: 'Detailed card description',
+      id: 'card-1',
+      name: 'Ship Trello view',
+    },
+    comments: [{ data: { text: 'Looks good' }, id: 'comment-1' }],
+  })
+
+  expect(requests).toHaveLength(1)
+  const requestUrl = new URL(requests[0])
+  expect(requestUrl.pathname).toBe('/1/batch')
+  expect(requestUrl.searchParams.get('key')).toBe(validApiKey)
+  expect(requestUrl.searchParams.get('token')).toBe(validToken)
+  const paths = requestUrl.searchParams.get('urls')?.split(',') || []
+  expect(paths).toHaveLength(3)
+  expect(
+    new URL(`https://api.trello.com${paths[0]}`).searchParams.get('fields'),
+  ).toBe('name,desc,url,idBoard,idList,labels')
+  expect(paths[1]).toContain('/cards/card-1/attachments?fields=')
+  expect(paths[2]).toContain('/cards/card-1/actions?fields=')
+
+  const cachePaths = cache.keys().map((key) => new URL(key).pathname)
+  expect(cachePaths.toSorted((a, b) => a.localeCompare(b))).toEqual([
+    '/1/cards/card-1',
+    '/1/cards/card-1/actions',
+    '/1/cards/card-1/attachments',
+  ])
+})
+
+test('getCardDetail reports failed batch subrequests', async () => {
+  const client = createTrelloClient(
+    async () => {
+      return jsonResponse([
+        { 200: { id: 'card-1', name: 'Card' } },
+        { 404: 'attachment not found' },
+        { 200: [] },
+      ])
+    },
+    undefined,
+    {
+      readBatchRequestsEnabled: () => Promise.resolve(true),
+    },
+  )
+
+  await expect(
+    client.getCardDetail(
+      { id: 'card-1', name: 'Card' },
+      {
+        apiKey: validApiKey,
+        token: validToken,
+      },
+    ),
+  ).rejects.toThrow('Trello request failed: 404 attachment not found')
 })
 
 test('updateCard sends title and description to trello', async () => {
@@ -931,6 +1080,58 @@ test('createList sends title and board to trello', async () => {
   expect(url.searchParams.get('pos')).toBe('bottom')
   expect(url.searchParams.get('fields')).toBe('name')
   expect(requestInits[0]?.method).toBe('POST')
+})
+
+test('addCardAttachment uploads a file as form data', async () => {
+  const requests: string[] = []
+  const requestInits: (
+    | {
+        readonly body?: Readonly<FormData>
+        readonly method?: string
+      }
+    | undefined
+  )[] = []
+  const client = createTrelloClient(async (url, init) => {
+    requests.push(url)
+    requestInits.push(init)
+    return jsonResponse({
+      id: 'attachment-1',
+      mimeType: 'image/png',
+      name: 'screenshot.png',
+      url: 'https://example.com/screenshot.png',
+    })
+  })
+  const file = new File(['image'], 'screenshot.png', {
+    type: 'image/png',
+  })
+
+  await expect(
+    client.addCardAttachment({ id: 'card-1', name: 'Ship uploads' }, file, {
+      apiKey: validApiKey,
+      token: validToken,
+    }),
+  ).resolves.toEqual({
+    id: 'attachment-1',
+    mimeType: 'image/png',
+    name: 'screenshot.png',
+    url: 'https://example.com/screenshot.png',
+  })
+
+  expect(requests).toHaveLength(1)
+  const url = new URL(requests[0])
+  expect(url.pathname).toBe('/1/cards/card-1/attachments')
+  expect(url.searchParams.get('key')).toBe(validApiKey)
+  expect(url.searchParams.get('token')).toBe(validToken)
+  expect(requestInits[0]?.method).toBe('POST')
+  const body = requestInits[0]?.body
+  expect(body).toBeInstanceOf(FormData)
+  const formData = body as FormData
+  const uploadedFile = formData.get('file') as File
+  expect(uploadedFile.name).toBe('screenshot.png')
+  expect(uploadedFile.type).toBe('image/png')
+  await expect(uploadedFile.text()).resolves.toBe('image')
+  expect(formData.get('name')).toBe('screenshot.png')
+  expect(formData.get('mimeType')).toBe('image/png')
 })
 
 test('search requests trello search with card and board params', async () => {

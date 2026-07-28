@@ -22,6 +22,7 @@ export interface TrelloViewDependencies {
   readonly imageCache?: TrelloImageCache
   readonly isTest?: boolean
   readonly readBoardBackgroundEnabled?: () => Promise<boolean>
+  readonly readCardDetailPopupEnabled?: () => Promise<boolean>
   readonly readSearchEnabled?: () => Promise<boolean>
   readonly recentStorage: RecentBoardStorage
   readonly storage: CredentialStorage
@@ -36,14 +37,18 @@ export interface TrelloViewState {
   baseUrl: string
   boardBackgroundEnabled: boolean
   boardDetail: TrelloBoardDetail | undefined
+  boardFilterOpen: boolean
   boardLabels: readonly TrelloLabel[]
   boardLabelsLoaded: boolean
   boardLabelsLoading: boolean
   boards: readonly TrelloBoard[]
+  cardAttachmentDropActive: boolean
   cardAttachmentsLoading: boolean
+  cardAttachmentsUploading: boolean
   cardCommentsLoading: boolean
   cardDetailLoading: boolean
   cardDetailLoadingCardId: string
+  cardDetailPopupEnabled: boolean
   cardDetailResizeStartWidth: number
   cardDetailResizeStartX: number
   cardDetailWidth: number
@@ -55,6 +60,7 @@ export interface TrelloViewState {
   coverImageUrls: Readonly<Record<string, string>>
   credentials: TrelloCredentials | undefined
   draftApiKey: string
+  draftBoardFilter: string
   draftCardDescription: string
   draftCardTitle: string
   draftComment: string

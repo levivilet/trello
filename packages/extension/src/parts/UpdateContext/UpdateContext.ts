@@ -1,6 +1,7 @@
 import type { TrelloViewState } from '../TrelloViewState/TrelloViewState.ts'
 
 export const contextKeyBoardDetailFocus = 'trello.boardDetailFocus'
+export const contextKeyBoardFilterFocus = 'trello.boardFilterFocus'
 export const contextKeyBoardsFocus = 'trello.boardsFocus'
 export const contextKeyCardDescriptionFocus = 'trello.cardDescriptionFocus'
 export const contextKeyCardDetailFocus = 'trello.cardDetailFocus'
@@ -13,10 +14,13 @@ export const updateContext = (state: Readonly<TrelloViewState>): void => {
   if (state.credentials && state.boardDetail) {
     context[contextKeyBoardDetailFocus] = true
   }
+  if (state.boardFilterOpen) {
+    context[contextKeyBoardFilterFocus] = true
+  }
   if (state.credentials && !state.boardDetail) {
     context[contextKeyBoardsFocus] = true
   }
-  if (state.selectedCardDetail) {
+  if (state.selectedCardDetail && !state.boardFilterOpen) {
     context[contextKeyCardDetailFocus] = true
   }
   if (state.cardLabelPickerOpen && state.focusedName === 'cardLabelSearch') {

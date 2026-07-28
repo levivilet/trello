@@ -1,3 +1,5 @@
+// cspell:ignore subrequest subresponses
+
 import { expect, test } from '@jest/globals'
 import type { TrelloApiCache } from '../src/parts/TrelloApiCache/TrelloApiCache.ts'
 import type {
@@ -17,6 +19,7 @@ import {
   deleteCachedJson,
   readCachedJson,
   requestJson,
+  requestJsonBatch,
 } from '../src/parts/RequestJson/RequestJson.ts'
 import { readCachedSearch } from '../src/parts/Search/Search.ts'
 import {
@@ -40,6 +43,10 @@ const board: TrelloBoard = {
 const card: TrelloCard = {
   id: 'card-1',
   name: 'Ship tests',
+}
+
+const failOnFetch: FetchLike = async () => {
+  throw new Error('Fetch should not be called')
 }
 
 const withCryptoUnavailable = async (
@@ -127,6 +134,97 @@ test('requestJson caches explicit GET requests and tolerates cache failures', as
     ok: true,
   })
   expect(writes).toHaveLength(1)
+})
+
+test('requestJsonBatch handles empty and oversized request lists', async () => {
+  await expect(
+    requestJsonBatch<readonly unknown[]>(failOnFetch, [], credentials),
+  ).resolves.toEqual([])
+
+  const requests = Array.from({ length: 11 }, (_, index) => {
+    return {
+      path: `/cards/card-${index}`,
+    }
+  })
+  await expect(
+    requestJsonBatch<readonly unknown[]>(failOnFetch, requests, credentials),
+  ).rejects.toThrow('Trello batch requests support at most 10 requests')
+})
+
+test('requestJsonBatch rejects outer request failures', async () => {
+  const failedResponse: TrelloResponse = {
+    async json(): Promise<unknown> {
+      return undefined
+    },
+    ok: false,
+    status: 503,
+    statusText: 'Service Unavailable',
+    async text(): Promise<string> {
+      return 'batch unavailable'
+    },
+  }
+
+  await expect(
+    requestJsonBatch<readonly unknown[]>(
+      async () => failedResponse,
+      [{ path: '/cards/card-1' }],
+      credentials,
+    ),
+  ).rejects.toThrow('Trello request failed: 503 batch unavailable')
+})
+
+test('requestJsonBatch rejects malformed subresponses', async () => {
+  const malformedValues: readonly unknown[] = [
+    undefined,
+    [],
+    [undefined],
+    [[]],
+    [{}],
+    [{ 200: [], 201: [] }],
+  ]
+
+  for (const value of malformedValues) {
+    const response: TrelloResponse = {
+      async json(): Promise<unknown> {
+        return value
+      },
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      async text(): Promise<string> {
+        return ''
+      },
+    }
+    await expect(
+      requestJsonBatch<readonly unknown[]>(
+        async () => response,
+        [{ path: '/cards/card-1' }],
+        credentials,
+      ),
+    ).rejects.toThrow('Trello batch request returned an invalid response')
+  }
+})
+
+test('requestJsonBatch includes structured subrequest errors', async () => {
+  const response: TrelloResponse = {
+    async json(): Promise<unknown> {
+      return [{ 500: { message: 'Internal error' } }]
+    },
+    ok: true,
+    status: 200,
+    statusText: 'OK',
+    async text(): Promise<string> {
+      return ''
+    },
+  }
+
+  await expect(
+    requestJsonBatch<readonly unknown[]>(
+      async () => response,
+      [{ path: '/cards/card-1' }],
+      credentials,
+    ),
+  ).rejects.toThrow('Trello request failed: 500 {"message":"Internal error"}')
 })
 
 test('cache helpers tolerate read and delete failures', async () => {

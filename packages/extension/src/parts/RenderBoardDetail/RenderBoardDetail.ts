@@ -11,7 +11,9 @@ import type {
 import type { TrelloViewState } from '../TrelloViewState/TrelloViewState.ts'
 import { getBoardBackgroundClassName } from '../BoardBackground/BoardBackground.ts'
 import * as DomEventListenerFunctions from '../DomEventListenerFunctions/DomEventListenerFunctions.ts'
+import { filterListCards } from '../FilterBoardCards/FilterBoardCards.ts'
 import * as MergeClassNames from '../MergeClassNames/MergeClassNames.ts'
+import { renderBoardFilter } from '../RenderBoardFilter/RenderBoardFilter.ts'
 import { renderCardDetailPanel } from '../RenderCardDetailPanel/RenderCardDetailPanel.ts'
 import { renderCards } from '../RenderCards/RenderCards.ts'
 import { renderError } from '../RenderError/RenderError.ts'
@@ -20,18 +22,25 @@ import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
 const renderListTitleInput = (
   state: Readonly<TrelloViewState>,
   list: Readonly<TrelloList>,
-): VirtualDomNode => {
+): readonly VirtualDomNode[] => {
   const { draftListTitles } = state
-  return {
-    childCount: 0,
-    className: 'TrelloListTitleInput',
-    name: `listTitle:${list.id}`,
-    onBlur: DomEventListenerFunctions.HandleBlur,
-    onFocus: DomEventListenerFunctions.HandleFocus,
-    onInput: DomEventListenerFunctions.HandleInput,
-    type: VirtualDomElements.Input,
-    value: draftListTitles[list.id] ?? list.name,
-  }
+  return [
+    {
+      childCount: 1,
+      className: 'TrelloListTitleInputWrapper',
+      type: VirtualDomElements.Div,
+    },
+    {
+      childCount: 0,
+      className: 'TrelloListTitleInput',
+      name: `listTitle:${list.id}`,
+      onBlur: DomEventListenerFunctions.HandleBlur,
+      onFocus: DomEventListenerFunctions.HandleFocus,
+      onInput: DomEventListenerFunctions.HandleInput,
+      type: VirtualDomElements.Input,
+      value: draftListTitles[list.id] ?? list.name,
+    },
+  ]
 }
 
 const renderListHeader = (
@@ -44,7 +53,7 @@ const renderListHeader = (
       className: 'TrelloListHeader',
       type: VirtualDomElements.Div,
     },
-    renderListTitleInput(state, list),
+    ...renderListTitleInput(state, list),
     {
       childCount: 1,
       className: 'TrelloListCardCount',
@@ -208,12 +217,14 @@ const renderList = (
   state: Readonly<TrelloViewState>,
   list: Readonly<TrelloList>,
 ): readonly VirtualDomNode[] => {
-  const { baseUrl, coverImageUrls } = state
-  const cards = renderCards(baseUrl, coverImageUrls, list.cards)
+  const { baseUrl, coverImageUrls, draftBoardFilter } = state
+  const filteredList = filterListCards(list, draftBoardFilter)
+  const cards = renderCards(baseUrl, coverImageUrls, filteredList.cards)
   return [
     {
       childCount: 3,
       className: getListClassName(state, list),
+      'data-id': `list:${list.id}`,
       name: `list:${list.id}`,
       onClick: DomEventListenerFunctions.HandleClick,
       onContextMenu: DomEventListenerFunctions.HandleContextMenu,
@@ -223,9 +234,9 @@ const renderList = (
       role: AriaRoles.None,
       type: VirtualDomElements.Div,
     },
-    ...renderListHeader(state, list),
+    ...renderListHeader(state, filteredList),
     {
-      childCount: Math.max(1, list.cards.length),
+      childCount: Math.max(1, filteredList.cards.length),
       className: 'TrelloCards',
       type: VirtualDomElements.Div,
     },
@@ -237,9 +248,10 @@ const renderList = (
 const getCardDetailPanelChildCount = (
   state: Readonly<TrelloViewState>,
 ): number => {
-  const { cardDetailLoading, selectedCardDetail } = state
+  const { cardDetailLoading, cardDetailPopupEnabled, selectedCardDetail } =
+    state
   if (selectedCardDetail) {
-    return 2
+    return cardDetailPopupEnabled ? 1 : 2
   }
   if (cardDetailLoading) {
     return 1
@@ -278,18 +290,20 @@ export const renderBoardDetail = (
   state: Readonly<TrelloViewState>,
   detail: Readonly<TrelloBoardDetail>,
 ): readonly VirtualDomNode[] => {
-  const { boardBackgroundEnabled, error } = state
+  const { boardBackgroundEnabled, boardFilterOpen, error } = state
   const content = renderBoardDetailContent(state, detail)
+  const filter = renderBoardFilter(state)
   const errorDom = renderError(error)
   return [
     {
-      childCount: 1 + (errorDom.length > 0 ? 1 : 0),
+      childCount: 2 + (boardFilterOpen ? 2 : 0) + (errorDom.length > 0 ? 1 : 0),
       className: getBoardBackgroundClassName(
         detail.board,
         boardBackgroundEnabled,
       ),
       type: VirtualDomElements.Div,
     },
+    ...filter,
     ...content,
     ...errorDom,
   ]

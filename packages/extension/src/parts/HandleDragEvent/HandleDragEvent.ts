@@ -5,8 +5,10 @@ import type {
 } from '../TrelloViewState/TrelloViewState.ts'
 import { findBoardCard } from '../FindBoardCard/FindBoardCard.ts'
 import { moveCardToList } from '../MoveCardToList/MoveCardToList.ts'
+import { uploadCardAttachments } from '../UploadCardAttachments/UploadCardAttachments.ts'
 
 const cardPrefix = 'card:'
+const cardDetailName = 'cardDetail'
 const listPrefix = 'list:'
 
 const getEventString = (event: Readonly<ViewEvent>, key: string): string => {
@@ -68,6 +70,14 @@ export const handleDragOverEvent = (
   event: Readonly<ViewEvent>,
 ): void => {
   const state = context.state as TrelloViewState
+  if (event.name === cardDetailName && !state.draggedCardId) {
+    if (state.cardAttachmentDropActive) {
+      return
+    }
+    state.cardAttachmentDropActive = true
+    context.requestRerender()
+    return
+  }
   const listId = getListIdFromName(event.name)
   if (state.dragTargetListId === listId) {
     return
@@ -80,6 +90,11 @@ export const handleDragLeaveEvent = (
   context: TrelloViewActionContext,
 ): void => {
   const state = context.state as TrelloViewState
+  if (state.cardAttachmentDropActive) {
+    state.cardAttachmentDropActive = false
+    context.requestRerender()
+    return
+  }
   if (!state.dragTargetListId) {
     return
   }
@@ -95,9 +110,14 @@ export const handleDragEndEvent = (context: TrelloViewActionContext): void => {
 export const handleDropEvent = async (
   context: TrelloViewActionContext,
   event: Readonly<ViewEvent>,
+  fileList?: FileList,
 ): Promise<void> => {
   const { requestRerender } = context
   const state = context.state as TrelloViewState
+  if (event.name === cardDetailName && !state.draggedCardId) {
+    await uploadCardAttachments(context, fileList)
+    return
+  }
   const targetListId = getListIdFromName(event.name)
   const cardId = getDroppedCardId(state, event)
   const card = findBoardCard(state, cardId)

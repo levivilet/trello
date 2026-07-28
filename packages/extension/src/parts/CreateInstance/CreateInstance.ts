@@ -19,6 +19,7 @@ import {
   startAddCard,
   submitAddCard,
 } from '../AddCard/AddCard.ts'
+import { closeBoardFilter as closeBoardFilterAction } from '../BoardFilter/BoardFilter.ts'
 import { closeCardDetail as closeCardDetailAction } from '../CloseCardDetail/CloseCardDetail.ts'
 import { createInitialState } from '../CreateInitialState/CreateInitialState.ts'
 import { createMemoryCurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
@@ -45,10 +46,7 @@ import { loadBoards } from '../LoadBoards/LoadBoards.ts'
 import { logout } from '../Logout/Logout.ts'
 import { type MenuEntry, getMenuEntries } from '../MenuEntries/MenuEntries.ts'
 import { openCard } from '../OpenCard/OpenCard.ts'
-import {
-  renderActions,
-  type ViewAction,
-} from '../RenderActions/RenderActions.ts'
+import { renderActionsDom } from '../RenderActionsDom/RenderActionsDom.ts'
 import { renderAuth } from '../RenderAuth/RenderAuth.ts'
 import { renderBoardDetail } from '../RenderBoardDetail/RenderBoardDetail.ts'
 import { renderBoards } from '../RenderBoards/RenderBoards.ts'
@@ -63,6 +61,7 @@ import { createTrelloImageCache } from '../TrelloImageCache/TrelloImageCache.ts'
 import {
   contextKeyCardDescriptionFocus,
   contextKeyCardLabelPickerFocus,
+  contextKeyBoardFilterFocus,
   contextKeyNewCardInputFocus,
   contextKeyNewListInputFocus,
   updateContext,
@@ -73,6 +72,7 @@ export interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly addList: (options: any) => Promise<void>
   readonly backToBoards: () => Promise<void>
   readonly cancelNewCard: () => void
+  readonly closeBoardFilter: () => void
   readonly closeCardDetail: () => void
   readonly getContext: () => Readonly<Record<string, boolean>>
   readonly getCss: () => string
@@ -84,7 +84,7 @@ export interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly handleDragLeave: () => Promise<void>
   readonly handleDragOver: (name: string) => Promise<void>
   readonly handleDragStart: (name: string) => Promise<void>
-  readonly handleDrop: (name: string) => Promise<void>
+  readonly handleDrop: (name: string, fileList?: FileList) => Promise<void>
   readonly handleImageError: (name: string) => Promise<void>
   readonly handleKeyDown: (
     name: string,
@@ -99,7 +99,7 @@ export interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly openMockBoard: (options: any) => Promise<void>
   readonly refreshBoards: () => Promise<void>
   readonly reload: () => Promise<void>
-  readonly renderActions: () => readonly ViewAction[]
+  readonly renderActionsDom: () => readonly VirtualDomNode[]
   readonly renderFocus: (
     oldContext: Readonly<Record<string, boolean>>,
     newContext: Readonly<Record<string, boolean>>,
@@ -140,6 +140,18 @@ const becameActive = (
   return !oldContext[key] && newContext[key]
 }
 
+const getSavedFilterValue = (savedState: unknown): string => {
+  if (
+    !savedState ||
+    typeof savedState !== 'object' ||
+    !('filterValue' in savedState) ||
+    typeof savedState.filterValue !== 'string'
+  ) {
+    return ''
+  }
+  return savedState.filterValue
+}
+
 export const backToBoardsActiveTrelloViewInstance = async (): Promise<void> => {
   await getActiveInstance()?.backToBoards()
 }
@@ -160,6 +172,10 @@ export const openMockBoard = async (options: any): Promise<void> => {
 
 export const closeCardDetailActiveTrelloViewInstance = (): void => {
   getActiveInstance()?.closeCardDetail()
+}
+
+export const closeBoardFilterActiveTrelloViewInstance = (): void => {
+  getActiveInstance()?.closeBoardFilter()
 }
 
 export const logoutActiveTrelloViewInstance = async (): Promise<void> => {
@@ -239,11 +255,15 @@ export const createInstance = async (
   }
 
   const initialize = async (rerender: boolean): Promise<void> => {
+    const filterValue = rerender
+      ? state.draftBoardFilter
+      : getSavedFilterValue(context?.state)
     const dependencies = dependencyState.factory()
     const {
       client,
       imageCache,
       readBoardBackgroundEnabled,
+      readCardDetailPopupEnabled,
       readSearchEnabled,
       recentStorage,
       storage,
@@ -267,6 +287,9 @@ export const createInstance = async (
     if (readBoardBackgroundEnabled) {
       state.boardBackgroundEnabled = await readBoardBackgroundEnabled()
     }
+    if (readCardDetailPopupEnabled) {
+      state.cardDetailPopupEnabled = await readCardDetailPopupEnabled()
+    }
     state.recentBoardViews = await recentStorage.read()
     const storedCredentials = await storage.read()
     if (storedCredentials) {
@@ -276,6 +299,7 @@ export const createInstance = async (
       await loadBoards(viewContext, false)
       await restoreCurrentBoard(viewContext)
     }
+    state.draftBoardFilter = filterValue
     updateContext(state)
     if (rerender) {
       requestRerender()
@@ -344,6 +368,10 @@ export const createInstance = async (
       cancelAddCard(viewContext)
       updateContext(state)
     },
+    closeBoardFilter(): void {
+      closeBoardFilterAction(viewContext)
+      updateContext(state)
+    },
     closeCardDetail(): void {
       closeCardDetailAction(viewContext)
       updateContext(state)
@@ -386,9 +414,9 @@ export const createInstance = async (
         handleDragStartEvent(viewContext, { name, type: 'dragstart' }),
       )
     },
-    async handleDrop(name: string): Promise<void> {
+    async handleDrop(name: string, fileList?: FileList): Promise<void> {
       await runEventHandler(() =>
-        handleDropEvent(viewContext, { name, type: 'drop' }),
+        handleDropEvent(viewContext, { name, type: 'drop' }, fileList),
       )
     },
     async handleEvent(event: Readonly<ViewEvent>): Promise<void> {
@@ -507,13 +535,16 @@ export const createInstance = async (
       }
       return renderBoards(state)
     },
-    renderActions(): readonly ViewAction[] {
-      return renderActions(state)
+    renderActionsDom(): readonly VirtualDomNode[] {
+      return renderActionsDom(state)
     },
     renderFocus(
       oldContext: Readonly<Record<string, boolean>>,
       newContext: Readonly<Record<string, boolean>>,
     ): string {
+      if (becameActive(oldContext, newContext, contextKeyBoardFilterFocus)) {
+        return '[name="boardFilter"]'
+      }
       if (
         becameActive(oldContext, newContext, contextKeyCardLabelPickerFocus)
       ) {
@@ -551,6 +582,7 @@ export const createInstance = async (
       return {
         boardId: state.boardDetail?.board.id,
         cardId: state.selectedCardDetail?.card.id,
+        filterValue: state.draftBoardFilter,
         isAuthenticated: Boolean(state.credentials),
       }
     },

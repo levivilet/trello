@@ -297,6 +297,79 @@ test('drag actions handle invalid names, repeated targets, and event fallbacks',
   expect(state.dragTargetListId).toBe('')
 })
 
+test('dragging files over an open card shows and clears the drop area', () => {
+  const { context, getRerenderCount, state } = createContext({
+    credentials,
+    selectedCardDetail: {
+      attachments: [],
+      card,
+      comments: [],
+    },
+  })
+
+  handleDragOverEvent(context, { name: 'cardDetail', type: 'dragover' })
+  handleDragOverEvent(context, { name: 'cardDetail', type: 'dragover' })
+
+  expect(state.cardAttachmentDropActive).toBe(true)
+  expect(getRerenderCount()).toBe(1)
+
+  handleDragLeaveEvent(context)
+
+  expect(state.cardAttachmentDropActive).toBe(false)
+  expect(getRerenderCount()).toBe(2)
+})
+
+test('dropping files on an open card uploads every attachment', async () => {
+  const { context, state } = createContext({
+    cardDetailLoadingCardId: card.id,
+    credentials,
+    selectedCardDetail: {
+      attachments: [],
+      card,
+      comments: [],
+    },
+  })
+  const files = [
+    new File(['image'], 'screenshot.png', { type: 'image/png' }),
+    new File(['notes'], 'notes.txt', { type: 'text/plain' }),
+  ] as unknown as FileList
+
+  await handleDropEvent(context, { name: 'cardDetail', type: 'drop' }, files)
+
+  expect(state.cardAttachmentsUploading).toBe(false)
+  expect(
+    state.selectedCardDetail?.attachments.map((attachment) => attachment.name),
+  ).toEqual(['screenshot.png', 'notes.txt'])
+})
+
+test('attachment upload errors keep successful files and surface the error', async () => {
+  const client = createMockTrelloClient({
+    cardAttachmentAddErrors: {
+      [card.id]: 'Attachment upload failed',
+    },
+  })
+  const { context, state } = createContext(
+    {
+      credentials,
+      selectedCardDetail: {
+        attachments: [],
+        card,
+        comments: [],
+      },
+    },
+    client,
+  )
+  const files = [
+    new File(['image'], 'screenshot.png', { type: 'image/png' }),
+  ] as unknown as FileList
+
+  await handleDropEvent(context, { name: 'cardDetail', type: 'drop' }, files)
+
+  expect(state.cardAttachmentsUploading).toBe(false)
+  expect(state.selectedCardDetail?.attachments).toEqual([])
+  expect(state.error).toBe('Attachment upload failed')
+})
+
 test('focus, image, and input actions handle missing and fallback values', async () => {
   const { context, state } = createContext({
     boardDetail,

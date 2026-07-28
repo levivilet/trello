@@ -12,6 +12,20 @@ import {
 } from '../CommentHelpers/CommentHelpers.ts'
 import { renderCardDetailAvatar } from '../RenderCardDetailAvatar/RenderCardDetailAvatar.ts'
 
+const renderCommentDate = (dateText: string): readonly VirtualDomNode[] => {
+  if (!dateText) {
+    return []
+  }
+  return [
+    {
+      childCount: 1,
+      className: 'TrelloCardCommentDate',
+      type: VirtualDomElements.Div,
+    },
+    text(dateText),
+  ]
+}
+
 export const renderCardDetailComment = (
   comment: Readonly<TrelloComment>,
 ): readonly VirtualDomNode[] => {
@@ -19,6 +33,7 @@ export const renderCardDetailComment = (
   const avatarUrl = getCommentAvatarUrl(comment)
   const dateText = getCommentDateText(comment)
   const commentText = getCommentText(comment)
+  const dateDom = renderCommentDate(dateText)
   return [
     {
       childCount: 2,
@@ -32,7 +47,7 @@ export const renderCardDetailComment = (
       type: VirtualDomElements.Div,
     },
     {
-      childCount: 1 + (dateText ? 1 : 0),
+      childCount: 1 + (dateDom.length > 0 ? 1 : 0),
       className: 'TrelloCardCommentHeader',
       type: VirtualDomElements.Div,
     },
@@ -42,16 +57,7 @@ export const renderCardDetailComment = (
       type: VirtualDomElements.Div,
     },
     text(author),
-    ...(dateText
-      ? [
-          {
-            childCount: 1,
-            className: 'TrelloCardCommentDate',
-            type: VirtualDomElements.Div,
-          },
-          text(dateText),
-        ]
-      : []),
+    ...dateDom,
     {
       childCount: 1,
       className: 'TrelloCardCommentText',

@@ -7,11 +7,22 @@ import { renderCardDescriptionEditor } from '../RenderCardDescriptionEditor/Rend
 import { renderCardDescriptionHeader } from '../RenderCardDescriptionHeader/RenderCardDescriptionHeader.ts'
 import { renderCardDescriptionPreview } from '../RenderCardDescriptionPreview/RenderCardDescriptionPreview.ts'
 
-export const renderCardDescription = (
+const renderCardDescriptionContent = (
   state: Readonly<TrelloViewState>,
   description: string,
 ): readonly VirtualDomNode[] => {
   const { editingCardDescription } = state
+  if (editingCardDescription) {
+    return renderCardDescriptionEditor(state)
+  }
+  return renderCardDescriptionPreview(description)
+}
+
+export const renderCardDescription = (
+  state: Readonly<TrelloViewState>,
+  description: string,
+): readonly VirtualDomNode[] => {
+  const content = renderCardDescriptionContent(state, description)
   return [
     {
       childCount: 2,
@@ -19,8 +30,6 @@ export const renderCardDescription = (
       type: VirtualDomElements.Div,
     },
     ...renderCardDescriptionHeader(),
-    ...(editingCardDescription
-      ? renderCardDescriptionEditor(state)
-      : renderCardDescriptionPreview(description)),
+    ...content,
   ]
 }

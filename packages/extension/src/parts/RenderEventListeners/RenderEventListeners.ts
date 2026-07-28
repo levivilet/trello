@@ -21,7 +21,7 @@ export const renderEventListeners = (): readonly DomEventListener[] => {
     },
     {
       name: 'handleDragOver',
-      params: ['handleDragOver', 'event.currentTarget.name'],
+      params: ['handleDragOver', 'event.currentTarget.dataset.id'],
       preventDefault: true,
     },
     {
@@ -30,7 +30,11 @@ export const renderEventListeners = (): readonly DomEventListener[] => {
     },
     {
       name: 'handleDrop',
-      params: ['handleDrop', 'event.currentTarget.name'],
+      params: [
+        'handleDrop',
+        'event.currentTarget.dataset.id',
+        'event.dataTransfer.files',
+      ],
       preventDefault: true,
     },
     {

@@ -40,12 +40,14 @@ export const view: TrelloView = {
 }
 
 export {
+  readCardDetailPopupEnabledPreference,
   resetTrelloViewDependencyFactory,
   setTrelloViewDependencyFactory,
 } from '../DependencyFactory/DependencyFactory.ts'
 export {
   backToBoardsActiveTrelloViewInstance,
   cancelNewCardActiveTrelloViewInstance,
+  closeBoardFilterActiveTrelloViewInstance,
   closeCardDetailActiveTrelloViewInstance,
   logoutActiveTrelloViewInstance,
   openCardActiveTrelloViewInstance,
@@ -59,9 +61,10 @@ export {
   openMockBoard,
 } from '../CreateInstance/CreateInstance.ts'
 export { getMenuEntries } from '../MenuEntries/MenuEntries.ts'
-export { renderActions } from '../RenderActions/RenderActions.ts'
+export { renderActionsDom } from '../RenderActionsDom/RenderActionsDom.ts'
 export {
   boardBackgroundEnabledPreference,
+  cardDetailPopupEnabledPreference,
   searchEnabledPreference,
   viewId,
 } from '../Constants/Constants.ts'
