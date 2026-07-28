@@ -107,7 +107,7 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   const originalDescription = Locator('text=Original description')
   await expect(originalDescription).toBeVisible()
   const discardedDescription = Locator('text=Original description edited')
-  await expect(discardedDescription).not.toBeVisible()
+  await expect(discardedDescription).toBeHidden()
 
   // eslint-disable-next-line e2e/no-direct-click
   await descriptionPreview.click()

@@ -20,5 +20,5 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   const board = Locator('button[name="board:board-1"]')
 
   await expect(error).toBeVisible()
-  await expect(board).not.toBeVisible()
+  await expect(board).toBeHidden()
 }

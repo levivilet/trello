@@ -25,5 +25,5 @@ export const test: Test = async ({ Command, expect, Locator }) => {
 
   await expect(apiKey).toBeVisible()
   await expect(token).toBeVisible()
-  await expect(board).not.toBeVisible()
+  await expect(board).toBeHidden()
 }

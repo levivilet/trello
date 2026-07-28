@@ -32,5 +32,5 @@ export const test: Test = async ({ Command, expect, Locator }) => {
 
   const refreshedBoard = Locator('button[name="board:board-2"]')
   await expect(refreshedBoard).toBeVisible()
-  await expect(firstBoard).not.toBeVisible()
+  await expect(firstBoard).toBeHidden()
 }
