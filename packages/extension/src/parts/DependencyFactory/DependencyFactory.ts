@@ -3,9 +3,10 @@ import type { TrelloViewDependencies } from '../TrelloViewState/TrelloViewState.
 import {
   batchRequestsEnabledPreference,
   boardBackgroundEnabledPreference,
+  cardDetailPopupEnabledPreference,
   searchEnabledPreference,
 } from '../Constants/Constants.ts'
-import { createCacheCredentialStorage } from '../CredentialStorage/CredentialStorage.ts'
+import { createSecretCredentialStorage } from '../CredentialStorage/CredentialStorage.ts'
 import { createCacheCurrentBoardStorage } from '../CurrentBoardStorage/CurrentBoardStorage.ts'
 import { createCacheRecentBoardStorage } from '../RecentBoardStorage/RecentBoardStorage.ts'
 import { createTrelloClient } from '../TrelloClient/TrelloClient.ts'
@@ -27,6 +28,16 @@ const readBoardBackgroundEnabledPreference = async (): Promise<boolean> => {
   return (await api.getPreference?.(boardBackgroundEnabledPreference)) === true
 }
 
+export const readCardDetailPopupEnabledPreference =
+  async (): Promise<boolean> => {
+    const api = ExtensionApi as unknown as {
+      readonly getPreference?: (key: string) => Promise<unknown>
+    }
+    return (
+      (await api.getPreference?.(cardDetailPopupEnabledPreference)) === true
+    )
+  }
+
 const readBatchRequestsEnabledPreference = async (): Promise<boolean> => {
   const api = ExtensionApi as unknown as {
     readonly getPreference?: (key: string) => Promise<unknown>
@@ -41,9 +52,10 @@ const defaultDependencyFactory = (): TrelloViewDependencies => ({
   currentBoardStorage: createCacheCurrentBoardStorage(),
   imageCache: createTrelloImageCache(),
   readBoardBackgroundEnabled: readBoardBackgroundEnabledPreference,
+  readCardDetailPopupEnabled: readCardDetailPopupEnabledPreference,
   readSearchEnabled: readSearchEnabledPreference,
   recentStorage: createCacheRecentBoardStorage(),
-  storage: createCacheCredentialStorage(),
+  storage: createSecretCredentialStorage(ExtensionApi),
 })
 
 export const dependencyState: { factory: DependencyFactory } = {

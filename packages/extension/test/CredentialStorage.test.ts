@@ -3,6 +3,8 @@ import {
   cacheName,
   createCacheCredentialStorage,
   createMemoryCredentialStorage,
+  createSecretCredentialStorage,
+  credentialsSecretKey,
   credentialsRequestUrl,
 } from '../src/parts/CredentialStorage/CredentialStorage.ts'
 import {
@@ -72,6 +74,166 @@ test('memory credential storage deletes credentials', async () => {
   await storage.delete()
 
   await expect(storage.read()).resolves.toBeUndefined()
+})
+
+test('secret credential storage reads and writes credentials', async () => {
+  const values = new Map<string, string>()
+  const deletedLegacyValues: number[] = []
+  const storage = createSecretCredentialStorage(
+    {
+      async deleteSecret(key: string): Promise<void> {
+        values.delete(key)
+      },
+      async getSecret(key: string): Promise<string | undefined> {
+        return values.get(key)
+      },
+      async storeSecret(key: string, value: string): Promise<void> {
+        values.set(key, value)
+      },
+    },
+    {
+      async delete(): Promise<void> {
+        deletedLegacyValues.push(1)
+      },
+      async read(): Promise<undefined> {
+        return undefined
+      },
+      async write(): Promise<void> {},
+    },
+  )
+
+  await storage.write({
+    apiKey: validApiKey,
+    token: validToken,
+  })
+
+  expect(values.get(credentialsSecretKey)).toBe(
+    JSON.stringify({
+      apiKey: validApiKey,
+      token: validToken,
+    }),
+  )
+  await expect(storage.read()).resolves.toEqual({
+    apiKey: validApiKey,
+    token: validToken,
+  })
+  await storage.delete()
+  await expect(storage.read()).resolves.toBeUndefined()
+  expect(deletedLegacyValues).toEqual([1, 1])
+})
+
+test('secret credential storage migrates legacy cache credentials', async () => {
+  let legacyCredentials:
+    | {
+        readonly apiKey: string
+        readonly token: string
+      }
+    | undefined = {
+    apiKey: validApiKey,
+    token: validToken,
+  }
+  const values = new Map<string, string>()
+  const storage = createSecretCredentialStorage(
+    {
+      async deleteSecret(key: string): Promise<void> {
+        values.delete(key)
+      },
+      async getSecret(key: string): Promise<string | undefined> {
+        return values.get(key)
+      },
+      async storeSecret(key: string, value: string): Promise<void> {
+        values.set(key, value)
+      },
+    },
+    {
+      async delete(): Promise<void> {
+        legacyCredentials = undefined
+      },
+      async read() {
+        return legacyCredentials
+      },
+      async write(): Promise<void> {},
+    },
+  )
+
+  await expect(storage.read()).resolves.toEqual({
+    apiKey: validApiKey,
+    token: validToken,
+  })
+
+  expect(legacyCredentials).toBeUndefined()
+  expect(values.get(credentialsSecretKey)).toBe(
+    JSON.stringify({
+      apiKey: validApiKey,
+      token: validToken,
+    }),
+  )
+})
+
+test('secret credential storage ignores malformed values', async () => {
+  const storage = createSecretCredentialStorage(
+    {
+      async deleteSecret(): Promise<void> {},
+      async getSecret(): Promise<string> {
+        return '{'
+      },
+      async storeSecret(): Promise<void> {},
+    },
+    createMemoryCredentialStorage(),
+  )
+
+  await expect(storage.read()).resolves.toBeUndefined()
+})
+
+test('secret credential storage falls back when the host does not support the api', async () => {
+  const legacyStorage = createMemoryCredentialStorage({
+    apiKey: validApiKey,
+    token: validToken,
+  })
+  const storage = createSecretCredentialStorage(
+    {
+      async deleteSecret(): Promise<void> {
+        throw new Error('Command not found Extensions.deleteSecret')
+      },
+      async getSecret(): Promise<string> {
+        throw new Error('Command not found Extensions.getSecret')
+      },
+      async storeSecret(): Promise<void> {
+        throw new Error('Command not found Extensions.storeSecret')
+      },
+    },
+    legacyStorage,
+  )
+
+  await expect(storage.read()).resolves.toEqual({
+    apiKey: validApiKey,
+    token: validToken,
+  })
+  await storage.write({
+    apiKey: 'updated-api-key',
+    token: 'updated-token',
+  })
+  await expect(legacyStorage.read()).resolves.toEqual({
+    apiKey: 'updated-api-key',
+    token: 'updated-token',
+  })
+  await storage.delete()
+  await expect(legacyStorage.read()).resolves.toBeUndefined()
+})
+
+test('secret credential storage preserves unexpected errors', async () => {
+  const storage = createSecretCredentialStorage(
+    {
+      async deleteSecret(): Promise<void> {},
+      async getSecret(): Promise<string> {
+        throw new Error('Secret storage failed')
+      },
+      async storeSecret(): Promise<void> {},
+    },
+    createMemoryCredentialStorage(),
+  )
+
+  await expect(storage.read()).rejects.toThrow('Secret storage failed')
 })
 
 test('cache credential storage uses the production cache name by default', async () => {

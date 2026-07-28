@@ -106,7 +106,7 @@ const applyFreshAttachments = (
   }
 }
 
-const resolveCardAttachmentImages = async (
+export const resolveCardAttachmentImages = async (
   context: TrelloViewActionContext,
   cardId: string,
   attachments: readonly TrelloAttachment[],
@@ -227,8 +227,10 @@ export const openCard = async (
   }
   state.cardDetailLoading = true
   state.cardDetailLoadingCardId = card.id
+  state.cardAttachmentDropActive = false
   state.cardCommentsLoading = true
   state.cardAttachmentsLoading = true
+  state.cardAttachmentsUploading = false
   state.attachmentImageUrls = {}
   state.selectedCardDetail = undefined
   state.addingCardLabelId = ''

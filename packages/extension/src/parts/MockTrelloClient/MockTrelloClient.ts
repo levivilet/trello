@@ -1,6 +1,7 @@
 import type { TrelloClient } from '../TrelloClient/TrelloClient.ts'
 import type { TrelloCacheFirstResult } from '../TrelloClientTypes/TrelloClientTypes.ts'
 import type {
+  TrelloAttachment,
   TrelloBoard,
   TrelloBoardDetail,
   TrelloCard,
@@ -23,6 +24,7 @@ export interface MockTrelloData {
   readonly boardDetails?: Readonly<Record<string, TrelloBoardDetail>>
   readonly boardLabels?: Readonly<Record<string, readonly TrelloLabel[]>>
   readonly boards?: readonly TrelloBoard[]
+  readonly cardAttachmentAddErrors?: Readonly<Record<string, string>>
   readonly cardCommentAddErrors?: Readonly<Record<string, string>>
   readonly cardCreateErrors?: Readonly<Record<string, string>>
   readonly cardDetailErrors?: Readonly<Record<string, string>>
@@ -64,6 +66,7 @@ export const createMockTrelloClient = (
   data: Readonly<MockTrelloData>,
 ): TrelloClient => {
   let listBoardsCallCount = 0
+  let addAttachmentCallCount = 0
   let addCommentCallCount = 0
   let createCardCallCount = 0
   let createLabelCallCount = 0
@@ -91,6 +94,32 @@ export const createMockTrelloClient = (
   }
 
   const client: TrelloClient = {
+    async addCardAttachment(
+      card: TrelloCard,
+      file: File,
+    ): Promise<TrelloAttachment> {
+      if (data.error) {
+        throw new Error(data.error)
+      }
+      const addError = data.cardAttachmentAddErrors?.[card.id]
+      if (addError) {
+        throw new Error(addError)
+      }
+      addAttachmentCallCount++
+      const attachment: TrelloAttachment = {
+        id: `created-attachment-${addAttachmentCallCount}`,
+        mimeType: file.type,
+        name: file.name,
+        url: `https://example.com/${encodeURIComponent(file.name)}`,
+      }
+      const previousDetail = cardDetails[card.id]
+      cardDetails[card.id] = {
+        attachments: [...(previousDetail?.attachments || []), attachment],
+        card: previousDetail?.card || findCard(card.id) || card,
+        comments: previousDetail?.comments || [],
+      }
+      return attachment
+    },
     async addCardComment(
       card: TrelloCard,
       text: string,

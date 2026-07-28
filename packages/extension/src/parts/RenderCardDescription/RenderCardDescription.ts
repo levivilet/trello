@@ -22,6 +22,7 @@ export const renderCardDescription = (
   state: Readonly<TrelloViewState>,
   description: string,
 ): readonly VirtualDomNode[] => {
+  const content = renderCardDescriptionContent(state, description)
   return [
     {
       childCount: 2,
@@ -29,6 +30,6 @@ export const renderCardDescription = (
       type: VirtualDomElements.Div,
     },
     ...renderCardDescriptionHeader(),
-    ...renderCardDescriptionContent(state, description),
+    ...content,
   ]
 }

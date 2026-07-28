@@ -33,6 +33,7 @@ export const renderCardDetailComment = (
   const avatarUrl = getCommentAvatarUrl(comment)
   const dateText = getCommentDateText(comment)
   const commentText = getCommentText(comment)
+  const dateDom = renderCommentDate(dateText)
   return [
     {
       childCount: 2,
@@ -46,7 +47,7 @@ export const renderCardDetailComment = (
       type: VirtualDomElements.Div,
     },
     {
-      childCount: 1 + (dateText ? 1 : 0),
+      childCount: 1 + (dateDom.length > 0 ? 1 : 0),
       className: 'TrelloCardCommentHeader',
       type: VirtualDomElements.Div,
     },
@@ -56,7 +57,7 @@ export const renderCardDetailComment = (
       type: VirtualDomElements.Div,
     },
     text(author),
-    ...renderCommentDate(dateText),
+    ...dateDom,
     {
       childCount: 1,
       className: 'TrelloCardCommentText',

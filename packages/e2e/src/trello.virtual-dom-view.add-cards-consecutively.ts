@@ -10,7 +10,6 @@ import {
 } from './_trello.virtual-dom-view.shared.ts'
 
 export const name = 'trello.virtual-dom-view.add-cards-consecutively'
-export const skip = true
 
 export const test: Test = async ({ Command, expect, Locator }) => {
   const boards = createBoards(1)
@@ -33,17 +32,21 @@ export const test: Test = async ({ Command, expect, Locator }) => {
   await addCard.click()
 
   const title = Locator('textarea[name="newCardTitle:list-1"]')
+  const submit = Locator('button[name="submitAddCard:list-1"]')
   const cards = Locator('.TrelloCard')
   await expect(title).toBeVisible()
+  await expect(submit).toBeVisible()
   await expect(cards).toHaveCount(1)
   await title.type('Build add card')
-  await title.type('\n')
+  // eslint-disable-next-line e2e/no-direct-click
+  await submit.click()
 
   await expect(cards).toHaveCount(2)
   await expect(title).toHaveValue('')
   await expect(title).toBeFocused()
   await title.type('Write tests')
-  await title.type('\n')
+  // eslint-disable-next-line e2e/no-direct-click
+  await submit.click()
   await expect(cards).toHaveCount(3)
   await expect(title).toHaveValue('')
   await expect(title).toBeFocused()

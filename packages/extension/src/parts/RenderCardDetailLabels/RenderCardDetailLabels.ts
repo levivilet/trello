@@ -71,13 +71,15 @@ export const renderCardDetailLabels = (
   labels: readonly TrelloLabel[] | undefined,
 ): readonly VirtualDomNode[] => {
   const { cardLabelPickerOpen } = state
+  const labelDom = renderLabels(labels)
+  const labelPickerDom = renderLabelPicker(state, labels)
   return [
     {
       childCount: 1 + (cardLabelPickerOpen ? 1 : 0),
       className: 'TrelloCardLabelSection',
       type: VirtualDomElements.Div,
     },
-    ...renderLabels(labels),
-    ...renderLabelPicker(state, labels),
+    ...labelDom,
+    ...labelPickerDom,
   ]
 }

@@ -21,6 +21,11 @@
       "type": "boolean",
       "default": false
     },
+    "trello.cardDetailPopupEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Open card details in a centered popup instead of a right-side panel."
+    },
     "trello.batchRequestsEnabled": {
       "type": "boolean",
       "default": false,
@@ -31,6 +36,7 @@
     "onView:trello.views.boards",
     "onCommand:trello.backToBoards",
     "onCommand:trello.cancelNewCard",
+    "onCommand:trello.closeBoardFilter",
     "onCommand:trello.closeCardDetail",
     "onCommand:trello.logout",
     "onCommand:trello.openCard",
@@ -69,6 +75,10 @@
     {
       "id": "trello.cancelNewCard",
       "label": "Trello: Cancel New Card"
+    },
+    {
+      "id": "trello.closeBoardFilter",
+      "label": "Trello: Close Board Filter"
     },
     {
       "id": "trello.closeCardDetail",
@@ -178,6 +188,11 @@
       "key": "Ctrl+R",
       "command": "trello.refreshBoards",
       "when": "trello.boardsFocus"
+    },
+    {
+      "key": "Escape",
+      "command": "trello.closeBoardFilter",
+      "when": "trello.boardFilterFocus"
     },
     {
       "key": "Escape",

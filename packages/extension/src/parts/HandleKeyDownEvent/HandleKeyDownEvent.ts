@@ -3,6 +3,7 @@ import type { TrelloViewActionContext } from '../TrelloViewState/TrelloViewState
 import { cancelAddCard } from '../AddCard/AddCard.ts'
 import { cancelWriteComment, submitComment } from '../AddComment/AddComment.ts'
 import { cancelAddList } from '../AddList/AddList.ts'
+import { closeBoardFilter } from '../BoardFilter/BoardFilter.ts'
 
 const getEventString = (event: Readonly<ViewEvent>, key: string): string => {
   const value = (event as unknown as Readonly<Record<string, unknown>>)[key]
@@ -31,6 +32,10 @@ export const handleKeyDownEvent = async (
     return
   }
   if (key !== 'Escape') {
+    return
+  }
+  if (context.state.boardFilterOpen) {
+    closeBoardFilter(context)
     return
   }
   if (event.name?.startsWith('newCardTitle:')) {
