@@ -3,8 +3,8 @@ import {
   type VirtualDomNode,
   VirtualDomElements,
 } from '@lvce-editor/virtual-dom-worker'
-import * as DomEventListenerFunctions from '../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import type { TrelloViewState } from '../TrelloViewState/TrelloViewState.ts'
+import * as DomEventListenerFunctions from '../DomEventListenerFunctions/DomEventListenerFunctions.ts'
 import * as MergeClassNames from '../MergeClassNames/MergeClassNames.ts'
 import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
 
@@ -75,7 +75,7 @@ const renderBoardFilterAction = (
     },
     {
       childCount: 0,
-      className: 'MaskIcon MaskIconFilter',
+      className: MergeClassNames.mergeClassNames('MaskIcon', 'MaskIconFilter'),
       role: AriaRoles.None,
       type: VirtualDomElements.Div,
     },
