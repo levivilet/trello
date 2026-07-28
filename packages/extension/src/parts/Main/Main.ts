@@ -36,7 +36,7 @@ export const activate = async (): Promise<void> => {
   registerView(TrelloView.view)
   registerCommand({
     execute() {
-      return executeCommand('SideBar.show', TrelloView.viewId, true)
+      return executeCommand('Layout.toggleSideBarView', TrelloView.viewId)
     },
     id: 'trello.show',
   })

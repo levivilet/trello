@@ -175,7 +175,8 @@
       "id": "trello.views.boards",
       "title": "Trello",
       "icon": "media/trello.svg",
-      "kind": "virtualDom"
+      "kind": "virtualDom",
+      "preferredLocation": "preview"
     }
   ],
   "keybindings": [
