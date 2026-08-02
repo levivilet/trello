@@ -8,7 +8,7 @@
   "isolated": true,
   "contentSecurityPolicy": [
     "default-src 'none'",
-    "connect-src https:",
+    "connect-src https://api.trello.com https://trello.com",
     "script-src 'self'"
   ],
   "categories": ["Other"],
