@@ -121,57 +121,6 @@
     {
       "css": "media/trello.css",
       "displayName": "Trello",
-      "eventListeners": [
-        {
-          "name": "handleDragStart",
-          "params": ["handleDragStart", "event.target.name"]
-        },
-        {
-          "name": "handleDragEnd",
-          "params": ["handleDragEnd"]
-        },
-        {
-          "name": "handleDragOver",
-          "params": ["handleDragOver", "event.currentTarget.name"],
-          "preventDefault": true
-        },
-        {
-          "name": "handleDragLeave",
-          "params": ["handleDragLeave"]
-        },
-        {
-          "name": "handleDrop",
-          "params": ["handleDrop", "event.currentTarget.name"],
-          "preventDefault": true
-        },
-        {
-          "name": "handleKeyDown",
-          "params": [
-            "handleKeyDown",
-            "event.target.name",
-            "event.key",
-            "event.ctrlKey"
-          ]
-        },
-        {
-          "name": "handleSashPointerDown",
-          "params": ["handleSashPointerDown", "event.clientX"],
-          "trackPointerEvents": ["handleSashPointerMove", "handleSashPointerUp"]
-        },
-        {
-          "name": "handleCardLabelPickerPointerDown",
-          "params": ["handleCardLabelPickerPointerDown"],
-          "preventDefault": true
-        },
-        {
-          "name": "handleSashPointerMove",
-          "params": ["handleSashPointerMove", "event.clientX"]
-        },
-        {
-          "name": "handleSashPointerUp",
-          "params": ["handleSashPointerUp"]
-        }
-      ],
       "id": "trello.views.boards",
       "title": "Trello",
       "icon": "media/trello.svg",
