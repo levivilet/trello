@@ -24,10 +24,10 @@
   "author": "Lvce Editor",
   "license": "MIT",
   "devDependencies": {
-    "@lvce-editor/eslint-config": "^17.6.0",
-    "eslint": "^10.8.0",
-    "knip": "^6.29.0",
-    "prettier": "^4.0.0-alpha.10",
+    "@lvce-editor/eslint-config": "^18.4.0",
+    "eslint": "^10.8.1",
+    "knip": "^6.32.2",
+    "prettier": "^4.0.0-alpha.13",
     "typescript": "^6.0.3"
   },
   "prettier": {
