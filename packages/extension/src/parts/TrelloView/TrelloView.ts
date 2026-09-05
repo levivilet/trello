@@ -1,4 +1,5 @@
-import type { View } from '@lvce-editor/api'
+import type { InstanceView } from '@lvce-editor/api'
+import type { TrelloViewState } from '../TrelloViewState/TrelloViewState.ts'
 import { viewId } from '../Constants/Constants.ts'
 import {
   type ActiveTrelloViewInstance,
@@ -7,8 +8,16 @@ import {
 import { renderEventListeners } from '../RenderEventListeners/RenderEventListeners.ts'
 import * as TrelloStrings from '../TrelloStrings/TrelloStrings.ts'
 
-type TrelloView = Omit<View<ActiveTrelloViewInstance>, 'commands'> & {
-  readonly commands: NonNullable<View<ActiveTrelloViewInstance>['commands']>
+type TrelloView = Omit<
+  InstanceView<ActiveTrelloViewInstance, Readonly<TrelloViewState>>,
+  'commands'
+> & {
+  readonly commands: NonNullable<
+    InstanceView<
+      ActiveTrelloViewInstance,
+      Readonly<TrelloViewState>
+    >['commands']
+  >
   readonly eventListeners?: ReturnType<typeof renderEventListeners>
 }
 
@@ -33,10 +42,12 @@ export const view: TrelloView = {
   // @ts-ignore
   displayName: TrelloStrings.trello(),
   eventListeners: renderEventListeners(),
+  getComponentState: (instance) => instance.getComponentState(),
   icon: 'list-tree',
   id: viewId,
   kind: 'virtualDom',
   preferredLocation: 'preview',
+  setComponentState: (instance, state) => instance.setComponentState(state),
   title: TrelloStrings.trello(),
 }
 

@@ -74,6 +74,7 @@ export interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly cancelNewCard: () => void
   readonly closeBoardFilter: () => void
   readonly closeCardDetail: () => void
+  readonly getComponentState: () => TrelloViewState
   readonly getContext: () => Readonly<Record<string, boolean>>
   readonly getCss: () => string
   readonly getMenuEntries: (menuId: string) => readonly MenuEntry[]
@@ -107,6 +108,7 @@ export interface ActiveTrelloViewInstance extends VirtualDomViewInstance {
   readonly renderSelections: () => readonly ViewSelection[]
   readonly renderTitle: () => string
   readonly saveCardDetail: () => Promise<void>
+  readonly setComponentState: (state: Readonly<TrelloViewState>) => void
   readonly startAddCard: (listId: string) => void
   readonly submitNewCard: () => Promise<void>
 }
@@ -380,6 +382,9 @@ export const createInstance = async (
       activeInstances.delete(instance)
       viewContext.imageCache.dispose()
     },
+    getComponentState(): TrelloViewState {
+      return state
+    },
     getContext(): Readonly<Record<string, boolean>> {
       return state.context
     },
@@ -585,6 +590,10 @@ export const createInstance = async (
         filterValue: state.draftBoardFilter,
         isAuthenticated: Boolean(state.credentials),
       }
+    },
+    setComponentState(newState: Readonly<TrelloViewState>): void {
+      const snapshot = { ...newState }
+      Object.assign(state, createInitialState(), snapshot)
     },
     startAddCard(listId: string): void {
       startAddCard(viewContext, listId)
